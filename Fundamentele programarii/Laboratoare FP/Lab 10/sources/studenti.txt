@@ -1,0 +1,5 @@
+23,Jordan,323
+14,Pascalau,215
+1,Popescu,216
+24,Frumosu,215
+11,Pragai,216

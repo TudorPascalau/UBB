@@ -1,0 +1,67 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit               
+     6                                  import exit msvcrt.dll    
+     7                                  
+     8                                  ; (a-2)/(b+c)+a*c+e-x
+     9                                  segment data use32 class=data
+    10                                      ; a,b-byte
+    11                                      ; c-word
+    12                                      ; e-doubleword
+    13                                      ; x-qword
+    14                                      
+    15 00000000 08                          a db 8
+    16 00000001 FE                          b db -2
+    17 00000002 FFFF                        c dw -1
+    18 00000004 FBFFFFFF                    e dd -5
+    19 00000008 0A00000000000000            x dq 10
+    20                                  
+    21                                  
+    22                                  segment code use32 class=code
+    23                                      start:
+    24                                      
+    25                                          ;b+c
+    26 00000000 A0[01000000]                    mov al, [b]
+    27 00000005 6698                            cbw ; AX = b
+    28 00000007 660305[02000000]                add ax, [c]; AX = b+c (= -3)
+    29                                          
+    30                                          ;stocare
+    31 0000000E 6689C3                          mov bx, ax ; BX = b+c (= -3)
+    32                                          
+    33                                          ;(a-2)/(b+c)
+    34 00000011 A0[00000000]                    mov al, [a]
+    35 00000016 2C02                            sub al, 2
+    36 00000018 6698                            cbw
+    37 0000001A 6699                            cwd ; DX:AX = a-2 (= 6)
+    38 0000001C 66F7FB                          idiv bx ; AX = DX:AX/BX = (a-2)/(b+c) = (-2)
+    39                                          
+    40                                          ;stocare
+    41 0000001F 6689C3                          mov bx,ax ; BX = (a-2)/(b+c) (= -2)
+    42                                          
+    43                                          ;a*c
+    44 00000022 A0[00000000]                    mov al, [a]
+    45 00000027 6698                            cbw ; AX = a (= 8)
+    46 00000029 66F72D[02000000]                imul word [c]; DX:AX = AX*c = a*c (=-8)
+    47                                          
+    48                                          ;stocare
+    49 00000030 6652                            push dx
+    50 00000032 6650                            push ax
+    51 00000034 59                              pop ecx; ECX = a*c (= -8)
+    52                                          
+    53                                          ;(a-2)/(b+c)+a*c
+    54 00000035 6689D8                          mov ax, bx
+    55 00000038 98                              cwde ; EAX = (a-2)/(b+c) (= -2)
+    56 00000039 01C8                            add eax, ecx; EAX = ;(a-2)/(b+c)+a*c (= -10)
+    57                                          
+    58                                          ;(a-2)/(b+c)+a*c+e
+    59 0000003B 0305[04000000]                  add eax, [e] ; EAX = (a-2)/(b+c)+a*c+e (= -15)
+    60                                          
+    61                                          ;(a-2)/(b+c)+a*c+e-x
+    62 00000041 99                              cdq ; EDX:EAX = (a-2)/(b+c)+a*c+e
+    63 00000042 2B05[08000000]                  sub eax, [x]
+    64 00000048 1B15[0C000000]                  sbb edx, [x+4] ; EDX:EAX = (a-2)/(b+c)+a*c+e-x (= -25)
+    65                                          
+    66 0000004E 6A00                            push    dword 0      
+    67 00000050 FF15[00000000]                  call    [exit]       

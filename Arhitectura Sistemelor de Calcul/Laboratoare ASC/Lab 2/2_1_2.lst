@@ -1,0 +1,33 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit               
+     6                                  import exit msvcrt.dll    
+     7                                  
+     8                                  ; Rezolvari si scaderi - (b+b) + (c-a) + d
+     9                                  
+    10                                  segment data use32 class=data
+    11                                      
+    12                                      ; a,b,c,d - byte
+    13 00000000 0A                          a db 10
+    14 00000001 14                          b db 20
+    15 00000002 0F                          c db 15
+    16 00000003 05                          d db 5
+    17                                  
+    18                                  
+    19                                  segment code use32 class=code
+    20                                      start:
+    21                                      
+    22 00000000 A0[01000000]                    mov AL, [b] ; AL = b = 20
+    23 00000005 0205[01000000]                  add AL, [b] ; AL = (b+b) = 40
+    24                                          
+    25 0000000B 8A1D[02000000]                  mov BL, [c] ; BL = c = 15
+    26 00000011 2A1D[00000000]                  sub BL, [a] ; BL = (c-a) = 5
+    27                                          
+    28 00000017 00D8                            add AL, BL ; AL = AL - BL = (b+b) + (c-a) = 45
+    29                                          
+    30 00000019 0205[03000000]                  add AL, [d] ; AL = (b+b) + (c-a) + d = 50
+    31                                          
+    32 0000001F 6A00                            push    dword 0      
+    33 00000021 FF15[00000000]                  call    [exit]       

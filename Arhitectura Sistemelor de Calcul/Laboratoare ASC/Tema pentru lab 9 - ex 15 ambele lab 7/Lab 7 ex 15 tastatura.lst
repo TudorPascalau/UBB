@@ -1,0 +1,54 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit, printf, scanf
+     6                                  
+     7                                  import exit msvcrt.dll
+     8                                  import printf msvcrt.dll  
+     9                                  import scanf msvcrt.dll
+    10                                  
+    11                                  segment data use32 class=data
+    12                                      
+    13 00000000 00000000                        a dd 0
+    14 00000004 00000000                        b dd 0
+    15                                          
+    16 00000008 613D00                          citire_a db "a=", 0 ; CR LF
+    17 0000000B 623D00                          citire_b db "b=", 0
+    18                                          
+    19 0000000E 256400                          formatinput db "%d", 0 ; numar decimal
+    20 00000011 612B6220696E206261-             formatoutput db "a+b in baza 16 este %x", 0 ; rezultat in hexa
+    20 0000001A 7A6120313620657374-
+    20 00000023 6520257800         
+    21                                  
+    22                                  segment code use32 class=code
+    23                                      start:
+    24                                      
+    25 00000000 68[08000000]                    push dword citire_a ; mesaj de citire
+    26 00000005 FF15[00000000]                  call [printf]
+    27 0000000B 83C404                          add esp, 4*1
+    28                                          
+    29 0000000E 68[00000000]                    push dword a ; citirea lui a
+    30 00000013 68[0E000000]                    push dword formatinput
+    31 00000018 FF15[00000000]                  call [scanf]
+    32 0000001E 83C408                          add esp, 4*2
+    33                                          
+    34 00000021 68[0B000000]                    push dword citire_b ; mesaj de citire
+    35 00000026 FF15[00000000]                  call [printf]
+    36 0000002C 83C404                          add esp, 4*1
+    37                                          
+    38 0000002F 68[04000000]                    push dword b ; citirea lui b
+    39 00000034 68[0E000000]                    push dword formatinput
+    40 00000039 FF15[00000000]                  call [scanf]
+    41 0000003F 83C408                          add esp, 4*2
+    42                                          
+    43 00000042 A1[00000000]                    mov eax, [a]
+    44 00000047 0305[04000000]                  add eax, [b] ; eax = a+b
+    45                                          
+    46 0000004D 50                              push eax
+    47 0000004E 68[11000000]                    push formatoutput
+    48 00000053 FF15[00000000]                  call [printf]
+    49 00000059 83C408                          add esp, 4*2
+    50                                          
+    51 0000005C 6A00                            push    dword 0      
+    52 0000005E FF15[00000000]                  call    [exit]       

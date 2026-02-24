@@ -1,0 +1,112 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit, fopen, fread, fclose, printf, scanf      
+     6                                  import exit msvcrt.dll 
+     7                                  import fopen msvcrt.dll
+     8                                  import fread msvcrt.dll
+     9                                  import fclose msvcrt.dll
+    10                                  import scanf msvcrt.dll
+    11                                  import printf msvcrt   
+    12                                  
+    13                                  ;In fisierul "in.txt" se da un sir de maximum 100 de caractere.
+    14                                  ;Sa se citeasca de la tastatura cate un caracter pana la introducerea caracterului '$'.
+    15                                  ;Pentru fiecare caracter citit, sa se afiseze pe ecran numarul de aparitii al acestuia in sirul din fisier.
+    16                                  
+    17                                  ;Ex:
+    18                                  ;in.txt: abcabAAbcbb
+    19                                  
+    20                                  ;a => 2
+    21                                  ;b => 5
+    22                                  ;z => 0
+    23                                  ;* => 0
+    24                                  ;A => 2
+    25                                  ;$ => sfarsit executie.
+    26                                  
+    27                                  segment data use32 class=data
+    28                                      
+    29 00000000 696E2E74787400              nume_fisier db "in.txt", 0
+    30 00000007 7200                        mod_acces db "r", 0
+    31 00000009 FFFFFFFF                    descriptor dd -1
+    32                                      
+    33 0000000D 00<rept>                    text times 101 db 0
+    34 00000072 00000000                    lung_text dd 0
+    35                                      len equ 100
+    36                                      
+    37 00000076 00                          n db 0
+    38 00000077 256300                      format_citire db "%c", 0
+    39                                      
+    40 0000007A 25633A2025640D0A00          format_afisare db "%c: %d", 13, 10, 0
+    41                                  
+    42                                  segment code use32 class=code
+    43                                      start:
+    44                                      
+    45 00000000 68[07000000]                    push dword mod_acces ; deschidem fisierul
+    46 00000005 68[00000000]                    push dword nume_fisier
+    47 0000000A FF15[00000000]                  call [fopen]
+    48 00000010 83C408                          add esp, 4*2
+    49                                          
+    50 00000013 A3[09000000]                    mov [descriptor], eax ; salvam descriptor
+    51 00000018 83F800                          cmp eax, 0 ; verificam deschiderea corecta a fisierului
+    52 0000001B 0F848A000000                    je final
+    53                                          
+    54 00000021 FF35[09000000]                  push dword [descriptor] ; citim sirul dat in in.txt
+    55 00000027 6A64                            push dword len
+    56 00000029 6A01                            push dword 1
+    57 0000002B 68[0D000000]                    push dword text
+    58 00000030 FF15[00000000]                  call [fread]
+    59 00000036 83C410                          add esp, 4*4
+    60                                          
+    61 00000039 A3[72000000]                    mov [lung_text], eax ; cate caractere s-au citit defapt
+    62 0000003E 83F800                          cmp eax, 0 ; daca nu s-au citit caractere putem incheia executia
+    63 00000041 7468                            je final
+    64                                          
+    65 00000043 FF35[09000000]                  push dword [descriptor] ; inchidem fisierul
+    66 00000049 FF15[00000000]                  call [fclose]
+    67 0000004F 83C404                          add esp, 4
+    68                                          
+    69                                          citire:
+    70 00000052 68[76000000]                        push dword n ; citim caracter
+    71 00000057 68[77000000]                        push dword format_citire
+    72 0000005C FF15[00000000]                      call [scanf]
+    73 00000062 83C408                              add esp, 4*2
+    74                                              
+    75 00000065 803D[76000000]24                    cmp byte [n], '$' ; citim pana la $
+    76 0000006C 743D                                je gata_citire
+    77                                              
+    78 0000006E BB00000000                          mov ebx, 0 ; in ebx contorizam numarul de aparitii
+    79 00000073 B800000000                          mov eax, 0
+    80 00000078 A0[76000000]                        mov al, byte [n] ; in eax avem caracterul
+    81 0000007D 50                                  push eax ; lodsb va modifica
+    82                                              
+    83 0000007E FC                                  cld ; pregatim loopul
+    84 0000007F BE[0D000000]                        mov esi, text
+    85 00000084 8B0D[72000000]                      mov ecx, [lung_text]
+    86 0000008A E31F                                jecxz final
+    87                                              
+    88                                              repeta: ; comparam caracter cu caracter
+    89 0000008C AC                                      lodsb ; al = caracter din text
+    90 0000008D 3A05[76000000]                          cmp al, byte [n]; comparam caracterul citit cu caracterele din text
+    91 00000093 7501                                    jne ne_egal
+    92                                                  
+    93 00000095 43                                      inc ebx ; incrementam contorul daca sunt egale
+    94                                                  
+    95                                                  ne_egal:
+    96 00000096 E2F4                                    loop repeta
+    97                                                  
+    98 00000098 58                                  pop eax ; revenim la caracterul initial
+    99                                                  
+   100 00000099 53                                  push ebx ; afisam caracterul si de cate ori apare
+   101 0000009A 50                                  push eax ; afisam caracterul
+   102 0000009B 68[7A000000]                        push dword format_afisare
+   103 000000A0 FF15[00000000]                      call [printf]
+   104 000000A6 83C40C                              add esp, 4*3
+   105                                              
+   106 000000A9 EBA7                                jmp citire ; reluam citirea pana dam de $
+   107                                          
+   108                                          gata_citire:
+   109                                          
+   110                                          final:
+   111 000000AB 6A00                            push    dword 0      
+   112 000000AD FF15[00000000]                  call    [exit]       

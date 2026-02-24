@@ -1,0 +1,62 @@
+     1                                  bits 32
+     2                                  global start        
+     3                                  extern exit
+     4                                  import exit msvcrt.dll
+     5                                  
+     6                                  ; Sa se determine si sa se salveze in memorie ultimii 3 biti ai rezultatului urmatoarei operatii, in interpretarea CU SEMN:
+     7                                  ; d*d*d-(17+x)/(a*a*c-b/c+2)   ; a,b,c-byte; d-word; x-qword
+     8                                  segment data use32 class=data
+     9 00000000 <res 00000001>              rezultat resb 1
+    10 00000001 02                          a db 2
+    11 00000002 F1                          b db -15
+    12 00000003 FD                          c db -3
+    13 00000004 0300                        d dw 3
+    14 00000006 0D00000000000000            x dq 13 ; G schimbam dw in dq pentru a defini corect qword
+    15                                  segment code use32 class=code
+    16                                      start:
+    17                                      
+    18 00000000 A0[01000000]                    mov AL, [a] ; al=a
+    19 00000005 F6E8                            imul AL ; ax=a*a
+    20 00000007 6689C3                          mov BX, AX ; bx = a*a
+    21 0000000A A0[03000000]                    mov AL, [c]
+    22 0000000F 6698                            cbw ; ax=c
+    23 00000011 66F7EB                          imul bx ; dx:ax=a*a*c
+    24 00000014 6689C3                          mov BX, AX
+    25 00000017 6689D1                          mov CX, DX
+    26 0000001A A0[02000000]                    mov AL, [b] ; al=b
+    27 0000001F 6698                            cbw ; G crestem dimensiunea pentru a putea imparti
+    28 00000021 F63D[03000000]                  idiv byte [c] ; al = b/c
+    29 00000027 6698                            cbw ; G inlocuim cwd cu cbw pentru a avea dimensiunile corecte ; ax=b/c
+    30 00000029 6629C3                          sub BX, AX
+    31 0000002C 6619D1                          sbb CX, DX ; G inlocuim sub cu sbb pentru a scadea corect
+    32 0000002F 6683C302                        add BX, 2
+    33 00000033 6683D100                        adc CX, 0 ; G adaugam adc in caz ca adunarea bx+2 produce transport
+    34                                          ; cx:bx = (a*a*c-b/c+2)
+    35 00000037 6651                            push CX ; G schimbam ordinea operatiilor de push
+    36 00000039 6653                            push BX
+    37 0000003B 5B                              pop EBX ; ebx = (a*a*c-b/c+2)
+    38 0000003C A1[06000000]                    mov EAX, [x]
+    39 00000041 8B15[0A000000]                  mov EDX, [x+4] ; G schimbam x in x+4, pentru a retine corect val lui x in qword edx:eax 
+    40 00000047 83C011                          add EAX, 17 
+    41 0000004A 83D200                          adc EDX, 0 ; edx:eax = (17+x) 
+    42 0000004D F7FB                            idiv EBX ; G inlocuim div cu idiv pt a inmulti cu semn; eax = (17+x)/(a*a*c-b/c+2)
+    43 0000004F 89C3                            mov EBX, EAX ; ebx = (17+x)/(a*a*c-b/c+2)
+    44 00000051 66A1[04000000]                  mov AX, [d] ; G inlocuim EAX cu AX pentru a corespunde dimensiunilor
+    45 00000057 66F72D[04000000]                imul word [d]; G modificam mul [d] in imul word [d], pt a specifica dim operatiei si a inmulti in interpret cu semn ; dx:ax = d*d
+    46 0000005E 6652                            push DX
+    47 00000060 6650                            push AX
+    48 00000062 59                              pop ECX ; ecx=d*d
+    49 00000063 66A1[04000000]                  mov AX, [d]
+    50 00000069 98                              cwde ;eax=d
+    51 0000006A F7E9                            imul ECX ; G schimbam eax in ecx pentru a inmulti corect ; edx:eax = d*d*d
+    52 0000006C 53                              push EBX ; punem pe stiva (17+x)/(a*a*c-b/c+2)
+    53 0000006D 89C3                            mov EBX, EAX
+    54 0000006F 89D1                            mov ECX, EDX ; dword ecx:ebx = d*d*d
+    55 00000071 58                              pop EAX ; eax = (17+x)/(a*a*c-b/c+2)
+    56 00000072 99                              cdq ; edx:eax = (17+x)/(a*a*c-b/c+2)
+    57 00000073 29C3                            sub EBX, EAX
+    58 00000075 19D1                            sbb ECX, EDX
+    59 00000077 83E307                          and EBX, 7 ; 7 = 00...00111b 
+    60 0000007A 881D[00000000]                  mov byte [rezultat], BL ; G modificam rezultat in byte [rezultat] pentru a nu avea eroare de asamblare
+    61 00000080 6A00                            push dword 0
+    62 00000082 FF15[00000000]                  call [exit]

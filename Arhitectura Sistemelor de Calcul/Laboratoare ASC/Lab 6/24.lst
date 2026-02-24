@@ -1,0 +1,57 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit               
+     6                                  import exit msvcrt.dll    
+     7                                  
+     8                                  ;Dandu-se un sir de dublucuvinte, sa se obtina un alt sir de dublucuvinte in care se vor pastra doar dublucuvintele din primul sir care au un numar par de biti cu valoare 1.
+     9                                  
+    10                                  segment data use32 class=data
+    11                                      
+    12 00000000 7B000000C801000015-         sir dd 123,456,789,258
+    12 00000009 03000002010000     
+    13                                      len equ ($-sir)/4
+    14                                      
+    15 00000010 <res 00000010>              dest resd len
+    16                                  
+    17                                  segment code use32 class=code
+    18                                      start:
+    19                                          
+    20                                          ; pregatim loop
+    21 00000000 B904000000                      mov ecx, len
+    22 00000005 BE[00000000]                    mov esi, sir
+    23 0000000A BF[10000000]                    mov edi, dest
+    24                                          
+    25 0000000F FC                              cld ; DF = 0, stanga la dreapta
+    26 00000010 E31B                            jecxz final
+    27                                          repeta:
+    28                                          
+    29 00000012 AD                                  lodsd ; EAX <- [sir + pozitie_curenta]
+    30                                              
+    31 00000013 51                                  push ecx
+    32                                              
+    33                                              ;bucla care numara nr de biti de 1 din dublucuvantul actual
+    34 00000014 89C2                                mov edx, eax ; nu stricam eax
+    35 00000016 B920000000                          mov ecx, 32 ; 32 de rotiri
+    36 0000001B B300                                mov bl, 0
+    37                                              numarare_biti:
+    38 0000001D D1EA                                    shr edx, 1 ; bitul iesit in dreapta se pastreaza in CF
+    39 0000001F 80D300                                  adc bl, 0
+    40 00000022 E2F9                                loop numarare_biti
+    41                                          
+    42 00000024 59                                  pop ecx
+    43                                              
+    44 00000025 F6C301                              test bl, 1
+    45 00000028 7501                                jnz skip 
+    46                                              ; are numar par de biti 1
+    47 0000002A AB                                  stosd
+    48                                              
+    49                                              skip:
+    50                                          
+    51 0000002B E2E5                            loop repeta
+    52                                          
+    53                                          
+    54                                          final:
+    55 0000002D 6A00                            push    dword 0      
+    56 0000002F FF15[00000000]                  call    [exit]       

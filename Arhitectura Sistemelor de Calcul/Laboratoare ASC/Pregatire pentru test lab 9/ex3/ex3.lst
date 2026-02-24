@@ -1,0 +1,121 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit, scanf, fopen, fprintf, fclose  
+     6                                  import exit msvcrt.dll
+     7                                  import scanf msvcrt.dll
+     8                                  import fopen msvcrt.dll
+     9                                  import fprintf msvcrt.dll
+    10                                  import fclose msvcrt.dll    
+    11                                  
+    12                                  ; Se da un sir de caractere care contine mai multe cuvinte separate prin spatiu (inclusiv ultimul caracter din sir este spatiu)
+    13                                  ; Programul va crea pentru fiecare cuvant din sir un nou fisier care va contine nimarul de caractere din cuvant si care va avea ca nume cuvantul respectiv.
+    14                                  
+    15                                  ; Varianta sir dat in data segment
+    16                                  
+    17                                  segment data use32 class=data
+    18                                      
+    19 00000000 416E6120617265206D-         sir db "Ana are mere "
+    19 00000009 65726520           
+    20                                      len_sir equ $-sir
+    21 0000000D 00<rept>                    cuvant times 30 db 0
+    22                                      
+    23 0000002B 00<rept>                    nume_fisier times 40 db 0
+    24 00000053 7700                        mod_acces db "w", 0
+    25 00000055 FFFFFFFF                    descriptor dd -1
+    26                                      
+    27 00000059 256400                      format_nr db "%d", 0
+    28                                      
+    29                                  
+    30                                  segment code use32 class=code
+    31                                  
+    32                                      final_cuv:
+    33                                      
+    34 00000000 B000                            mov al, 0 ; adaugam terminator
+    35 00000002 AA                              stosb ; terminam cuvantul cu 0
+    36                                          
+    37 00000003 83FB00                          cmp ebx, 0
+    38 00000006 7464                            je skip_file
+    39                                          
+    40 00000008 51                              push ecx ; salvam ecx - apeluri C modifica
+    41 00000009 56                              push esi ; salvam parcurgerea sirului
+    42                                          
+    43 0000000A FC                              cld ; copiem cuvantul in nume_fisier
+    44 0000000B BE[0D000000]                    mov esi, cuvant
+    45 00000010 BF[2B000000]                    mov edi, nume_fisier
+    46                                          
+    47                                          copiaza_cuvant:
+    48 00000015 AC                                  lodsb
+    49 00000016 AA                                  stosb
+    50 00000017 3C00                                cmp al, 0
+    51 00000019 75FA                                jne copiaza_cuvant
+    52                                              
+    53                                          ;am copiat inclusiv 0 terminal , il inlocuim cu .txt
+    54                                              
+    55 0000001B 4F                              dec edi
+    56 0000001C B02E                            mov al, '.'
+    57 0000001E AA                              stosb
+    58 0000001F B074                            mov al, 't'
+    59 00000021 AA                              stosb
+    60 00000022 B078                            mov al, 'x'
+    61 00000024 AA                              stosb
+    62 00000025 B074                            mov al, 't'
+    63 00000027 AA                              stosb
+    64 00000028 B000                            mov al, 0 ; terminatorul
+    65 0000002A AA                              stosb
+    66                                          
+    67                                          ; deschidem fisierul
+    68 0000002B 68[53000000]                    push dword mod_acces
+    69 00000030 68[2B000000]                    push dword nume_fisier
+    70 00000035 FF15[00000000]                  call [fopen]
+    71 0000003B 83C408                          add esp, 4*2
+    72                                          
+    73 0000003E A3[55000000]                    mov [descriptor], eax ; salvam descriptor 
+    74 00000043 83F800                          cmp eax, 0 ; verificam deschiderea
+    75 00000046 7424                            je skip_file
+    76                                          
+    77 00000048 53                              push ebx ; scriem numarul
+    78 00000049 68[59000000]                    push dword format_nr
+    79 0000004E FF35[55000000]                  push dword [descriptor]
+    80 00000054 FF15[00000000]                  call [fprintf]
+    81 0000005A 83C40C                          add esp, 4*3
+    82                                          
+    83 0000005D FF35[55000000]                  push dword [descriptor] ; inchidem fisierul
+    84 00000063 FF15[00000000]                  call [fclose]
+    85 00000069 83C404                          add esp, 4
+    86                                  
+    87                                          skip_file:
+    88 0000006C 5E                              pop esi ; revenim la esi pt parcurgere sir initial
+    89                                          
+    90 0000006D 59                              pop ecx ; restauram ecx
+    91 0000006E 83F900                          cmp ecx, 0
+    92 00000071 7426                            je final
+    93                                          
+    94 00000073 EB0D                            jmp urmator ; citim urmatorul cuvant
+    95                                          
+    96                                      start:
+    97                                      
+    98 00000075 FC                              cld ; pregatim parcurgerea sirului
+    99 00000076 B90D000000                      mov ecx, len_sir
+   100 0000007B BE[00000000]                    mov esi, sir
+   101 00000080 E317                            jecxz final
+   102                                          
+   103                                          urmator:
+   104 00000082 BB00000000                          mov ebx, 0 ; numar litere cuvant
+   105 00000087 BF[0D000000]                        mov edi, cuvant ; pregatim noul cuvant
+   106                                          
+   107                                          repeta:
+   108 0000008C AC                                  lodsb ; citim caracterul curent
+   109 0000008D 3C20                                cmp al, ' ' ; spatiu = sfarsit cuvant
+   110 0000008F 0F846BFFFFFF                        je final_cuv
+   111                                              
+   112 00000095 AA                                  stosb ; nu e spatiu - il adaugam in sir
+   113 00000096 43                                  inc ebx
+   114 00000097 E2F3                                loop repeta
+   115                                              
+   116                                          
+   117                                          final:
+   118                                          
+   119 00000099 6A00                            push    dword 0      
+   120 0000009B FF15[00000000]                  call    [exit]       

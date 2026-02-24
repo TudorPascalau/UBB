@@ -1,0 +1,2 @@
+class EroareUI(Exception):
+    pass

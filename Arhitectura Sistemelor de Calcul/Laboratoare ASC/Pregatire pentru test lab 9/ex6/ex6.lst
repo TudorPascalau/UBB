@@ -1,0 +1,115 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit, fopen, fread, fclose, printf      
+     6                                  import exit msvcrt.dll
+     7                                  import fopen msvcrt.dll
+     8                                  import fread msvcrt.dll
+     9                                  import fclose msvcrt.dll
+    10                                  import printf msvcrt
+    11                                  
+    12                                  ; Se da un fisier text input.txt, care contine un sir de caractere
+    13                                  ; Sa se determine si sa se afiseze pe ecran numarul de aparitii al fiecarui litere din fisier
+    14                                  ; Literele mari si mici se vor considera la fel (nu se face diferenta intre majuscule)
+    15                                  ; Se vor afisa doar literele care apar in text, impreuna cu numarul lor de aparitii    
+    16                                  
+    17                                  segment data use32 class=data
+    18                                      
+    19 00000000 696E7075742E747874-         nume_fisier db "input.txt", 0
+    19 00000009 00                 
+    20 0000000A 7200                        mod_acces db "r", 0
+    21 0000000C FFFFFFFF                    descriptor dd -1
+    22                                      
+    23 00000010 00<rept>                    frecv times 200 db 0
+    24                                      
+    25                                      len equ 100
+    26 000000D8 00<rept>                    text times (len+1) db 0
+    27 0000013D 00000000                    len_text dd 0
+    28                                      
+    29 00000141 25633A2025640D0A00          format_afisare db "%c: %d", 13, 10, 0
+    30                                  
+    31                                  segment code use32 class=code
+    32                                      start:
+    33                                      
+    34 00000000 68[0A000000]                    push dword mod_acces ; deschidem fisierul
+    35 00000005 68[00000000]                    push dword nume_fisier
+    36 0000000A FF15[00000000]                  call [fopen]
+    37 00000010 83C408                          add esp, 4*2
+    38                                          
+    39 00000013 A3[0C000000]                    mov [descriptor], eax ; salvam descriptorul
+    40 00000018 83F800                          cmp eax, 0 ; verificam deschiderea fisierului
+    41 0000001B 0F8482000000                    je final
+    42                                          
+    43 00000021 FF35[0C000000]                  push dword [descriptor] ; citim textul
+    44 00000027 6A64                            push dword len
+    45 00000029 6A01                            push dword 1
+    46 0000002B 68[D8000000]                    push dword text
+    47 00000030 FF15[00000000]                  call [fread]
+    48 00000036 83C410                          add esp, 4*4
+    49                                          
+    50 00000039 A3[3D010000]                    mov [len_text], eax ; salvam lungimea reala a sirului
+    51                                          
+    52 0000003E FC                              cld ; pregatim parcurgerea sirului
+    53 0000003F BE[D8000000]                    mov esi, text
+    54 00000044 8B0D[3D010000]                  mov ecx, [len_text]
+    55 0000004A E357                            jecxz final
+    56                                          
+    57                                          repeta: ; contorizam toate literele din text
+    58 0000004C 31C0                                xor eax, eax
+    59 0000004E AC                                  lodsb ; eax = valoarea literei
+    60                                              
+    61 0000004F 83F841                              cmp eax, 'A'
+    62 00000052 721D                                jb skip_caracter
+    63 00000054 83F85A                              cmp eax, 'Z'
+    64 00000057 760F                                jbe litera_mare
+    65                                              
+    66 00000059 83F861                              cmp eax, 'a'
+    67 0000005C 7213                                jb skip_caracter
+    68 0000005E 83F87A                              cmp eax, 'z'
+    69 00000061 770E                                ja skip_caracter
+    70                                              
+    71 00000063 83E861                              sub eax, 'a'
+    72 00000066 EB03                                jmp contorizare
+    73                                              
+    74                                              litera_mare:
+    75 00000068 83E841                              sub eax, 'A'
+    76                                              
+    77                                              contorizare:
+    78 0000006B FE80[10000000]                      inc byte[frecv+eax] ; frecv[litera]++, unde frecv[0] reprezinta frecv[a]
+    79                                              
+    80                                              skip_caracter:
+    81 00000071 E2D9                                loop repeta
+    82                                              
+    83 00000073 FC                              cld
+    84 00000074 BE[10000000]                    mov esi, frecv
+    85 00000079 BB61000000                      mov ebx, 'a'
+    86 0000007E B91A000000                      mov ecx, 26
+    87                                          afisari_litere:
+    88 00000083 51                                  push ecx ; salvame ecx / apeluri modifica
+    89                                              
+    90 00000084 B800000000                          mov eax, 0
+    91 00000089 AC                                  lodsb ; eax = numarul de aparitii al literei
+    92                                              
+    93 0000008A 83F800                              cmp eax, 0
+    94 0000008D 7410                                je skip_afisare
+    95                                              
+    96 0000008F 50                                  push eax
+    97 00000090 53                                  push ebx
+    98 00000091 68[41010000]                        push format_afisare
+    99 00000096 FF15[00000000]                      call [printf]
+   100 0000009C 83C40C                              add esp, 4*3
+   101                                              
+   102                                              skip_afisare:
+   103 0000009F 43                                  inc ebx
+   104 000000A0 59                                  pop ecx
+   105 000000A1 E2E0                                loop afisari_litere
+   106                                          
+   107                                          final:
+   108                                          
+   109 000000A3 FF35[0C000000]                  push dword [descriptor]
+   110 000000A9 FF15[00000000]                  call [fclose]
+   111 000000AF 83C404                          add esp, 4
+   112                                          
+   113 000000B2 6A00                            push    dword 0      
+   114 000000B4 FF15[00000000]                  call    [exit]       

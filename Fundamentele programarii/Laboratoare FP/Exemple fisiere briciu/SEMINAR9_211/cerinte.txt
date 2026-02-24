@@ -1,0 +1,18 @@
+Aplicatie de gestiune:
+    melodii
+    persoane
+    ratings (o persoana poate atribui un rating unei melodii)
+
+Pentru melodii, persoane:
+    adaugare, modificare, stergere, afisare lista
+    cautare
+Pentru ratings:
+    - afisare melodii cu rating in ordine:
+        -alfabetica, dupa artist+titlu
+        -medie rating-uri
+    - afisare cele mai ascultate melodii
+
+Plan:
+    Seminar 7: gestiune melodii (practice ui - service - domain, validator - repository)
+    Seminar 8: repo fisiere, clasa Rating
+    Seminar 9: clasa Rating (continued), rapoarte

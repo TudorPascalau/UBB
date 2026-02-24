@@ -1,0 +1,61 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit               
+     6                                  import exit msvcrt.dll    
+     7                                  
+     8                                  segment data use32 class=data
+     9                                      
+    10 00000000 0500                        a dw 5
+    11 00000002 0A00                        b dw 10
+    12 00000004 0F000000                    c dd 15
+    13                                      
+    14                                      
+    15                                  
+    16                                  segment code use32 class=code
+    17                                      start:
+    18                                          
+    19                                          ;calculam [(a*b+5)/10]*c = 75
+    20                                          
+    21                                          ;program corect calcul cu semn
+    22 00000000 66A1[00000000]                  mov ax,[a]
+    23 00000006 668B1D[02000000]                mov bx,[b]
+    24 0000000D 66F7EB                          imul bx ; modificam ebx in bx, pentru a inmulti corect word cu word -> dx:ax = a*b
+    25 00000010 66BB0500                        mov bx, 5
+    26 00000014 6601D8                          add ax, bx
+    27                                          ; renuntam la stc, deoarece nu mereu se seteaza CF la adunarea ax, bx
+    28 00000017 6683D200                        adc dx, 0 ; inlocuim 1 cu 0, pentru a aduna corect -> dx:ax = a*b+5
+    29 0000001B 66BB0A00                        mov bx, 10 ; inlocuim 0x10 cu 10, altfel am muta in bx valoarea 16
+    30 0000001F 66F7FB                          idiv bx ; -> ax = (a*b+5)/10
+    31 00000022 98                              cwde ; renuntam la 1, pentru a nu avea eroare de asamblare
+    32 00000023 8B1D[04000000]                  mov ebx, [c]
+    33 00000029 F7EB                            imul ebx; inlocuim ecx cu ebx pentru a inmulti corect -> edx:eax = (a*b+5)/10*c
+    34 0000002B 52                              push edx ; inlocuim pop cu push pentru a pune pe stiva rezultatul
+    35 0000002C 50                              push eax
+    36                                          
+    37                                          ;program corect fara semn
+    38 0000002D B800000000                      mov eax, 0
+    39 00000032 BB00000000                      mov ebx, 0 ; resetam valorile pentru a efectua calcule noi
+    40 00000037 66A1[00000000]                  mov ax, [a]
+    41 0000003D 668B1D[02000000]                mov bx, [b] ; inlocuim ebx cu bx si b+2 cu b, pentru a pune in bx valoarea din memorie a lui b
+    42 00000044 66F7E3                          mul bx ; inlocuim imul cu mul, deoarece facem inmultire fara semn
+    43 00000047 66BB0500                        mov bx, 5
+    44 0000004B 6601D8                          add ax, bx ; inlocuim cx cu bx pentru a aduna corect
+    45                                          ; renuntam la stc, deoarece nu mereu se seteaza CF la adunarea ax, bx
+    46 0000004E 6683D200                        adc dx, 0 ; -> dx:ax = a*b+5
+    47 00000052 66BB0A00                        mov bx, 10
+    48 00000056 66F7F3                          div bx ; -> ax =(a*b+5)/10 
+    49 00000059 666A00                          push word 0
+    50 0000005C 6650                            push ax
+    51 0000005E 58                              pop eax; eax = (a*b+5)/10 
+    52 0000005F 8B1D[04000000]                  mov ebx, [c]
+    53 00000065 F7E3                            mul ebx ; edx:eax = (a*b+5)/10 
+    54 00000067 5B                              pop ebx 
+    55 00000068 59                              pop ecx ; -> ecx:ebx =  (a*b+5)/10*c fara semn
+    56 00000069 F8                              clc
+    57 0000006A 01D8                            add eax, ebx
+    58 0000006C 11CA                            adc edx, ecx ; inlocuim add cu adc pentru a face adunarea intre qworduri corect
+    59                                          
+    60 0000006E 6A00                            push    dword 0      
+    61 00000070 FF15[00000000]                  call    [exit]       

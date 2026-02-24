@@ -1,0 +1,149 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit, scanf, fopen, fprintf, fclose  
+     6                                  import exit msvcrt.dll
+     7                                  import scanf msvcrt.dll
+     8                                  import fopen msvcrt.dll
+     9                                  import fprintf msvcrt.dll
+    10                                  import fclose msvcrt.dll
+    11                                  
+    12                                  ; Sa se citeasca cifre de la tastatura pana la intalnirea caracterului $
+    13                                  ; Sa sa se scrie intr-un fisier fiecare cifra para si apoi numarul cel mai mic posibil format din exact trei cifre pare din cele citite (daca exita)
+    14                                  ; Daca nu exista 3 cifre pare, atunci fisierul va contine doar cifrele pare existente (poate fi si vid)    
+    15                                  
+    16                                  segment data use32 class=data
+    17                                      
+    18 00000000 00                          n db 0
+    19 00000001 256300                      format_citire db "%c", 0
+    20                                      
+    21 00000004 6E756D61722E747874-         nume_fisier db "numar.txt", 0
+    21 0000000D 00                 
+    22 0000000E 7700                        mod_acces db "w", 0
+    23 00000010 00000000                    descriptor dd 0
+    24                                      
+    25 00000014 256400                      format_numar db "%d", 0
+    26 00000017 256300                      format_spatiu db "%c", 0
+    27                                      
+    28 0000001A 0A                          x db 10 ; unde tinem minte cifrele mici
+    29 0000001B 0A                          y db 10
+    30 0000001C 0A                          z db 10
+    31                                  
+    32                                  segment code use32 class=code
+    33                                      start:
+    34                                      
+    35                                          
+    36                                          
+    37 00000000 BF00000000                      mov edi, 0 ; contor numere pare
+    38                                      
+    39 00000005 68[0E000000]                    push dword mod_acces ; deschidem fisierul
+    40 0000000A 68[04000000]                    push dword nume_fisier
+    41 0000000F FF15[00000000]                  call [fopen]
+    42 00000015 83C408                          add esp, 4*2
+    43                                          
+    44 00000018 A3[10000000]                    mov [descriptor], eax ; salvam descriptor
+    45 0000001D 83F800                          cmp eax, 0
+    46 00000020 0F84FC000000                    je final
+    47                                      
+    48                                          citeste:
+    49 00000026 68[00000000]                        push dword n ; citim cifre
+    50 0000002B 68[01000000]                        push dword format_citire
+    51 00000030 FF15[00000000]                      call [scanf]
+    52 00000036 83C408                              add esp, 4*2
+    53                                              
+    54 00000039 B800000000                          mov eax, 0
+    55 0000003E A0[00000000]                        mov al, [n] ; salvam in eax pt lucru mai usor
+    56 00000043 3C24                                cmp al, '$' ; pana dam de $
+    57 00000045 746A                                je gata_citire
+    58                                              
+    59 00000047 3C20                                cmp al, ' ' ; sarim peste spatii
+    60 00000049 74DB                                je citeste
+    61                                              
+    62 0000004B 2C30                                sub al, '0' ; transformam val ASCII in val cifrei
+    63                                              
+    64 0000004D A801                                test al, 1
+    65 0000004F 755B                                jnz nu_e_par
+    66                                              
+    67 00000051 47                                  inc edi ; contorizam numarul de cifre pare
+    68                                              
+    69 00000052 3A05[1A000000]                      cmp al, [x]; deoarece valoare citita este doar o cifra, se ia in considerare doar partea low
+    70 00000058 7307                                jae al_doilea_mic
+    71                                              
+    72 0000005A A2[1A000000]                        mov [x], al
+    73 0000005F EB1C                                jmp dupa_comparari
+    74                                              
+    75                                              al_doilea_mic:
+    76 00000061 3A05[1B000000]                      cmp al, [y]
+    77 00000067 7307                                jae al_treilea_mic
+    78                                              
+    79 00000069 A2[1B000000]                        mov [y], al
+    80 0000006E EB0D                                jmp dupa_comparari
+    81                                              
+    82                                              al_treilea_mic:
+    83 00000070 3A05[1C000000]                      cmp al, [z]
+    84 00000076 7305                                jae dupa_comparari
+    85                                              
+    86 00000078 A2[1C000000]                        mov [z], al
+    87                                              
+    88                                              dupa_comparari:
+    89                                              
+    90 0000007D 50                                  push eax
+    91 0000007E 68[14000000]                        push dword format_numar
+    92 00000083 FF35[10000000]                      push dword [descriptor]
+    93 00000089 FF15[00000000]                      call [fprintf]
+    94 0000008F 83C40C                              add esp, 4*3
+    95                                              
+    96 00000092 B820000000                          mov eax, ' '
+    97 00000097 50                                  push eax
+    98 00000098 68[17000000]                        push dword format_spatiu
+    99 0000009D FF35[10000000]                      push dword [descriptor]
+   100 000000A3 FF15[00000000]                      call [fprintf]
+   101 000000A9 83C40C                              add esp, 4*3
+   102                                              
+   103                                              nu_e_par:
+   104                                              
+   105 000000AC E975FFFFFF                          jmp citeste ; reluam citirea
+   106                                              
+   107                                          gata_citire:
+   108                                          
+   109 000000B1 83FF03                          cmp edi, 3
+   110 000000B4 725D                            jb skip_numar
+   111                                          
+   112 000000B6 B800000000                      mov eax, 0 ; prima cifra
+   113 000000BB A0[1A000000]                    mov al, [x]
+   114                                          
+   115 000000C0 50                              push eax
+   116 000000C1 68[14000000]                    push dword format_numar
+   117 000000C6 FF35[10000000]                  push dword [descriptor]
+   118 000000CC FF15[00000000]                  call [fprintf]
+   119 000000D2 83C40C                          add esp, 4*3
+   120                                          
+   121 000000D5 B800000000                      mov eax, 0 ; a doua cifra
+   122 000000DA A0[1B000000]                    mov al, [y]
+   123                                          
+   124 000000DF 50                              push eax
+   125 000000E0 68[14000000]                    push dword format_numar
+   126 000000E5 FF35[10000000]                  push dword [descriptor]
+   127 000000EB FF15[00000000]                  call [fprintf]
+   128 000000F1 83C40C                          add esp, 4*3
+   129                                          
+   130 000000F4 B800000000                      mov eax, 0 ; a treia cifra
+   131 000000F9 A0[1C000000]                    mov al, [z]
+   132                                          
+   133 000000FE 50                              push eax
+   134 000000FF 68[14000000]                    push dword format_numar
+   135 00000104 FF35[10000000]                  push dword [descriptor]
+   136 0000010A FF15[00000000]                  call [fprintf]
+   137 00000110 83C40C                          add esp, 4*3
+   138                                          
+   139                                          skip_numar:
+   140                                          
+   141 00000113 FF35[10000000]                  push dword [descriptor]
+   142 00000119 FF15[00000000]                  call [fclose]
+   143 0000011F 83C404                          add esp, 4
+   144                                          
+   145                                          final:
+   146                                          
+   147 00000122 6A00                            push    dword 0      
+   148 00000124 FF15[00000000]                  call    [exit]       

@@ -1,0 +1,7 @@
+20.02,08:00,discutie,normala
+05.02,16:30,Examen,extraordinara
+05.02,12:30,Examen,normala
+06.02,20:00,praying to god,extraordinara
+07.02,06:59,vreau 10 la examen,extraordinara
+04.02,8:35,vreau 10 la examen,normala
+15.03,12:00,subiect,normala

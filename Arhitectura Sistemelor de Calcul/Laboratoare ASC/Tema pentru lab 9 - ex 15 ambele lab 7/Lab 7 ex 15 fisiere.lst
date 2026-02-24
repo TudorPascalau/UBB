@@ -1,0 +1,86 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit, fopen, fprintf, fclose  
+     6                                  import exit msvcrt.dll  
+     7                                  import fopen msvcrt.dll
+     8                                  import fprintf msvcrt.dll
+     9                                  import fclose msvcrt.dll  
+    10                                  
+    11                                  ; Se dau un nume de fisier si un text (definite in segmentul de date). Textul contine litere mici, litere mari, cifre si caractere speciale. 
+    12                                  ; Sa se inlocuiasca toate caracterele speciale din textul dat cu caracterul 'X'. 
+    13                                  ; Sa se creeze un fisier cu numele dat si sa se scrie textul obtinut in fisier.
+    14                                  
+    15                                  segment data use32 class=data
+    16                                      
+    17 00000000 6C6162203720657820-             nume_fisier db "lab 7 ex 15.txt", 0
+    17 00000009 31352E74787400     
+    18 00000010 7700                            mod_acces db "w", 0
+    19                                          
+    20 00000012 54657874756C20636F-             text db "Textul contine litere mici! mari 1 cifra & caractere speciale?"
+    20 0000001B 6E74696E65206C6974-
+    20 00000024 657265206D69636921-
+    20 0000002D 206D61726920312063-
+    20 00000036 696672612026206361-
+    20 0000003F 726163746572652073-
+    20 00000048 70656369616C653F   
+    21                                          len equ $-text
+    22                                          
+    23 00000050 00<rept>                        rezultat times len+1 db 0
+    24                                          
+    25 0000008F FFFFFFFF                        descriptor dd -1
+    26                                  
+    27                                  segment code use32 class=code
+    28                                      start:
+    29                                      
+    30 00000000 68[10000000]                    push dword mod_acces ; deschidem fisierul
+    31 00000005 68[00000000]                    push dword nume_fisier
+    32 0000000A FF15[00000000]                  call [fopen]
+    33 00000010 83C408                          add esp, 4*2
+    34                                          
+    35 00000013 A3[8F000000]                    mov [descriptor], eax ; tinem minte descriptorul
+    36                                          
+    37 00000018 83F800                          cmp eax, 0 ; verificam daca functia fopen a deschis cu succes fisierul
+    38 0000001B 7447                            je final
+    39                                          
+    40 0000001D BE[12000000]                    mov esi, text
+    41 00000022 BF[50000000]                    mov edi, rezultat
+    42 00000027 B93E000000                      mov ecx, len
+    43 0000002C FC                              cld
+    44                                          
+    45 0000002D E312                            jecxz skip
+    46                                          
+    47                                          repeta:
+    48 0000002F AC                                  lodsb ; al = caracter din sir
+    49 00000030 3C41                                cmp al, 'A' ; verificam daca caracterul este special
+    50 00000032 730A                                jae nespecial
+    51                                              
+    52 00000034 3C30                                cmp al, '0'
+    53 00000036 7204                                jb special
+    54                                              
+    55 00000038 3C39                                cmp al, '9'
+    56 0000003A 7700                                ja special
+    57                                              
+    58                                              special:
+    59 0000003C B058                                mov al, "X"
+    60                                              
+    61                                              nespecial:
+    62 0000003E AA                                  stosb
+    63                                              
+    64 0000003F E2EE                                loop repeta
+    65                                              
+    66                                          skip:
+    67                                              
+    68 00000041 68[50000000]                    push dword rezultat ; scriem in fisier rezultatul
+    69 00000046 FF35[8F000000]                  push dword [descriptor]
+    70 0000004C FF15[00000000]                  call [fprintf]
+    71 00000052 83C408                          add esp, 4*2
+    72                                          
+    73 00000055 FF35[8F000000]                  push dword [descriptor] ; inchidem fisierul
+    74 0000005B FF15[00000000]                  call [fclose]
+    75 00000061 83C404                          add esp, 4*1
+    76                                          
+    77                                          final:
+    78 00000064 6A00                            push    dword 0      
+    79 00000066 FF15[00000000]                  call    [exit]       

@@ -1,0 +1,41 @@
+P = { vi | vi @ Dvi}
+Dvi = { aij | j = 0,ni}
+
+algoritmul de fortza bruta
+#genereaza
+produs i=0,n-1 |Dvi|
+for a0 in Dv0: |Dv0|
+	for a1 in Dv1: |Dv1|
+		...
+			for an-1 in Dvn-1: |Dvn-1|
+				candidat = (a0,a1,...,an-1)
+#testeaza
+				if e_solutie(candidat):
+					proceseaza_solutie(candidat)
+=> theta(produs i=0,n-1 |Dvi|)
+
+backtracking
+#genereaza
+produs i=0,n-1 |Dvi|
+candidat = []
+for a0 in Dv0: |Dv0|
+	candidat = candidat U {a0}
+	if e_consistent(candidat):
+		for a1 in Dv1: |Dv1|
+			candidat = candidat U {a1}
+			if e_consistent(candidat):
+
+				...
+					for an-1 in Dvn-1: |Dvn-1|
+					candidat = candidat U {an-1}
+					if e_consistent(candidat):
+				
+							
+							#testeaza
+							if e_solutie(candidat):
+								proceseaza_solutie(candidat)
+						candidat.pop(an-1)
+				candidat.pop(a1)
+			candidat.pop(a0)
+			
+=> O(produs i=0,n-1 |Dvi|)

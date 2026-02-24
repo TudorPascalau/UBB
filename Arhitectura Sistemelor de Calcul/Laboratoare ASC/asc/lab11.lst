@@ -1,0 +1,113 @@
+     1                                  bits 32
+     2                                  
+     3                                  global start        
+     4                                  
+     5                                  extern exit, scanf, printf               
+     6                                  import exit msvcrt.dll    
+     7                                  import printf msvcrt.dll
+     8                                  import scanf msvcrt.dll
+     9                                  
+    10                                  ; Se citesc de la tastatura un numar natural n si n propozitii care contin cel putin n cuvinte (nu se fac validari).
+    11                                  ; Sa se afiseze sirul format prin concatenarea cuvintelor de pe pozitia i din propozitia i, i=1,n (separate prin spatiu).
+    12                                  
+    13                                  segment data use32 class=data
+    14 00000000 00000000                    n dd 0
+    15 00000004 256400                      format_citire_n db "%d", 0
+    16 00000007 <res 00000064>              buffer resb 100
+    17 0000006B 257300                      format_citire_prop db "%s", 0
+    18 0000006E <res 00000064>              sir_rez resb 100
+    19 000000D2 00000000                    pas_curent dd 0
+    20 000000D6 00000000                    pozitie_sir_rez dd 0
+    21                                  
+    22                                  segment code use32 class=code
+    23                                      copiere_cuvant:
+    24 00000000 8B74240C                        mov esi, [esp+12]
+    25 00000004 8B5C2408                        mov ebx, [esp+8]
+    26 00000008 8B7C2404                        mov edi, [esp+4]
+    27                                          
+    28 0000000C 89F1                            mov ecx, esi
+    29 0000000E 29D9                            sub ecx, ebx   ; ECX contine lungimea cuvantului
+    30                                                  
+    31 00000010 89DE                            mov esi, ebx
+    32                                                  
+    33                                          repeta3:
+    34 00000012 A4                                  movsb
+    35 00000013 E2FD                            loop repeta3
+    36                                          
+    37 00000015 89F8                            mov eax, edi
+    38 00000017 C20C00                          ret 3*4
+    39                                      
+    40                                      start:
+    41 0000001A 68[00000000]                    push dword n
+    42 0000001F 68[04000000]                    push dword format_citire_n
+    43 00000024 FF15[00000000]                  call [scanf]
+    44 0000002A 83C408                          add esp, 4*2
+    45                                          
+    46 0000002D 8B0D[00000000]                  mov ecx, [n]
+    47 00000033 BF[6E000000]                    mov edi, sir_rez
+    48 00000038 C705[D2000000]0000-             mov dword [pas_curent], 0
+    48 00000040 0000               
+    49 00000042 E36F                            jecxz final
+    50                                          repeta:
+    51                                              ; Citim o propozitie
+    52 00000044 60                                  pusha
+    53                                              
+    54 00000045 68[07000000]                        push dword buffer
+    55 0000004A 68[6B000000]                        push dword format_citire_prop
+    56 0000004F FF15[00000000]                      call [scanf]
+    57 00000055 83C408                              add esp, 4*2
+    58                                              
+    59 00000058 61                                  popa
+    60                                              
+    61 00000059 BE[07000000]                        mov esi, buffer
+    62 0000005E BB[07000000]                        mov ebx, buffer  ; Inceputul cuvantului curent
+    63 00000063 BA00000000                          mov edx, 0     ; Numaram spatiile
+    64                                              
+    65                                              repeta2:
+    66 00000068 AC                                      lodsb
+    67 00000069 3C5F                                    cmp AL, '_'
+    68 0000006B 7402                                    je gasit_spatiu
+    69 0000006D EBF9                                    jmp repeta2
+    70                                                  
+    71                                                  gasit_spatiu:
+    72 0000006F 3B15[D2000000]                          cmp edx, [pas_curent]
+    73 00000075 7402                                    je gasit_cuvant_cautat
+    74 00000077 EB17                                    jmp alt_spatiu
+    75                                                  
+    76                                                  gasit_cuvant_cautat:
+    77                                                  ; Copiam cuvantul (de la punctul de inceput in EBX)
+    78                                                  ; Determinam lungimea cuvantului
+    79 00000079 60                                      pusha
+    80                                                  
+    81 0000007A 56                                      push esi
+    82 0000007B 53                                      push ebx
+    83 0000007C 57                                      push edi
+    84 0000007D E87EFFFFFF                              call copiere_cuvant
+    85 00000082 A3[D6000000]                            mov [pozitie_sir_rez], eax
+    86                                                  
+    87 00000087 61                                      popa
+    88 00000088 8B3D[D6000000]                          mov edi, [pozitie_sir_rez]
+    89                                                  
+    90 0000008E EB05                                    jmp final_repeta2
+    91                                                  
+    92                                                  alt_spatiu:
+    93 00000090 89F3                                    mov ebx, esi  ; Schimbam locul de inceput al cuvantului curent
+    94 00000092 42                                      inc edx
+    95 00000093 EBD3                                jmp repeta2
+    96                                              final_repeta2:
+    97                                              
+    98 00000095 FF05[D2000000]                      inc dword [pas_curent]
+    99 0000009B E2A7                            loop repeta
+   100                                          
+   101 0000009D B000                            mov AL, 0
+   102 0000009F AA                              stosb
+   103                                          
+   104 000000A0 68[6E000000]                    push dword sir_rez
+   105 000000A5 68[6B000000]                    push dword format_citire_prop
+   106 000000AA FF15[00000000]                  call [printf]
+   107 000000B0 83C408                          add esp, 4*2
+   108                                          
+   109                                          
+   110                                          final:
+   111 000000B3 6A00                            push    dword 0      
+   112 000000B5 FF15[00000000]                  call    [exit]       

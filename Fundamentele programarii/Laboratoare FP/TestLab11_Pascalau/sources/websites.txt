@@ -1,0 +1,12 @@
+1,google.com,Mihai Viteazul,Ion Popescu,20
+2,google.com/search,Teodor Mihali,Ionela Popescu,40
+3,youtube.com,Teodor Mihali,Luminita Popescu,44
+4,youtube.com/search,Teodor Mihali,Tudor Pascalau,11
+5,gmail.com,Teodor Mihali,Rares Pragai,29
+6,yahoo.com,Teodor Mihali,David Dragos,25
+7,facebook.com,Teodor Mihali,Alecisa Rotaru,30
+8,facebook.com/search,Teodor Mihali,Ovidiu Bodrogean,22
+9,github.com,Teodor Mihali,Mircea Pascalau,45
+10,github.com/search,Teodor Mihali,Maria Pascalau,10
+11,instagram.com,Mihai Viteazul,Tudor Popescu,20
+15,test.com,Mihail Kogalniceanu,Jeff Bezos,67

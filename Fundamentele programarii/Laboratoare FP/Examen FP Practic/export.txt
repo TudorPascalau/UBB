@@ -1,0 +1,2 @@
+05.02,12:30,Examen,normala
+05.02,16:30,Examen,extraordinara

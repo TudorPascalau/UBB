@@ -1,0 +1,4 @@
+04.02,8:35,vreau 10 la examen,normala
+05.02,12:30,Examen,normala
+05.02,16:30,Examen,extraordinara
+07.02,06:59,vreau 10 la examen,extraordinara

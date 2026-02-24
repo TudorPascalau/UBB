@@ -1,0 +1,3 @@
+
+class EroareValidator(Exception):
+    pass
