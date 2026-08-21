@@ -1,0 +1,59 @@
+3. Se dau un fișier binar care conține 100.000 de numere aleatoare și un tablou care poate stoca doar 100 de numere.
+Să se determine suma primelor 1000 de numere întregi din acest fișier 
+folosind 10 thread-uri (consumers threads).
+	Citirea celor 1000 de numere intregi se va face, pe rând, în variabila buffer 
+folosind alte 10 thread-uri (producers threads).
+
+#define MAX_SIZE 100
+#define MAX_THR 10
+
+#define E_GOL 0
+#define E_PLIN 1
+
+int suma = 0;
+int buffer[MAX_SIZE];
+
+int stare = E_GOL;
+
+pthread_cond_t vcp = PTHREAD_COND_INITIALIZER;
+pthread_cond_t vcc = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+
+// producator
+void* produc(void* arg) {
+
+	pthread_mutex_lock(&mtx);
+	if(stare == E_PLIN) {
+		pthread_cond_wait(&vcp, &mtx);
+	}
+
+	for(int i = 0; i < MAX_SIZE; i++) {
+		buffer[i] = rand() % 256;
+	}
+	
+	stare = E_PLIN;
+	pthread_cond_signal(&vcc);
+	pthread_mutex_unlock(&mtx);
+
+	return NULL;
+}
+
+// consumator
+void* consum(void* arg) {
+
+	pthread_mutex_lock(&mtx);
+	if(stare == E_GOL) {
+		pthread_cond_wait(&vcc, &mtx);
+	}
+
+	for(int i = 0; i < MAX_SIZE; i++) {
+		suma = suma + buffer[i];
+	}
+	
+	stare = E_GOL;
+	pthread_cond_signal(&vcp);
+	pthread_mutex_unlock(&mtx);
+
+	return NULL;
+}
+

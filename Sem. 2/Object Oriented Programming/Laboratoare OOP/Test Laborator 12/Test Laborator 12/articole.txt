@@ -1,0 +1,13 @@
+1,Nike,minge,S
+2,Nike,minge,M
+3,Nike,minge,L
+4,Cross,bicicleta,S
+5,Cross,bicicleta,M
+6,Cross,bicicleta,L
+7,Adidas,racheta,S
+8,Adidas,racheta,M
+9,Adidas,racheta,L
+10,Puma,coarda,S
+11,Puma,coarda,M
+12,Puma,coarda,L
+13,Puma,minge,S

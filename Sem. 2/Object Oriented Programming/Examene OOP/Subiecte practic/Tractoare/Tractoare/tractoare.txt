@@ -1,0 +1,8 @@
+1,John Deere,agricultura,4
+2,Case IH,agricultura,6
+3,New Holland,constructii,4
+4,Massey Ferguson,constructii,4
+5,Claas,utilitate,10
+6,Valtra,constructii,12
+7,Beta,agricultura,2
+8,Gamma,noutate,10

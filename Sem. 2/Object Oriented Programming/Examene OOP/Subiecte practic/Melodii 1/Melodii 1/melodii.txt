@@ -1,0 +1,9 @@
+1,Cant Stop,RHCP,1
+2,Californication,RHCP,3
+3,Sultans of Swing,Dire Straits,1
+4,Money for Nothing,Dire Straits,1
+5,Have You Ever Seen The Rain,CCR,2
+6,Hold the Line,TOTO,2
+7,Africa,TOTO,2
+8,Yesterday,The Beatles,10
+10,Clint Eastwood,Gorillaz,1

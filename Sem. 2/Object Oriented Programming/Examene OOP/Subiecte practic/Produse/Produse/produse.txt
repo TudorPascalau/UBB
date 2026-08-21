@@ -1,0 +1,12 @@
+1,Laptop Gaming ASUS,Electronice,49.99
+2,Scaun Birou Ergonomic,Mobila,59.5
+3,Tastatura Mecanica,Electronice,29.99
+4,Cafea Boabe 1kg,Alimentatie,85.25
+5,Casti Wireless,Electronice,19
+6,Rucsac Laptop,Accesorii,12.75
+7,Mouse Wireless,Electronice,79.9
+8,Set Creioane Desen,Papetarie,35.4
+9,Smartwatch Fitness,Electronice,34.99
+10,Sticla Termos,Accesorii,65.5
+20,Sticla 500ml,Accesorii,23.5
+15,Steam Deck,Electronice,70.67

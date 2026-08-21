@@ -1,0 +1,98 @@
+2. Se dă un tablou care conține 100.000 de numere întregi. Folosind un număr potrivit de thread-uri
+și cele mai potrivite mecanisme de sincronizare, să se calculeze diferența absolută dintre valoarea minimă
+determinată în fiecare interval de 2000 de numere consecutive și media aritmetică a tuturor valorilor minime.
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <fcntl.h>
+#include <limits.h>
+
+#definte MAX_THR 50
+#define MAX_NUM 100000
+
+int* numere = NULL;
+int suma_min = 0;
+
+pthread_mutex_t mtx  // = PTHREAD_MUTEX_INITIALIZER; //sem_t sem;
+pthread_barrier_t barr;
+
+void* cauta_minim(void* arg) {
+
+	int id = *(int *)arg;
+	
+	int st = id * (MAX_NUM / MAX_THR);
+	int dr = st + (MAX_NUM / MAX_THR);
+	int local_min = INT_MAX;
+	for(int i = st; i< dr; i++) {
+		if(numere[i] < local_min)
+			local_min = numere[i];
+	}
+	
+	pthread_mutex_lock(&mtx); //sem_wait(&sem);
+	suma_minime += local_min;
+	pthread_mutex_unlock(&mtx); //sem_post(&sem);
+	
+	pthread_barrier_wait(&barr)
+	
+	float medie = suma_minime/MAX_THR;
+	float dif = abs(medie - local_min);
+	
+	printf("[Thread %2d] media: %f, diferenta %f", id, medie, dif);
+	
+	free(arg);
+	return NULL;
+}
+
+int main(int argc, char* argv[]) {
+	
+	// verific numarul de argumente
+	if (argc < 2) {
+		printf("Trebuie nume de fisier");
+		exit(1);
+	}
+	
+	// alocam dinamic tabloul
+	numere = malloc(MAX_NUM * sizeof(int));
+	if(numere == NULL) {
+		perror("malloc()");
+		exit(1);
+	}
+	
+	// deschid fisierul binar
+	int fd = open(argv[1], O_RDONLY);
+	if (fd < 0) {
+		perror("open()");
+		exit(2);
+	}
+	
+	// citesc numerele aleatoare
+	for(int i = 0; i < MAX_NUM(); i++) {
+		read(fd, &numere[i], 2);
+	}
+	
+	// initializez mutex
+	pthread_mutex_init(&mtx, NULL);  //sem_init(&sem, 0, 1);
+	pthread_barrier_init(&barr, NULL, MAX_THR);
+	
+	// creez thread-urile
+	pthread_t threads[MAX_THR];
+	for(int i = 0; i < MAX_THR; i++) {
+		int* id = malloc(sizeof(int));
+		*id = i;
+		pthread_create(&threads[i], NULL, cauta_minim, id);
+	}
+	
+	// astept terminarea thread-urilor
+	for(int i = 0; i < MAX_THR; i++) {
+		pthread_join(threads[i], NULL);
+	}
+	
+	// dealoc variabilele alocate dinamic
+	free(numere);
+	pthread_mutex_destroy(&mtx);  //sem_destory(&sem);
+	pthread_barrier_destroy(&barr);
+	
+	return 0;
+}

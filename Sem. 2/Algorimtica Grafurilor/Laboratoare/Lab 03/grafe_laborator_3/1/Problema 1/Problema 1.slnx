@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Problema 1 - Dijkstra/Problema 1 - Dijkstra.vcxproj" Id="5699c509-5982-48cd-8db4-4315ae6e5547" />
+  <Project Path="Problema 1/Problema 1.vcxproj" Id="d37c0e7d-0f32-4c14-a3a7-4b524733c48e" />
+</Solution>

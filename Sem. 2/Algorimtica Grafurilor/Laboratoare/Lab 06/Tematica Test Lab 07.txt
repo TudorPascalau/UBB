@@ -1,0 +1,6 @@
+Peste 2 saptamani partial
+Tematica:
+	1. APM (Kruskal / Prim)
+	2. Flux (Ford - Fulkerson)
+
+NU se da codari (FARA Pruffman / Huffman)

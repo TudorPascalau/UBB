@@ -1,0 +1,40 @@
+3
+The Great Gatsby
+F. Scott Fitzgerald
+abcd
+1925
+4
+Moby Dick
+Herman Melville
+aventura
+1851
+5
+War and Peace
+Leo Tolstoy
+istoric
+1869
+6
+Pride and Prejudice
+Jane Austen
+roman
+1813
+7
+The Hobbit
+J.R.R. Tolkien
+fantasy
+1937
+8
+Crime and Punishment
+Fyodor Dostoevsky
+psihologic
+1866
+9
+Brave New World
+Aldous Huxley
+distopie
+1932
+10
+The Catcher in the Rye
+J.D. Salinger
+roman
+1951

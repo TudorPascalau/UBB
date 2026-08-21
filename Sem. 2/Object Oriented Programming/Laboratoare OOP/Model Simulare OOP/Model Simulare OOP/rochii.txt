@@ -1,0 +1,7 @@
+1,Small Red Dress,S,4000,false
+2,Small Blue Dress,S,3000,false
+3,Medium Red Dress,M,4000,true
+4,Medium Blue Dress,M,3000,false
+5,Large Red Dress,L,4000,true
+6,Black and Blue Dress,M,6000,true
+7,White and Gold Dress,M,7000,false

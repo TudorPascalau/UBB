@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Model 2/Model 2.vcxproj" Id="658c5e44-43b9-4ac5-bfab-d74a45b6fb54" />
+  <Project Path="Scris 1/Scris 1.vcxproj" Id="b94d0d65-4abc-4487-a85b-571565d54105" />
+  <Project Path="Scris 2/Scris 2.vcxproj" Id="4a656903-f838-4079-b520-fc3cc56e15fd" />
+</Solution>

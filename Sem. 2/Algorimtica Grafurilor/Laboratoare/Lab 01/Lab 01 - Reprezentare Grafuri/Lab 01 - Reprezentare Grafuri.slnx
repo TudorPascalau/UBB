@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Lab 01 - Problema 2/Lab 01 - Problema 2.vcxproj" Id="c259027b-1002-41d0-8f71-1b6efb2ba420" />
+  <Project Path="Lab 01 - Reprezentare Grafuri/Lab 01 - Reprezentare Grafuri.vcxproj" Id="a42ba0e0-044f-4d3b-8346-9fe90be779b3" />
+</Solution>

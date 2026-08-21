@@ -1,0 +1,31 @@
+# Visual Studio
+.vs/
+Debug/
+Release/
+x64/
+x86/
+bin/
+obj/
+
+# Build artifacts
+*.exe
+*.dll
+*.lib
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.tlog
+*.lastbuildstate
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Temporary files
+*.tmp
+*.log
+*.user
+*.suo

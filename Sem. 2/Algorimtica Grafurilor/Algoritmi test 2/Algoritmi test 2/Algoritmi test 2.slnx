@@ -1,0 +1,14 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Algoritmi test 2/Algoritmi test 2.vcxproj" Id="a71c4fe6-9a21-4275-8eb6-14eba0b43747" />
+  <Project Path="Flux maxim - nota 5/Flux maxim - nota 5.vcxproj" Id="354e9c34-fa03-4115-8db6-1ef1251da979" />
+  <Project Path="FluxCuplaj/FluxCuplaj.vcxproj" Id="91d4448c-e7c0-466f-97fe-31185ca5ccfb" />
+  <Project Path="Kruskal/Kruskal.vcxproj" Id="1293fe8a-3dfd-45ec-9337-30dd9fec1da4" />
+  <Project Path="MST Coordonate/MST Coordonate.vcxproj" Id="ba290a90-e5b3-446d-ac58-db9c78285b45" />
+  <Project Path="Nota 10 - Flux petrol/Nota 10 - Flux petrol.vcxproj" Id="f6f1c84c-c218-4928-90fb-fc5ef78ce79e" />
+  <Project Path="Nota 5 - MST Muchii/Nota 5 - MST Muchii.vcxproj" Id="d3f15b87-2543-4b33-8aa9-8d05e3524c7b" />
+  <Project Path="Prim/Prim.vcxproj" Id="38e38575-c2e0-4078-8b91-3de336bbda2c" />
+</Solution>
