@@ -1,31 +1,41 @@
+# ============================================================
+# Operating system files
+# ============================================================
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+
+
+# ============================================================
+# IDE / Editor files
+# ============================================================
+
 # Visual Studio
 .vs/
-Debug/
-Release/
-x64/
-x86/
-bin/
-obj/
-
-# Build artifacts
-*.exe
-*.dll
-*.lib
-*.obj
-*.pdb
-*.ilk
-*.idb
-*.tlog
-*.lastbuildstate
-
-# CMake
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-
-# Temporary files
-*.tmp
-*.log
-*.user
 *.suo
+*.user
+
+# VS Code
+.vscode/
+
+# JetBrains IDEs
+.idea/
+
+
+# ============================================================
+# Temporary files
+# ============================================================
+
+*.tmp
+*.temp
+*.log
+*~
+*.swp
+*.swo
