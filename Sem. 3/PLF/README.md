@@ -11,4 +11,4 @@ La analiza repository-ului:
 - Dacă un exemplu este analizat pentru înțelegerea unui concept, explică eventualele limite care influențează explicația, fără a presupune că trebuie reparat în repository.
 - Verifică separat soluțiile proprii de laborator. Această notă nu le scutește de cerințele de corectitudine și execuție ale temei.
 
-Nota se aplică exclusiv materialelor PLF menționate mai sus. Seminarul MAP este tratat separat.
+Nota se aplică exclusiv materialelor PLF menționate mai sus.
