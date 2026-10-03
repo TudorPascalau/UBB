@@ -1,0 +1,39 @@
+root = true
+
+# Reguli comune
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+tab_width = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Java — IntelliJ IDEA
+[*.java]
+ij_java_brace_style = end_of_line
+ij_java_class_brace_style = end_of_line
+ij_java_method_brace_style = end_of_line
+ij_java_continuation_indent_size = 8
+
+# C# — Visual Studio
+[*.cs]
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+
+# Fișiere de configurare
+[*.{json,yml,yaml}]
+indent_size = 2
+
+# Păstrează spațiile folosite pentru line breaks în Markdown
+[*.md]
+trim_trailing_whitespace = false
+
+# Makefile necesită taburi
+[{Makefile,*.mk}]
+indent_style = tab
