@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class ComplexNumberParser {
 
     // Real number REGEX
-    private static final String NUMBER = "(?:\\d+(?:\\.\\d+)?|\\.\\d+)";
+    private static final String NUMBER = "\\d+(?:\\.\\d+)?|\\.\\d+";
 
     private static final Pattern COMPLEX_PATTERN = Pattern.compile(
             "^([+-]?" + NUMBER + ")([+-])(" + NUMBER + ")?\\*?i$"
@@ -22,7 +22,7 @@ public class ComplexNumberParser {
         // Remove whitespace
         String normalizedInput = input.replaceAll("\\s+", "");
 
-        Matcher matcher = COMPLEX_PATTERN.matcher(input);
+        Matcher matcher = COMPLEX_PATTERN.matcher(normalizedInput);
         if(!matcher.matches()) {
             throw new IllegalArgumentException("Input is not a complex number");
         }

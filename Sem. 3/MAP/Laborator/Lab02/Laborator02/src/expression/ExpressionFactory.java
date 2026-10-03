@@ -11,7 +11,6 @@ public class ExpressionFactory {
             case SUBTRACTION -> new SubtractionExpression(operands);
             case MULTIPLICATION -> new MultiplicationExpression(operands);
             case DIVISION -> new DivisionExpression(operands);
-            default -> throw new IllegalArgumentException("Unknown operation " + operation);
         };
     }
 }
