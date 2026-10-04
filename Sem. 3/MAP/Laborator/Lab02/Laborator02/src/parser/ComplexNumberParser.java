@@ -29,7 +29,7 @@ public class ComplexNumberParser {
 
         double real = Double.parseDouble(matcher.group(1));
         String coefficient = matcher.group(3);
-        double imaginary = (coefficient == null) ? 0.0 : Double.parseDouble(coefficient);
+        double imaginary = (coefficient == null) ? 1.0 : Double.parseDouble(coefficient);
 
         if("-".equals(matcher.group(2))) {
             imaginary = -imaginary;
