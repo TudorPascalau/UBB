@@ -2,7 +2,7 @@ package expression;
 
 import model.ComplexNumber;
 
-public class SubtractionExpression extends ComplexExpression {
+public final class SubtractionExpression extends ComplexExpression {
     public SubtractionExpression(ComplexNumber[] operands) {
         super(operands);
     }
