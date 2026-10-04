@@ -1,6 +1,6 @@
 # MAP — predare între proiectele locale
 
-Ultima actualizare: 3 octombrie 2026  
+Ultima actualizare: 4 octombrie 2026  
 Folder MAP: `E:\Facultate\UBB\Sem. 3\MAP`  
 Celălalt proiect local: numele și calea nu au fost încă precizate.
 
@@ -39,14 +39,14 @@ Inventar bazat pe citirea surselor la 3 octombrie 2026. Acesta nu reprezintă un
 
 ## Ultima sesiune
 
-- **Data:** 3 octombrie 2026.
+- **Data:** 4 octombrie 2026.
 - **Proiect sursă:** MAP.
-- **Obiectiv:** crearea unui document comun pentru predarea contextului către celălalt proiect local.
-- **Realizat:** inventarierea structurii, citirea surselor Java și crearea acestui document cu starea observată și punctele de continuare.
-- **Fișiere modificate:** `HANDOFF.md` (nou).
-- **Verificări:** citirea structurii și a surselor; fără compilare sau teste. Codul Java nu a fost modificat.
-- **Informații lipsă:** numele și calea celuilalt proiect, precum și rezumatul confirmat al lucrului realizat înaintea acestei sesiuni.
-- **Următorul pas:** completarea datelor celuilalt proiect și alegerea activității de continuat; punctele de mai sus sunt observații, nu sarcini autorizate de implementare.
+- **Obiectiv:** verificarea diagramei finale față de cod și PDF; explicarea principiilor OOP/SOLID și a cerințelor în chat.
+- **Realizat:** citirea diagramei și a surselor, extragerea și inspectarea vizuală a ambelor pagini PDF; identificarea principiilor și șabloanelor susținute de implementare. Utilizatorul a revenit la agregări pentru colaboratorii parserului, conform convențiilor cursului.
+- **Fișiere modificate:** doar `HANDOFF.md`; sursele Java și diagrama au fost păstrate.
+- **Verificări:** compilare cu JDK 21 reușită. Exemplul din PDF cu `-2+i` produce `5.0-3.0*i`, în loc de `5.0-2.0*i`; cu coeficient explicit `-2+1*i`, rezultatul este corect.
+- **Neconcordanțe observate:** `Attribute1` există în modelul ComplexExpression, dar nu în cod; două asocieri vechi sunt încă în model, fără vederi, alături de agregările noi. Agregările noi nu au rolurile/multiplicitățile transferate. OCP și DIP sunt aplicate parțial: fabrica și parsarea operatorului folosesc switch, iar colaboratorii parserului au tipuri concrete. Switch-urile moderne cer Java 14+, de clarificat față de restricțiile cursului.
+- **Următorul pas:** corectarea coeficientului imaginar omis și curățarea modelului UML, la cererea utilizatorului. Explicația în chat poate servi drept bază pentru readme.txt, livrabil cerut de PDF.
 
 ## Model pentru actualizări viitoare
 
@@ -67,3 +67,6 @@ Următorul pas concret:
 ## Istoric scurt
 
 - 2026-10-03 — Document inițial creat în rădăcina MAP; starea surselor inventariată, fără modificări de cod.
+- 2026-10-04 — Completarea claselor și a enumerării din `Lab02.mdj` conform codului Java, fără relații.
+- 2026-10-04 — Ajustarea relațiilor adăugate de utilizator, fără legături suplimentare ale fabricii către clasele concrete.
+- 2026-10-04 — Verificarea variantei finale și a PDF-ului; compilare reușită, identificarea erorii pentru coeficientul imaginar omis și a elementelor UML rămase în model.
