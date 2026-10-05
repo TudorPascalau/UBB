@@ -18,7 +18,7 @@ public class CommandLineExpressionParser implements ExpressionParser {
     public ComplexExpression parse(String[] args) {
         validateStructure(args);
 
-        Operation operation = parseOperation(args[1]);
+        Operation operation = Operation.fromSymbol(args[1]);
         ComplexNumber[] operands = new ComplexNumber[args.length/2 + 1];
 
         for (int i = 0; i < operands.length; i++) {
