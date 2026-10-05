@@ -1,7 +1,6 @@
 package parser;
 
 import expression.ComplexExpression;
-import expression.DefaultExpressionFactory;
 import expression.ExpressionFactory;
 import model.ComplexNumber;
 import model.Operation;
