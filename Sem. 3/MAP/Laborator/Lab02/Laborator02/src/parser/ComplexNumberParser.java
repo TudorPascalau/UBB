@@ -5,7 +5,7 @@ import model.ComplexNumber;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ComplexNumberParser {
+public class ComplexNumberParser implements NumberParser {
 
     // Real number REGEX
     private static final String NUMBER = "\\d+(?:\\.\\d+)?|\\.\\d+";

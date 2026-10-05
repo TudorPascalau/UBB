@@ -1,17 +1,18 @@
 package parser;
 
 import expression.ComplexExpression;
+import expression.DefaultExpressionFactory;
 import expression.ExpressionFactory;
 import model.ComplexNumber;
 import model.Operation;
 
 public class CommandLineExpressionParser implements ExpressionParser {
-    private final ComplexNumberParser numberParser;
-    private final ExpressionFactory expressionFactory;
+    private final NumberParser numberParser;
+    private final ExpressionFactory defaultExpressionFactory;
 
-    public CommandLineExpressionParser(ComplexNumberParser numberParser, ExpressionFactory expressionFactory) {
+    public CommandLineExpressionParser(NumberParser numberParser, ExpressionFactory expressionFactory) {
         this.numberParser = numberParser;
-        this.expressionFactory = expressionFactory;
+        this.defaultExpressionFactory = expressionFactory;
     }
 
     @Override
@@ -25,7 +26,7 @@ public class CommandLineExpressionParser implements ExpressionParser {
             operands[i] = numberParser.parse(args[i*2]);
         }
 
-        return expressionFactory.createExpression(operation, operands);
+        return defaultExpressionFactory.createExpression(operation, operands);
     }
 
     private void validateStructure(String[] args) {
