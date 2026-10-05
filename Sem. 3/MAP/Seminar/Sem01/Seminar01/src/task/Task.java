@@ -15,6 +15,10 @@ public abstract class Task {
         return taskId;
     }
 
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -25,8 +29,9 @@ public abstract class Task {
 
     public abstract void execute();
 
-    public String toString(){
-        return "Task id:" + this.taskId + "description " + this.description;
+    @Override
+    public String toString() {
+        return "id=" + taskId + "|description=" + description;
     }
 
     @Override

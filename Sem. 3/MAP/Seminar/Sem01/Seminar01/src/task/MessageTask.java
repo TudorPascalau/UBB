@@ -23,11 +23,11 @@ public class MessageTask extends Task {
 
     @Override
     public String toString() {
-        return "Message Task{" +
-                "message " + this.message +
-                ", from " + this.from +
-                ", to " + this.to +
-                " at time" + date.format(DATE_TIME_FORMATTER);
+        return super.toString() +
+                "|message=" + message +
+                "|from=" + from +
+                "|to=" + to +
+                "|date=" + date.format(DATE_TIME_FORMATTER);
     }
 
     @Override
