@@ -45,19 +45,4 @@ public class CommandLineExpressionParser implements ExpressionParser {
             }
         }
     }
-
-    private Operation parseOperation(String token) {
-        switch (token) {
-            case "+":
-                return Operation.ADDITION;
-            case "-":
-                return Operation.SUBTRACTION;
-            case "*":
-                return Operation.MULTIPLICATION;
-            case "/":
-                return Operation.DIVISION;
-            default:
-                throw new IllegalArgumentException("Invalid operation");
-        }
-    }
 }
