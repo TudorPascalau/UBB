@@ -7,11 +7,11 @@ import model.Operation;
 
 public class CommandLineExpressionParser implements ExpressionParser {
     private final NumberParser numberParser;
-    private final ExpressionFactory defaultExpressionFactory;
+    private final ExpressionFactory expressionFactory;
 
     public CommandLineExpressionParser(NumberParser numberParser, ExpressionFactory expressionFactory) {
         this.numberParser = numberParser;
-        this.defaultExpressionFactory = expressionFactory;
+        this.expressionFactory = expressionFactory;
     }
 
     @Override
@@ -25,7 +25,7 @@ public class CommandLineExpressionParser implements ExpressionParser {
             operands[i] = numberParser.parse(args[i*2]);
         }
 
-        return defaultExpressionFactory.createExpression(operation, operands);
+        return expressionFactory.createExpression(operation, operands);
     }
 
     private void validateStructure(String[] args) {
