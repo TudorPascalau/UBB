@@ -39,14 +39,14 @@ Inventar bazat pe citirea surselor la 3 octombrie 2026. Acesta nu reprezintă un
 
 ## Ultima sesiune
 
-- **Data:** 5 octombrie 2026.
+- **Data:** 6 octombrie 2026.
 - **Proiect sursă:** MAP.
-- **Obiectiv:** sincronizarea README-ului și diagramei UML cu interfețele introduse pentru DIP.
-- **Realizat:** adăugarea NumberParser și transformarea contractului ExpressionFactory în interfață în UML; reprezentarea DefaultExpressionFactory și a realizărilor ComplexNumberParser -> NumberParser și DefaultExpressionFactory -> ExpressionFactory. Actualizarea atributelor și constructorului parserului, inclusiv numele actual defaultExpressionFactory; agregările parserului sunt către interfețe. README-ul descrie contractele, injecția în Main, efectul asupra DIP/ISP și limita rămasă în Operation.
-- **Fișiere modificate:** Laborator/Lab02/readme.txt, Laborator/Lab02/Lab02.mdj și HANDOFF.md. Sursele Java au fost doar citite.
-- **Verificări:** confruntarea cu sursele Java actuale, JSON valid, identificatori unici și fără referințe invalide noi; casetele interfețelor noi nu se suprapun cu parserul. Fără compilare Java sau verificare vizuală în StarUML, fiind actualizate documentația și modelul.
-- **Decizii relevante:** DIP este respectat pentru colaboratorii parserului; Operation încă instanțiază clasele concrete ale expresiilor. Main construiește implementările, dar rămâne stabil când se adaugă operații în enum.
-- **Următorul pas:** revizuirea vizuală a diagramei în StarUML.
+- **Obiectiv:** mutarea construirii expresiilor din Operation în DefaultExpressionFactory și documentarea posibilității unui registru.
+- **Realizat:** Operation păstrează constantele, simbolurile și fromSymbol; DefaultExpressionFactory construiește expresiile prin switch clasic. README-ul explică limita OCP și un posibil registru ExpressionCreator[] compatibil cu restricțiile laboratorului. Diagrama UML nu a fost modificată.
+- **Fișiere modificate:** Laborator/Lab02/Laborator02/src/model/Operation.java, Laborator/Lab02/Laborator02/src/expression/DefaultExpressionFactory.java, Laborator/Lab02/readme.txt și HANDOFF.md.
+- **Verificări:** cerințele PDF confirmă interdicția colecțiilor generice predefinite și a facilităților Java 8. Compilare reușită cu JDK 21; rezultate verificate pentru toate cele patru operații și respingerea unui operator necunoscut. Operatorul * a fost transmis între ghilimele pentru a evita expandarea wildcard-ului pe Windows.
+- **Decizii relevante:** switch-ul este acceptat pentru simplitate; fabrica și enum-ul necesită modificări la adăugarea operațiilor. Registrul bazat pe array este doar o extensie documentată, nu implementată.
+- **Următorul pas:** sincronizarea diagramei UML prin eliminarea createExpression din Operation și reprezentarea dependențelor de creare ale fabricii către expresiile concrete.
 ## Model pentru actualizări viitoare
 
 Înlocuiește secțiunea „Ultima sesiune” cu datele reale ale sesiunii încheiate. Actualizează și starea curentă dacă implementarea s-a schimbat. Păstrează mai jos un rezumat scurt al sesiunii precedente când este util.
