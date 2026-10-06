@@ -17,7 +17,9 @@ public class AbstractTaskRunner implements TaskRunner {
 
     @Override
     public void executeAllTasks() {
-        taskRunner.executeAllTasks();
+        while (hasTask()) {
+            executeOneTask();
+        }
     }
 
     @Override

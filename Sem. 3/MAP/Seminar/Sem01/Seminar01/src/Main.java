@@ -1,13 +1,25 @@
+import factory.Strategy;
+import runner.PrinterTaskRunner;
+import runner.StrategyTaskRunner;
 import task.MessageTask;
-import task.SortingTask;
-import container.StackContainer;
-import sorter.BubbleSort;
-import sorter.QuickSort;
 
 import java.time.LocalDateTime;
 
 public class Main {
     public static void main(String[] args) {
+        if (args.length != 1) {
+            System.out.println("Introdu o strategie: FIFO sau LIFO.");
+            return;
+        }
+
+        Strategy strategy;
+        try {
+            strategy = Strategy.valueOf(args[0]);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Strategie invalida. Foloseste FIFO sau LIFO.");
+            return;
+        }
+
         MessageTask[] tasks = {
                 new MessageTask("1", "Feedback lab1", "Ai obtinut 9.60", "Gigi", "Ana",
                         LocalDateTime.of(2018, 9, 27, 9, 29)),
@@ -21,22 +33,19 @@ public class Main {
                         LocalDateTime.of(2018, 10, 5, 11, 45))
         };
 
-        for (MessageTask task : tasks) {
-            task.execute();
-        }
+        System.out.println("Strategy task runner");
+        StrategyTaskRunner taskRunner = new StrategyTaskRunner(strategy);
+        taskRunner.addTask(tasks[0]);
+        taskRunner.addTask(tasks[1]);
+        taskRunner.addTask(tasks[2]);
+        taskRunner.executeAllTasks();
 
-        System.out.println("BubbleSort:");
-        new SortingTask("6", "Sortare BubbleSort", new int[]{5, -2, 3, 3, 0}, new BubbleSort()).execute();
-        System.out.println("QuickSort:");
-        new SortingTask("7", "Sortare QuickSort", new int[]{5, -2, 3, 3, 0}, new QuickSort()).execute();
+        System.out.println("Printer task runner");
+        PrinterTaskRunner printerTaskRunner = new PrinterTaskRunner(taskRunner);
+        printerTaskRunner.addTask(tasks[0]);
+        printerTaskRunner.addTask(tasks[1]);
+        printerTaskRunner.addTask(tasks[2]);
+        printerTaskRunner.executeAllTasks();
 
-        System.out.println("StackContainer (LIFO):");
-        StackContainer stack = new StackContainer(2);
-        for (MessageTask task : tasks) {
-            stack.add(task);
-        }
-        while (!stack.isEmpty()) {
-            stack.remove().execute();
-        }
     }
 }
