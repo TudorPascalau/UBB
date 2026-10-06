@@ -33,7 +33,7 @@ public final class ComplexNumber {
     public ComplexNumber divide(ComplexNumber other) {
         if (other.real == 0.0 && other.imaginary == 0.0) {
             throw new ArithmeticException(
-                    "Nu se poate împărți la numărul complex zero."
+                    "Cannot divide by zero."
             );
         }
 
