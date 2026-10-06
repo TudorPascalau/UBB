@@ -13,8 +13,14 @@ public class Main {
         ExpressionFactory expressionFactory = new DefaultExpressionFactory();
 
         ExpressionParser parser = new CommandLineExpressionParser(numberParser, expressionFactory);
-        ComplexExpression expression = parser.parse(args);
 
-        System.out.println(expression.evaluate());
+        try {
+            ComplexExpression expression = parser.parse(args);
+            System.out.println(expression.evaluate());
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid expression: " + e.getMessage());
+        } catch (ArithmeticException e) {
+            System.err.println("Arithmetic error: " + e.getMessage());
+        }
     }
 }
