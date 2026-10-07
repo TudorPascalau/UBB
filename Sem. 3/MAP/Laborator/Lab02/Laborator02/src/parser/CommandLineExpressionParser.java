@@ -1,8 +1,8 @@
 package parser;
 
-import expression.ComplexExpression;
+import expression.Expression;
 import expression.ExpressionFactory;
-import model.ComplexNumber;
+import model.Number;
 import model.Operation;
 
 public class CommandLineExpressionParser implements ExpressionParser {
@@ -15,11 +15,11 @@ public class CommandLineExpressionParser implements ExpressionParser {
     }
 
     @Override
-    public ComplexExpression parse(String[] args) {
+    public Expression parse(String[] args) {
         validateStructure(args);
 
         Operation operation = Operation.fromSymbol(args[1]);
-        ComplexNumber[] operands = new ComplexNumber[args.length/2 + 1];
+        Number[] operands = new Number[args.length/2 + 1];
 
         for (int i = 0; i < operands.length; i++) {
             operands[i] = numberParser.parse(args[i*2]);

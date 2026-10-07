@@ -1,9 +1,9 @@
 package expression;
 
-import model.ComplexNumber;
+import model.Number;
 import model.Operation;
 
 public interface ExpressionFactory {
-    ComplexExpression createExpression(
-            Operation operation, ComplexNumber[] operands);
+    Expression createExpression(
+            Operation operation, Number[] operands);
 }

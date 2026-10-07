@@ -1,7 +1,7 @@
 package parser;
 
-import model.ComplexNumber;
+import model.Number;
 
 public interface NumberParser {
-    ComplexNumber parse(String input);
+    Number parse(String input);
 }

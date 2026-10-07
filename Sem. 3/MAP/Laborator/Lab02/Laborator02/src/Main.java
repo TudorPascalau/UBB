@@ -1,5 +1,5 @@
-import expression.ComplexExpression;
-import expression.DefaultExpressionFactory;
+import expression.Expression;
+import expression.ComplexExpressionFactory;
 import expression.ExpressionFactory;
 import parser.CommandLineExpressionParser;
 import parser.ComplexNumberParser;
@@ -10,12 +10,12 @@ public class Main {
     public static void main(String[] args) {
 
         NumberParser numberParser = new ComplexNumberParser();
-        ExpressionFactory expressionFactory = new DefaultExpressionFactory();
+        ExpressionFactory expressionFactory = new ComplexExpressionFactory();
 
         ExpressionParser parser = new CommandLineExpressionParser(numberParser, expressionFactory);
 
         try {
-            ComplexExpression expression = parser.parse(args);
+            Expression expression = parser.parse(args);
             System.out.println(expression.evaluate());
         } catch (IllegalArgumentException e) {
             System.err.println("Invalid expression: " + e.getMessage());

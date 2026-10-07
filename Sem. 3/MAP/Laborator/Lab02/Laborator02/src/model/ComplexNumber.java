@@ -1,6 +1,6 @@
 package model;
 
-public final class ComplexNumber {
+public final class ComplexNumber implements Number {
     private final double real;
     private final double imaginary;
 
@@ -9,39 +9,63 @@ public final class ComplexNumber {
         this.imaginary = imaginary;
     }
 
-    public ComplexNumber add(ComplexNumber other) {
-        return new ComplexNumber(
-                real + other.real,
-                imaginary + other.imaginary
-        );
-    }
-
-    public ComplexNumber subtract(ComplexNumber other) {
-        return new ComplexNumber(
-                real - other.real,
-                imaginary - other.imaginary
-        );
-    }
-
-    public ComplexNumber multiply(ComplexNumber other) {
-        return new ComplexNumber(
-                real * other.real -  imaginary * other.imaginary,
-                real * other.imaginary +  imaginary * other.real
-        );
-    }
-
-    public ComplexNumber divide(ComplexNumber other) {
-        if (other.real == 0.0 && other.imaginary == 0.0) {
-            throw new ArithmeticException(
-                    "Cannot divide by zero."
+    private ComplexNumber requireComplexNumber(Number other) {
+        if (!(other instanceof ComplexNumber)) {
+            throw new IllegalArgumentException(
+                    "Operand must be a complex number"
             );
         }
 
-        double denominator = other.real * other.real + other.imaginary * other.imaginary;
+        return (ComplexNumber) other;
+    }
+
+    @Override
+    public ComplexNumber add(Number other) {
+        ComplexNumber operand = requireComplexNumber(other);
 
         return new ComplexNumber(
-                (real * other.real + imaginary * other.imaginary) / denominator,
-                (imaginary * other.real - real * other.imaginary) / denominator
+                real + operand.real,
+                imaginary + operand.imaginary
+        );
+    }
+
+    @Override
+    public ComplexNumber subtract(Number other) {
+        ComplexNumber operand = requireComplexNumber(other);
+
+        return new ComplexNumber(
+                real - operand.real,
+                imaginary - operand.imaginary
+        );
+    }
+
+    @Override
+    public ComplexNumber multiply(Number other) {
+        ComplexNumber operand = requireComplexNumber(other);
+
+        return new ComplexNumber(
+                real * operand.real - imaginary * operand.imaginary,
+                real * operand.imaginary + imaginary * operand.real
+        );
+    }
+
+    @Override
+    public ComplexNumber divide(Number other) {
+        ComplexNumber operand = requireComplexNumber(other);
+
+        if (operand.real == 0.0 && operand.imaginary == 0.0) {
+            throw new ArithmeticException("Cannot divide by zero.");
+        }
+
+        double denominator =
+                operand.real * operand.real
+                        + operand.imaginary * operand.imaginary;
+
+        return new ComplexNumber(
+                (real * operand.real
+                        + imaginary * operand.imaginary) / denominator,
+                (imaginary * operand.real
+                        - real * operand.imaginary) / denominator
         );
     }
 

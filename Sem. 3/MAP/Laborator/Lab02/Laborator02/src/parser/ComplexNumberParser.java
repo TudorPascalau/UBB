@@ -14,6 +14,7 @@ public class ComplexNumberParser implements NumberParser {
             "^([+-]?" + NUMBER + ")([+-])(?:(" + NUMBER + ")\\*?)?i$"
     );
 
+    @Override
     public ComplexNumber parse(String input) {
         if(input == null) {
             throw new IllegalArgumentException("Input cannot be null");

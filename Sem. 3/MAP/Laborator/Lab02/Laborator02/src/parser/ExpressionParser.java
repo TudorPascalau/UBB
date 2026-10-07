@@ -1,7 +1,7 @@
 package parser;
 
-import expression.ComplexExpression;
+import expression.Expression;
 
 public interface ExpressionParser {
-    ComplexExpression parse(String[] args);
+    Expression parse(String[] args);
 }
