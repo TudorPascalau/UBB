@@ -1,41 +1,28 @@
-Programul evaluează expresii cu numere complexe primite ca argumente în linia de comandă. O expresie conține minimum doi operanzi și același operator între ei: adunare, scădere, înmulțire sau împărțire. Evaluarea se face succesiv, de la stânga la dreapta, iar rezultatul este afișat în consolă.
-
-Ideea principală este separarea interpretării datelor de crearea și evaluarea expresiei. "ComplexNumber" reprezintă un număr complex și implementează operațiile aritmetice. "NumberParser" definește contractul parsării unui număr, implementat de "ComplexNumberParser". "CommandLineExpressionParser" validează structura expresiei, identifică operația prin "Operation.fromSymbol" și parsează operanzii folosind acest contract. "ExpressionFactory" este interfața pentru crearea expresiilor, iar implementarea "DefaultExpressionFactory" selectează și construiește expresia concretă printr-un switch clasic pe operație. "ComplexExpression" definește algoritmul comun de evaluare.
-
-Enumerarea "Operation" asociază fiecărei constante simbolul operatorului, păstrat în câmpul privat și final "symbol". Metoda statică "fromSymbol" parcurge tabloul constantelor returnat de "values()" și returnează constanta cu simbolul corespunzător; pentru un simbol necunoscut aruncă "IllegalArgumentException". Enum-ul identifică operația, fără să cunoască sau să construiască expresiile concrete. Soluția folosește tablouri simple și switch clasic, fără colecții generice predefinite, lambda, referințe la constructori sau alte facilități introduse în Java 8 ori ulterior.
-
-Cele patru clase concrete de expresii implementează operația specifică. Numerele complexe sunt imutabile: operațiile returnează obiecte noi, fără modificarea operanzilor. Operanzii unei expresii sunt păstrați într-un tablou "ComplexNumber[]".
+Programul evaluează expresii cu numere complexe primite din linia de comandă. Numerele și expresiile sunt obiecte separate: numerele oferă operațiile aritmetice, iar expresiile pot fi evaluate și extinse cu noi tipuri de operații. Fiecare expresie are minimum doi operanzi și același operator între ei.
 
 ------------------------------
 Principii de proiectare SOLID
 
 S - Single Responsibility Principle
-Fiecare clasă are o responsabilitate clară: reprezentarea și aritmetica numerelor complexe, parsarea unui număr, interpretarea unei expresii, crearea expresiei sau evaluarea acesteia. Această separare permite modificarea unei responsabilități fără a amesteca logica ei cu celelalte.
+Fiecare clasă are o responsabilitate clară: reprezentarea și aritmetica numerelor complexe (clasa ComplexNumber), parsarea unui număr (NumberParser), interpretarea unei expresii (ComplexExpression), crearea expresiei sau evaluarea acesteia. Această separare permite modificarea unei responsabilități fără a amesteca logica ei cu celelalte.
 
 O - Open/Closed Principle
-"ComplexExpression" poate fi extinsă prin subclase care implementează "executeOperation", fără modificarea algoritmului din "evaluate". Interfața "ExpressionParser" permite introducerea altor implementări de parsare. Adăugarea unui operator nou presupune adăugarea unei subclase de expresie, a unei constante cu simbol în "Operation" și a unui caz în switch-ul din "DefaultExpressionFactory". "Main" și parserul rămân neschimbate. OCP este aplicat parțial: enum-ul și fabrica trebuie modificate la extindere. Pentru cele patru operații ale laboratorului, switch-ul păstrează implementarea simplă și centralizează construirea expresiilor în fabrică.
-
-Posibilitate de extindere: switch-ul poate fi înlocuit ulterior cu un registru bazat pe un array "ExpressionCreator[]", furnizat fabricii prin constructor. O interfață proprie "ExpressionCreator" ar defini metodele "getOperation()" și "create(ComplexNumber[] operands)", iar fiecare implementare ar construi expresia asociată unei operații. Fabrica ar parcurge array-ul, ar selecta creatorul corespunzător și ar delega construirea. O operație nouă ar necesita un creator nou și includerea lui în array-ul de configurare, fără modificarea fabricii. Enum-ul "Operation" ar trebui în continuare extins; eliminarea acestei limite ar necesita și o abstracție extensibilă pentru operații și adaptarea rezolvării simbolurilor în parser. Această variantă respectă restricțiile laboratorului prin array-uri și interfețe proprii, fără Map, Function sau referințe la constructori. Este o posibilitate de upgrade, nu implementarea actuală, și introduce clase suplimentare.
+Codul este inchis modificarii deoarece algoritmii de creare si evaluare a expresiilor se bazeaza pe interfete (ExpressionFactory, ExpressionParser) ce pot fi extinse prin subclase noi pentru adaugarea unor functionalitati noi.
 
 L - Liskov Substitution Principle
-Clasele "AdditionExpression", "SubtractionExpression", "MultiplicationExpression" și "DivisionExpression" pot fi utilizate prin referințe de tip "ComplexExpression". Codul care evaluează expresia apelează aceeași metodă "evaluate", fără verificarea tipului concret. Evaluarea presupune operanzi valizi pentru operația aleasă; împărțirea la zero este semnalată prin excepție.
+Clasele derivate (expresiile pentru adunare, scădere, înmulțire și împărțire) pot fi folosite în locul clasei de bază (ComplexExpression), deoarece toate respectă același mod de evaluare.
 
 I - Interface Segregation Principle
-Interfața "ExpressionParser" definește doar metoda "parse" pentru argumentele unei expresii, "NumberParser" definește doar metoda "parse" pentru textul unui număr, iar "ExpressionFactory" definește doar metoda "createExpression". Contractele sunt separate și restrânse; implementările lor nu sunt obligate să ofere operații de afișare sau alte funcționalități care nu țin de responsabilitatea respectivă.
+Interfețele au responsabilități separate și oferă doar metodele necesare: parsarea unui număr (NumberParser), interpretarea unei expresii (ExpressionParser) și crearea acesteia (ExpressionFactory). Alegem câteva interfețe mai mici, separate, peste una mare ce conține toate metodele la un loc.
 
 D - Dependency Inversion Principle
-"CommandLineExpressionParser" depinde de interfețele "NumberParser" și "ExpressionFactory", nu de clasele concrete "ComplexNumberParser" și "DefaultExpressionFactory". Câmpurile și parametrii constructorului au tipurile interfețelor, iar implementările concrete respectă aceste contracte. Astfel, parsarea numerelor sau crearea expresiilor poate fi înlocuită fără modificarea parserului expresiei. DIP este respectat pentru aceste colaborări ale parserului.
-"Main" construiește implementările concrete și le furnizează prin constructor, apoi folosește abstracțiile "ExpressionParser" și "ComplexExpression" pentru parsare și evaluare. Construirea obiectelor concrete în punctul de configurare al aplicației este necesară și nu anulează inversarea dependențelor din parser. Adăugarea unei operații noi în enum nu necesită modificarea acestei configurări.
-"Operation" nu mai depinde de clasele concrete ale expresiilor. Cunoașterea și instanțierea lor sunt centralizate în "DefaultExpressionFactory", conform rolului său de fabrică. DIP este aplicat colaboratorilor parserului; fabrica concretă păstrează dependențele necesare construirii expresiilor.
--------------------------------------------------
-Sabloane de proiectare
+Parserul expresiei depinde de abstracții (NumberParser, ExpressionFactory), primite prin constructor, astfel încât parsarea numerelor și crearea expresiilor pot fi înlocuite fără modificarea lui.
 
-Simple Factory: 
-Interfața "ExpressionFactory" oferă parserului contractul pentru crearea expresiilor prin metoda "createExpression". Clasa "DefaultExpressionFactory" implementează contractul, selectează constructorul într-un switch pe "Operation" și returnează rezultatul prin tipul abstract "ComplexExpression". Parserul nu instanțiază direct clasele expresiilor. Această organizare păstrează rolul de Simple Factory printr-un contract separat de implementarea sa; interfața nu reprezintă, singură, șablonul GoF Abstract Factory.
-În diagrama UML, această organizare se regăsește în interfața "ExpressionFactory", în clasa "DefaultExpressionFactory" și în relația de realizare dintre ele. Metoda "createExpression" aparține contractului și implementării fabricii; în cod a fost eliminată din "Operation". Enumerarea păstrează atributul privat "symbol", constructorul privat "Operation(symbol: String)" și metoda statică "fromSymbol(symbol: String): Operation". Metoda veche "parseOperation" a fost eliminată din parser și din diagramă. Clasele concrete de expresii sunt legate prin generalizare de "ComplexExpression". Agregarea dintre "CommandLineExpressionParser" și interfața "ExpressionFactory" arată că parserul păstrează o referință prin contractul fabricii. Diagrama existentă trebuie sincronizată cu această refactorizare: eliminarea metodei "createExpression" din "Operation" și reprezentarea dependențelor de creare ale fabricii către expresiile concrete.
+------------------------------
+Șabloane de proiectare
 
-Template Method:
-Metoda "evaluate" din "ComplexExpression" definește algoritmul comun: pornește de la primul operand, parcurge restul tabloului și apelează "executeOperation" la fiecare pas. În cod, "evaluate" este "final", iar "executeOperation" este abstractă. Fiecare subclasă implementează doar operația aritmetică specifică.
-În diagrama UML, acest șablon se regăsește în clasa abstractă "ComplexExpression", în metodele "evaluate" și "executeOperation" și în relațiile de generalizare ale celor patru expresii concrete. Metodele "executeOperation" din subclase reprezintă implementările pasului variabil al algoritmului.
+Simple Factory
+Crearea expresiilor este centralizată într-o fabrică (DefaultExpressionFactory), care alege clasa potrivită operației și permite parserului să obțină expresia fără să cunoască modul de construire.
 
-Injecția de dependențe prin constructor este o tehnică suplimentară folosită pentru colaboratorii parserului. Agregările din UML leagă "CommandLineExpressionParser" de interfețele "NumberParser" și "ExpressionFactory". Relațiile de realizare arată că "ComplexNumberParser" implementează "NumberParser", iar "DefaultExpressionFactory" implementează "ExpressionFactory". Atributul "numberParser" și parametrul cu același nume au tipul "NumberParser"; atributul "defaultExpressionFactory" și parametrul "expressionFactory" au tipul "ExpressionFactory", conform codului actual.
+Template Method
+Clasa de bază (ComplexExpression) definește algoritmul comun de evaluare (evaluate), iar clasele derivate implementează doar operația specifică (executeOperation).
