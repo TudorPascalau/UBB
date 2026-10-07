@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class ComplexNumberParser implements NumberParser {
 
     private static final String NUMBER =
-            "\\d+(?:\\.\\d+)?|\\.\\d+";
+            "(?:\\d+(?:\\.\\d+)?|\\.\\d+)";
 
     private static final Pattern COMPLEX_PATTERN = Pattern.compile(
             "^([+-]?" + NUMBER + ")([+-])(?:(" + NUMBER + ")\\*?)?i$"
