@@ -9,64 +9,12 @@ public final class ComplexNumber implements Number {
         this.imaginary = imaginary;
     }
 
-    private ComplexNumber requireComplexNumber(Number other) {
-        if (!(other instanceof ComplexNumber)) {
-            throw new IllegalArgumentException(
-                    "Operand must be a complex number"
-            );
-        }
-
-        return (ComplexNumber) other;
+    public double getReal() {
+        return real;
     }
 
-    @Override
-    public ComplexNumber add(Number other) {
-        ComplexNumber operand = requireComplexNumber(other);
-
-        return new ComplexNumber(
-                real + operand.real,
-                imaginary + operand.imaginary
-        );
-    }
-
-    @Override
-    public ComplexNumber subtract(Number other) {
-        ComplexNumber operand = requireComplexNumber(other);
-
-        return new ComplexNumber(
-                real - operand.real,
-                imaginary - operand.imaginary
-        );
-    }
-
-    @Override
-    public ComplexNumber multiply(Number other) {
-        ComplexNumber operand = requireComplexNumber(other);
-
-        return new ComplexNumber(
-                real * operand.real - imaginary * operand.imaginary,
-                real * operand.imaginary + imaginary * operand.real
-        );
-    }
-
-    @Override
-    public ComplexNumber divide(Number other) {
-        ComplexNumber operand = requireComplexNumber(other);
-
-        if (operand.real == 0.0 && operand.imaginary == 0.0) {
-            throw new ArithmeticException("Cannot divide by zero.");
-        }
-
-        double denominator =
-                operand.real * operand.real
-                        + operand.imaginary * operand.imaginary;
-
-        return new ComplexNumber(
-                (real * operand.real
-                        + imaginary * operand.imaginary) / denominator,
-                (imaginary * operand.real
-                        - real * operand.imaginary) / denominator
-        );
+    public double getImaginary() {
+        return imaginary;
     }
 
     @Override

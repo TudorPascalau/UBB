@@ -9,6 +9,10 @@ public final class SubtractionExpression extends ComplexExpression {
 
     @Override
     protected ComplexNumber executeOperation(ComplexNumber a, ComplexNumber b) {
-        return a.subtract(b);
+
+        double real = a.getReal() -  b.getReal();
+        double imaginary = a.getImaginary() -  b.getImaginary();
+
+        return new ComplexNumber(real, imaginary);
     }
 }

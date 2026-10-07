@@ -1,4 +1,4 @@
-USE LaboratorGestiuneJocuri;
+ USE LaboratorGestiuneJocuri;
 GO
 
 CREATE TABLE Users

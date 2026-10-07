@@ -2,7 +2,7 @@
 Principii de proiectare SOLID
 
 S - Single Responsibility Principle
-Fiecare clasă are o responsabilitate clară: reprezentarea și aritmetica numerelor complexe (ComplexNumber), parsarea unui număr (ComplexNumberParser), interpretarea unei expresii (CommandLineExpressionParser), crearea expresiei (ComplexExpressionFactory) sau evaluarea acesteia (ComplexExpression). Această separare permite modificarea unei responsabilități fără a amesteca logica ei cu celelalte.
+Fiecare clasă are o responsabilitate clară: reprezentarea numerelor complexe (ComplexNumber), parsarea unui număr (ComplexNumberParser), interpretarea unei expresii (CommandLineExpressionParser), crearea expresiei (ComplexExpressionFactory) sau evaluarea acesteia (ComplexExpression). Această separare permite modificarea unei responsabilități fără a amesteca logica ei cu celelalte.
 
 O - Open/Closed Principle
 Moștenirea din ComplexExpression permite adăugarea unor expresii noi fără modificarea algoritmului evaluate. Interfețele permit înlocuirea implementărilor numerelor, expresiilor, parserelor și fabricii, precum poate fi văzut în diagrama UML. Principiul este aplicat parțial: adăugarea unei operații noi necesită modificarea enumerării Operation și a selecției din ComplexExpressionFactory.
