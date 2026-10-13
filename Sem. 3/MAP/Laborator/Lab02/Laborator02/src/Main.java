@@ -8,7 +8,6 @@ import parser.NumberParser;
 
 public class Main {
     public static void main(String[] args) {
-
         NumberParser numberParser = new ComplexNumberParser();
         ExpressionFactory expressionFactory = new ComplexExpressionFactory();
 

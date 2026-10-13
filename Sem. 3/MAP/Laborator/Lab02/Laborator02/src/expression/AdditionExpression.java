@@ -9,9 +9,8 @@ public final class AdditionExpression extends ComplexExpression {
 
     @Override
     protected ComplexNumber executeOperation(ComplexNumber a, ComplexNumber b) {
-
-        double real = a.getReal() +  b.getReal();
-        double  imaginary = a.getImaginary() +  b.getImaginary();
+        double real = a.getReal() + b.getReal();
+        double imaginary = a.getImaginary() + b.getImaginary();
 
         return new ComplexNumber(real, imaginary);
     }
