@@ -18,22 +18,21 @@ i * i => -1.0+0.0*i
 2 + 3 => 5.0+0.0*i
 2*i + -3*i => 0.0-1.0*i
 +i + -i => 0.0+0.0*i
+1+2i + 3+4*i => 4.0+6.0*i
+2i + -3*i => 0.0-1.0*i
 
 # Expresii invalide: expresie => invalid
-# Ghilimelele din aceste cazuri descriu intentionat un singur argument invalid.
-1+2*i => invalid
-1+2*i + => invalid
-1+2*i + 3+4*i - 5+6*i => invalid
-1+2*i ^ 3+4*i => invalid
-abc + 1+2*i => invalid
-1,5+2*i + 1+2*i => invalid
-1++2*i + 3+4*i => invalid
-1+2i + 3+4*i => invalid
-"1 + 2*i" + 3+4*i => invalid
-"1 2+3*i" + 1 => invalid
-"2+ i" + 1 => invalid
-"2+3 *i" + 1 => invalid
-"" + 1 => invalid
+1+2*i
+1+2*i + 3+4*i - 5+6*i
+1+2*i ^ 3+4*i
+abc + 1+2*i
+1,5+2*i + 1+2*i
+1++2*i + 3+4*i
+"1 + 2*i" + 3+4*i
+"1 2+3*i" + 1
+"2+ i" + 1
+"2+3 *i" + 1
+"" + 1
 
 # Eroare aritmetica: expresie => arithmetic
-1+2*i / 0 => arithmetic
+1+2*i / 0

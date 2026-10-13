@@ -11,8 +11,8 @@ public class ComplexNumberParser implements NumberParser {
             "(?:\\d+(?:\\.\\d+)?|\\.\\d+)";
 
     private static final Pattern COMPLEX_PATTERN = Pattern.compile(
-            "^(?:([+-]?" + NUMBER + ")(?:([+-])(?:(" + NUMBER + ")\\*)?i)?"
-                    + "|([+-]?)(?:(" + NUMBER + ")\\*)?i)$"
+            "^(?:([+-]?" + NUMBER + ")(?:([+-])(?:(" + NUMBER + ")\\*?)?i)?"
+                    + "|([+-]?)(?:(" + NUMBER + ")\\*?)?i)$"
     );
 
     @Override
