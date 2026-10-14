@@ -58,5 +58,40 @@ public class SocialNetworkService {
         userRepository.delete(id);
     }
 
+    public Iterable<User> getUsers() {
+        return userRepository.findAll();
+    }
+
+    public void addFriendship(Long firstUserId, Long secondUserId) {
+        requireUser(firstUserId);
+        requireUser(secondUserId);
+
+        Friendship friendship =
+                new Friendship(firstUserId, secondUserId);
+
+        if (friendshipRepository.save(friendship) != null) {
+            throw new ServiceException(
+                    "Prietenia există deja."
+            );
+        }
+    }
+
+    public void removeFriendship(Long firstUserId, Long secondUserId) {
+        requireUser(firstUserId);
+        requireUser(secondUserId);
+
+        FriendshipId friendshipId =
+                new FriendshipId(firstUserId, secondUserId);
+
+        if (friendshipRepository.delete(friendshipId) == null) {
+            throw new ServiceException(
+                    "Prietenia nu există."
+            );
+        }
+    }
+
+    public Iterable<Friendship> getFriendships() {
+        return friendshipRepository.findAll();
+    }
 
 }
