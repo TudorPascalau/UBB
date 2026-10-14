@@ -1,4 +1,6 @@
 package validation;
 
-public interface Validator {
+public interface Validator<T> {
+    void validate(T entity);
 }
+
