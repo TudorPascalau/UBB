@@ -7,6 +7,9 @@
 
 sublist(_, _, 0, []).
 
+sublist([], _, N, []) :-
+    N > 0.
+
 sublist([H|T], 1, N, [H|R]) :-
     N > 0,
     N1 is N - 1,
@@ -14,9 +17,11 @@ sublist([H|T], 1, N, [H|R]) :-
 
 sublist([_|T], M, N, R) :-
     M > 1,
+    N > 0,
     M1 is M - 1,
     N1 is N - 1,
     sublist(T, M1, N1, R).
+
 
 % Exemple testare
 % sublist([10,20,30,40,50], 2, 4, R).
