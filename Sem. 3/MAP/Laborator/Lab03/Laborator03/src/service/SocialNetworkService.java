@@ -66,13 +66,10 @@ public class SocialNetworkService {
         requireUser(firstUserId);
         requireUser(secondUserId);
 
-        Friendship friendship =
-                new Friendship(firstUserId, secondUserId);
+        Friendship friendship = new Friendship(firstUserId, secondUserId);
 
         if (friendshipRepository.save(friendship) != null) {
-            throw new ServiceException(
-                    "Prietenia există deja."
-            );
+            throw new ServiceException("Prietenia există deja.");
         }
     }
 
@@ -80,13 +77,10 @@ public class SocialNetworkService {
         requireUser(firstUserId);
         requireUser(secondUserId);
 
-        FriendshipId friendshipId =
-                new FriendshipId(firstUserId, secondUserId);
+        FriendshipId friendshipId = new FriendshipId(firstUserId, secondUserId);
 
         if (friendshipRepository.delete(friendshipId) == null) {
-            throw new ServiceException(
-                    "Prietenia nu există."
-            );
+            throw new ServiceException("Prietenia nu există.");
         }
     }
 
