@@ -4,9 +4,6 @@
 % M - pozitia de inceput a sublistei, numerotata de la 1
 % N - pozitia de sfarsit a sublistei, inclusa in rezultat
 % R - sublista formata din elementele lui L de pe pozitiile M,...,N
-%
-% Preconditii:
-% 1 <= M <= N <= lungimea listei L
 
 sublist(_, _, 0, []).
 
