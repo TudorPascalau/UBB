@@ -1,0 +1,62 @@
+package service;
+
+import domain.Friendship;
+import domain.FriendshipId;
+import domain.User;
+import repository.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public class SocialNetworkService {
+
+    private final Repository<Long, User> userRepository;
+    private final Repository<FriendshipId, Friendship> friendshipRepository;
+
+    private User requireUser(Long id){
+        User user = userRepository.findOne(id);
+        if(user == null) {
+            throw new ServiceException("User with id " + id + " not found");
+        }
+
+        return user;
+    }
+
+    public SocialNetworkService(
+            Repository<Long, User> userRepository,
+            Repository<FriendshipId, Friendship> friendshipRepository) {
+
+        this.userRepository = Objects.requireNonNull(userRepository, "UserRepository cannot be null");
+        this.friendshipRepository = Objects.requireNonNull(friendshipRepository, "FriendshipRepository cannot be null");
+
+    }
+
+    public void addUser(Long id, String firstName, String lastName) {
+        User user = new User(id, firstName, lastName);
+
+        if(userRepository.save(user) != null) {
+            throw new ServiceException("User already exists with id: " + id);
+        }
+    }
+
+    public void removeUser(Long id) {
+        requireUser(id);
+
+        List<FriendshipId> friendshipsToDelete = new ArrayList<>();
+        for (Friendship friendship : friendshipRepository.findAll()) {
+            if (friendship.getFirstUserId().equals(id)
+                    || friendship.getSecondUserId().equals(id)) {
+                friendshipsToDelete.add(friendship.getId());
+            }
+        }
+
+        for(FriendshipId friendshipId : friendshipsToDelete) {
+            friendshipRepository.delete(friendshipId);
+        }
+
+        userRepository.delete(id);
+    }
+
+
+}
