@@ -1,20 +1,23 @@
 package repository;
 
 import domain.Entity;
+import validation.ValidationException;
 import validation.Validator;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 
 public abstract class AbstractFileRepository<ID, E extends Entity<ID>> implements Repository<ID, E>{
     private final Path file;
     private final Validator<E> validator;
     private Map<ID, E> entities = new HashMap<>();
 
-    protected AbstractFileRepository(Path file, Validator<E> validator) {
-        this.file = file;
+    protected AbstractFileRepository(String file, Validator<E> validator) {
+        this.file = Path.of(file).toAbsolutePath();
         this.validator = Objects.requireNonNull(validator, "Validator cannot be null");
     }
 
@@ -23,5 +26,133 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> implement
     protected abstract String toCsv(E entity);
 
     protected final void loadFromFile() {
+        if(Files.notExists(file)) {
+            return;
+        }
+
+        Map<ID, E> loaded = new HashMap<>();
+        try{
+            List<String> lines = Files.readAllLines(file, StandardCharsets.UTF_8);
+            for(int index = 0; index < lines.size(); index++) {
+                String line = lines.get(index);
+                if(line.isEmpty()) continue;
+
+                try{
+                    E entity = fromCsv(line);
+                    validator.validate(entity);
+
+                    if(loaded.putIfAbsent(entity.getId(), entity) != null) {
+                        throw new IllegalStateException("Duplicate entry found for " + entity.getId());
+                    }
+                }
+
+                catch(IllegalArgumentException | ValidationException e){
+                    throw new RepositoryException("Invalid data in " + file + "at line " + (index+1), e);
+                }
+            }
+
+            entities = loaded;
+        }
+        catch (IOException e){
+            throw new RepositoryException("Error reading file " + file, e);
+        }
+    }
+
+    private void persist(Map<ID, E> updated) {
+        List<String> lines = new ArrayList<>();
+
+        for(E entity : updated.values()){
+            lines.add(toCsv(entity));
+        }
+
+        Path temporaryFile = null;
+
+        try {
+            Files.createDirectories(file.getParent());
+            temporaryFile = Files.createTempFile(
+                    file.getParent(), "repository-", ".tmp"
+            );
+
+            Files.write(temporaryFile, lines, StandardCharsets.UTF_8);
+            Files.move(
+                    temporaryFile,
+                    file,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+        }
+        catch (IOException e) {
+            throw new RepositoryException("Error saving file " + temporaryFile, e);
+        }
+        finally {
+            if(temporaryFile != null) {
+                try {
+                    Files.delete(temporaryFile);
+                }
+                catch (IOException ignored) {}
+            }
+        }
+
+        entities = updated;
+    }
+
+    @Override
+    public E findOne(ID id) {
+        Objects.requireNonNull(id, "ID cannot be null");
+        return entities.get(id);
+    }
+
+    @Override
+    public Iterable<E> findAll() {
+        return new ArrayList<>(entities.values());
+    }
+
+    @Override
+    public E save(E entity) {
+        Objects.requireNonNull(entity, "Entity cannot be null");
+        validator.validate(entity);
+
+        E existing = entities.get(entity.getId());
+
+        if(existing != null) {
+            return existing;
+        }
+
+        Map<ID, E> updated = new HashMap<>(entities);
+        updated.put(entity.getId(), entity);
+        persist(updated);
+
+        return null;
+    }
+
+    @Override
+    public E update(E entity) {
+        Objects.requireNonNull(entity, "Entity cannot be null");
+        validator.validate(entity);
+
+        if (!entities.containsKey(entity.getId())) {
+            return entity;
+        }
+
+        Map<ID, E> updated = new HashMap<>(entities);
+        updated.put(entity.getId(), entity);
+        persist(updated);
+
+        return null;
+    }
+
+    @Override
+    public E delete(ID id){
+        Objects.requireNonNull(id, "ID cannot be null");
+
+        E existing = entities.get(id);
+        if(existing == null) {
+            return null;
+        }
+
+        Map<ID, E> updated = new HashMap<>(entities);
+        updated.remove(id);
+        persist(updated);
+
+        return existing;
     }
 }
