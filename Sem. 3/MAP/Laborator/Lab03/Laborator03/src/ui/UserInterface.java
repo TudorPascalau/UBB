@@ -83,13 +83,16 @@ public class UserInterface {
     }
 
     private void addUser() {
+        System.out.print("Username: ");
+        String username = scanner.nextLine().trim();
+
         System.out.print("Prenume: ");
         String firstName = scanner.nextLine().trim();
 
         System.out.print("Nume: ");
         String lastName = scanner.nextLine().trim();
 
-        service.addUser(firstName, lastName);
+        service.addUser(username, firstName, lastName);
         System.out.println("Utilizator adaugat.");
     }
 
@@ -114,18 +117,19 @@ public class UserInterface {
     }
 
     private void addFriendship() {
-        Long firstId = readId("ID primul utilizator: ");
-        Long secondId = readId("ID al doilea utilizator: ");
+        System.out.print("Username primul utilizator: ");
+        String firstUsername = scanner.nextLine().trim();
+        System.out.print("Username al doilea utilizator: ");
+        String secondUsername = scanner.nextLine().trim();
 
-        service.addFriendship(firstId, secondId);
+        service.addFriendship(firstUsername, secondUsername);
         System.out.println("Prietenie adaugata.");
     }
 
     private void removeFriendship() {
-        Long firstId = readId("ID primul utilizator: ");
-        Long secondId = readId("ID al doilea utilizator: ");
+        Long id = readId("ID prietenie: ");
 
-        service.removeFriendship(firstId, secondId);
+        service.removeFriendship(id);
         System.out.println("Prietenie stearsa.");
     }
 

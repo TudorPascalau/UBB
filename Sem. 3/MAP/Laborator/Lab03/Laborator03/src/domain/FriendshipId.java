@@ -2,30 +2,36 @@ package domain;
 
 import java.util.Objects;
 
-public class FriendshipId {
-    private final Long firstUserId;
-    private final Long secondUserId;
+public final class FriendshipId {
+    private final Long id;
+    private final String firstUsername;
+    private final String secondUsername;
 
-    public FriendshipId(Long firstUserId, Long secondUserId) {
-        Objects.requireNonNull(firstUserId, "firstUserId is null");
-        Objects.requireNonNull(secondUserId, "secondUserId is null");
+    public FriendshipId(Long id, String firstUsername, String secondUsername) {
+        this.id = Objects.requireNonNull(id, "Friendship ID is null");
+        Objects.requireNonNull(firstUsername, "firstUsername is null");
+        Objects.requireNonNull(secondUsername, "secondUsername is null");
 
-        if(firstUserId.compareTo(secondUserId) <= 0) {
-            this.firstUserId = firstUserId;
-            this.secondUserId = secondUserId;
+        if (firstUsername.compareTo(secondUsername) <= 0) {
+            this.firstUsername = firstUsername;
+            this.secondUsername = secondUsername;
         }
         else {
-            this.firstUserId = secondUserId;
-            this.secondUserId = firstUserId;
+            this.firstUsername = secondUsername;
+            this.secondUsername = firstUsername;
         }
     }
 
-    public Long getFirstUserId() {
-        return firstUserId;
+    public Long getId() {
+        return id;
     }
 
-    public Long getSecondUserId() {
-        return secondUserId;
+    public String getFirstUsername() {
+        return firstUsername;
+    }
+
+    public String getSecondUsername() {
+        return secondUsername;
     }
 
     @Override
@@ -34,16 +40,18 @@ public class FriendshipId {
         if (o == null || getClass() != o.getClass()) return false;
 
         FriendshipId friendshipId = (FriendshipId) o;
-        return firstUserId.equals(friendshipId.firstUserId) && secondUserId.equals(friendshipId.secondUserId);
+        return id.equals(friendshipId.id)
+                && firstUsername.equals(friendshipId.firstUsername)
+                && secondUsername.equals(friendshipId.secondUsername);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(firstUserId, secondUserId);
+        return Objects.hash(id, firstUsername, secondUsername);
     }
 
     @Override
     public String toString() {
-        return "(" + firstUserId + ", " + secondUserId + ")";
+        return "(" + id + ", " + firstUsername + ", " + secondUsername + ")";
     }
 }

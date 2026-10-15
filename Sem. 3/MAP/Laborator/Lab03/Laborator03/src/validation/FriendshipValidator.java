@@ -10,7 +10,15 @@ public class FriendshipValidator implements Validator<Friendship> {
             throw new ValidationException("Friendship cannot be null");
         }
 
-        if(friendship.getFirstUserId().equals(friendship.getSecondUserId())) {
+        if (friendship.getNumericId() <= 0) {
+            throw new ValidationException("Friendship ID must be positive");
+        }
+
+        if (friendship.getFirstUsername().isBlank() || friendship.getSecondUsername().isBlank()) {
+            throw new ValidationException("Usernames cannot be empty");
+        }
+
+        if (friendship.getFirstUsername().equalsIgnoreCase(friendship.getSecondUsername())) {
             throw new ValidationException("Friendship cannot be with self");
         }
     }

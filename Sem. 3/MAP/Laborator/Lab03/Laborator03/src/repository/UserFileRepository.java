@@ -1,7 +1,6 @@
 package repository;
 
 import domain.User;
-import validation.Validator;
 
 public class UserFileRepository extends AbstractFileRepository<Long, User> {
 
@@ -14,25 +13,28 @@ public class UserFileRepository extends AbstractFileRepository<Long, User> {
     protected User fromCsv(String line) {
         String[] fields = line.split(",", -1);
 
-        if (fields.length != 3) {
+        if (fields.length != 4) {
             throw new IllegalArgumentException(
-                    "Format asteptat: id,firstName,lastName"
+                    "Format asteptat: id,username,firstName,lastName"
             );
         }
 
         return new User(
                 Long.parseLong(fields[0].trim()),
                 fields[1],
-                fields[2]
+                fields[2],
+                fields[3]
         );
     }
 
     @Override
     protected String toCsv(User user) {
+        requireSimpleCsvField(user.getUsername());
         requireSimpleCsvField(user.getFirstName());
         requireSimpleCsvField(user.getLastName());
 
         return user.getId() + ","
+                + user.getUsername() + ","
                 + user.getFirstName() + ","
                 + user.getLastName();
     }
@@ -42,7 +44,7 @@ public class UserFileRepository extends AbstractFileRepository<Long, User> {
                 || value.contains("\n")
                 || value.contains("\r")
                 || value.contains("\"")) {
-            throw new RepositoryException("Formatul CSV simplificat nu permite virgule, ghilimele sau linii noi in nume.");
+            throw new RepositoryException("Formatul CSV simplificat nu permite virgule, ghilimele sau linii noi in campuri.");
         }
     }
 }

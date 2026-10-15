@@ -2,7 +2,6 @@ package repository;
 
 import domain.Friendship;
 import domain.FriendshipId;
-import validation.Validator;
 
 public class FriendshipFileRepository
         extends AbstractFileRepository<FriendshipId, Friendship> {
@@ -16,15 +15,25 @@ public class FriendshipFileRepository
     protected Friendship fromCsv(String line) {
         String[] fields = line.split(",", -1);
 
-        if (fields.length != 2) {
-            throw new IllegalArgumentException("Format asteptat: firstUserId,secondUserId");
+        if (fields.length != 3) {
+            throw new IllegalArgumentException("Format asteptat: id,firstUsername,secondUsername");
         }
 
-        return new Friendship(Long.parseLong(fields[0].trim()), Long.parseLong(fields[1].trim()));
+        return new Friendship(Long.parseLong(fields[0].trim()), fields[1], fields[2]);
     }
 
     @Override
     protected String toCsv(Friendship friendship) {
-        return friendship.getFirstUserId() + "," + friendship.getSecondUserId();
+        requireSimpleCsvField(friendship.getFirstUsername());
+        requireSimpleCsvField(friendship.getSecondUsername());
+        return friendship.getNumericId() + ","
+                + friendship.getFirstUsername() + "," + friendship.getSecondUsername();
+    }
+
+    private void requireSimpleCsvField(String value) {
+        if (value.contains(",") || value.contains("\"")
+                || value.contains("\n") || value.contains("\r")) {
+            throw new RepositoryException("Username cannot be represented in simplified CSV");
+        }
     }
 }

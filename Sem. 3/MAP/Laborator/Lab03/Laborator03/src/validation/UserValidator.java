@@ -11,6 +11,10 @@ public class UserValidator implements Validator<User> {
 
         StringBuilder errorMessage = new StringBuilder();
 
+        if (user.getUsername() == null || user.getUsername().isBlank()) {
+            errorMessage.append("Username cannot be empty. ");
+        }
+
         if(user.getFirstName() == null || user.getFirstName().isBlank()) {
             errorMessage.append("First name cannot be empty");
         }
