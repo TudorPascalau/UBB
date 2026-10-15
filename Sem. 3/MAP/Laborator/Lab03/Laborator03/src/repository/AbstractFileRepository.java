@@ -13,12 +13,10 @@ import java.util.*;
 
 public abstract class AbstractFileRepository<ID, E extends Entity<ID>> implements Repository<ID, E>{
     private final Path file;
-    private final Validator<E> validator;
     private Map<ID, E> entities = new HashMap<>();
 
-    protected AbstractFileRepository(String file, Validator<E> validator) {
+    protected AbstractFileRepository(String file) {
         this.file = Path.of(file).toAbsolutePath();
-        this.validator = Objects.requireNonNull(validator, "Validator cannot be null");
     }
 
     protected abstract E fromCsv(String line);
@@ -26,7 +24,7 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> implement
     protected abstract String toCsv(E entity);
 
     protected final void loadFromFile() {
-        if(Files.notExists(file)) {
+        if (Files.notExists(file)) {
             return;
         }
 
@@ -39,10 +37,9 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> implement
 
                 try{
                     E entity = fromCsv(line);
-                    validator.validate(entity);
 
                     if(loaded.putIfAbsent(entity.getId(), entity) != null) {
-                        throw new IllegalStateException("Duplicate entry found for " + entity.getId());
+                        throw new IllegalArgumentException("Duplicate entry found for " + entity.getId());
                     }
                 }
 
@@ -61,7 +58,7 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> implement
     private void persist(Map<ID, E> updated) {
         List<String> lines = new ArrayList<>();
 
-        for(E entity : updated.values()){
+        for (E entity : updated.values()) {
             lines.add(toCsv(entity));
         }
 
@@ -69,30 +66,26 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> implement
 
         try {
             Files.createDirectories(file.getParent());
-            temporaryFile = Files.createTempFile(
-                    file.getParent(), "repository-", ".tmp"
-            );
+
+            temporaryFile = Files.createTempFile(file.getParent(),"repository-",".tmp");
 
             Files.write(temporaryFile, lines, StandardCharsets.UTF_8);
-            Files.move(
-                    temporaryFile,
-                    file,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
+
+            Files.move(temporaryFile, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+
+            entities = updated;
         }
         catch (IOException e) {
-            throw new RepositoryException("Error saving file " + temporaryFile, e);
+            throw new RepositoryException("Error saving file " + file, e);
         }
         finally {
-            if(temporaryFile != null) {
+            if (temporaryFile != null) {
                 try {
-                    Files.delete(temporaryFile);
+                    Files.deleteIfExists(temporaryFile);
                 }
                 catch (IOException ignored) {}
             }
         }
-
-        entities = updated;
     }
 
     @Override
@@ -109,11 +102,10 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> implement
     @Override
     public E save(E entity) {
         Objects.requireNonNull(entity, "Entity cannot be null");
-        validator.validate(entity);
 
         E existing = entities.get(entity.getId());
 
-        if(existing != null) {
+        if (existing != null) {
             return existing;
         }
 
@@ -127,7 +119,6 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> implement
     @Override
     public E update(E entity) {
         Objects.requireNonNull(entity, "Entity cannot be null");
-        validator.validate(entity);
 
         if (!entities.containsKey(entity.getId())) {
             return entity;

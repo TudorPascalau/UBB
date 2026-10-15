@@ -4,6 +4,7 @@ import domain.Friendship;
 import domain.FriendshipId;
 import domain.User;
 import repository.Repository;
+import validation.Validator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +14,24 @@ public class SocialNetworkService {
 
     private final Repository<Long, User> userRepository;
     private final Repository<FriendshipId, Friendship> friendshipRepository;
+
+    private final Validator<User> userValidator;
+    private final Validator<Friendship> friendshipValidator;
+
     private long nextUserId = 1;
 
     public SocialNetworkService(
             Repository<Long, User> userRepository,
-            Repository<FriendshipId, Friendship> friendshipRepository) {
+            Repository<FriendshipId, Friendship> friendshipRepository,
+            Validator<User> userValidator,
+            Validator<Friendship> friendshipValidator) {
 
         this.userRepository = Objects.requireNonNull(userRepository, "UserRepository cannot be null");
         this.friendshipRepository = Objects.requireNonNull(friendshipRepository, "FriendshipRepository cannot be null");
+
+        this.userValidator = Objects.requireNonNull(userValidator, "UserValidator cannot be null");
+        this.friendshipValidator = Objects.requireNonNull(friendshipValidator, "FriendshipValidator cannot be null");
+
         for (User user : userRepository.findAll()) {
             if (user.getId() >= nextUserId) {
                 nextUserId = user.getId() + 1;
@@ -31,9 +42,14 @@ public class SocialNetworkService {
     public void addUser(String firstName, String lastName) {
         User user = new User(nextUserId, firstName, lastName);
 
-        if(userRepository.save(user) != null) {
-            throw new ServiceException("User already exists with id: " + nextUserId);
+        userValidator.validate(user);
+
+        if (userRepository.save(user) != null) {
+            throw new ServiceException(
+                    "User already exists with id: " + nextUserId
+            );
         }
+
         nextUserId++;
     }
 
@@ -63,7 +79,10 @@ public class SocialNetworkService {
         requireUser(firstUserId);
         requireUser(secondUserId);
 
-        Friendship friendship = new Friendship(firstUserId, secondUserId);
+        Friendship friendship =
+                new Friendship(firstUserId, secondUserId);
+
+        friendshipValidator.validate(friendship);
 
         if (friendshipRepository.save(friendship) != null) {
             throw new ServiceException("Prietenia există deja.");
@@ -88,7 +107,7 @@ public class SocialNetworkService {
 
     private User requireUser(Long id){
         User user = userRepository.findOne(id);
-        if(user == null) {
+        if (user == null) {
             throw new ServiceException("User with id " + id + " not found");
         }
 

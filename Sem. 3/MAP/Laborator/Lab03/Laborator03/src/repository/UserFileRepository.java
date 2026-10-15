@@ -5,8 +5,8 @@ import validation.Validator;
 
 public class UserFileRepository extends AbstractFileRepository<Long, User> {
 
-    public UserFileRepository(String fileName, Validator<User> validator) {
-        super(fileName, validator);
+    public UserFileRepository(String fileName) {
+        super(fileName);
         loadFromFile();
     }
 
@@ -42,10 +42,7 @@ public class UserFileRepository extends AbstractFileRepository<Long, User> {
                 || value.contains("\n")
                 || value.contains("\r")
                 || value.contains("\"")) {
-            throw new RepositoryException(
-                    "Formatul CSV simplificat nu permite virgule, "
-                            + "ghilimele sau linii noi in nume."
-            );
+            throw new RepositoryException("Formatul CSV simplificat nu permite virgule, ghilimele sau linii noi in nume.");
         }
     }
 }

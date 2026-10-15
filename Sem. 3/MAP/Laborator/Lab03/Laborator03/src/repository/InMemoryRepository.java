@@ -11,16 +11,14 @@ import java.util.Objects;
 public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<ID, E>{
 
     private final Map<ID, E> entities;
-    private final Validator<E> validator;
 
-    public InMemoryRepository(Validator<E> validator) {
-        this.validator = Objects.requireNonNull(validator, "Validator cannot be null");
+    public InMemoryRepository() {
         this.entities = new HashMap<>();
     }
 
     @Override
     public E findOne(ID id) {
-        if(id == null) {
+        if (id == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
 
@@ -34,11 +32,9 @@ public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<
 
     @Override
     public E save(E entity) {
-        if(entity == null) {
+        if (entity == null) {
             throw new IllegalArgumentException("Entity cannot be null");
         }
-
-        validator.validate(entity);
 
         if(entities.containsKey(entity.getId())) {
             return entities.get(entity.getId());
@@ -50,22 +46,21 @@ public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<
 
     @Override
     public E update(E entity) {
-        if(entity == null) {
+        if (entity == null) {
             throw new IllegalArgumentException("Entity cannot be null");
         }
 
-        validator.validate(entity);
         if(!entities.containsKey(entity.getId())) {
             return entity;
         }
 
         entities.put(entity.getId(), entity);
-        return entity;
+        return null;
     }
 
     @Override
     public E delete(ID id) {
-        if(id == null) {
+        if (id == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
 

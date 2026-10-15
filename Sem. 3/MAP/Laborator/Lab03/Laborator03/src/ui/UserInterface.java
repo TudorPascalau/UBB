@@ -2,6 +2,7 @@ package ui;
 
 import domain.Friendship;
 import domain.User;
+import repository.RepositoryException;
 import service.ServiceException;
 import service.SocialNetworkService;
 import validation.ValidationException;
@@ -58,7 +59,7 @@ public class UserInterface {
             catch (NumberFormatException e) {
                 System.out.println("ID has to be a number");
             }
-            catch (ValidationException | ServiceException e) {
+            catch (ValidationException | ServiceException | RepositoryException e) {
                 System.out.println(e.getMessage());
             }
         }
