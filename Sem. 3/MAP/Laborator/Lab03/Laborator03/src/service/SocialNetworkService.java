@@ -1,8 +1,6 @@
 package service;
 
-import domain.Friendship;
-import domain.FriendshipId;
-import domain.User;
+import domain.*;
 import repository.Repository;
 import validation.Validator;
 
@@ -18,6 +16,8 @@ public class SocialNetworkService {
     private final Validator<User> userValidator;
     private final Validator<Friendship> friendshipValidator;
 
+    private final CommunityAnalyzer communityAnalyzer;
+
     private long nextUserId = 1;
     private long nextFriendshipId = 1;
 
@@ -25,13 +25,16 @@ public class SocialNetworkService {
             Repository<Long, User> userRepository,
             Repository<FriendshipId, Friendship> friendshipRepository,
             Validator<User> userValidator,
-            Validator<Friendship> friendshipValidator) {
+            Validator<Friendship> friendshipValidator,
+            CommunityAnalyzer communityAnalyzer) {
 
         this.userRepository = Objects.requireNonNull(userRepository, "UserRepository cannot be null");
         this.friendshipRepository = Objects.requireNonNull(friendshipRepository, "FriendshipRepository cannot be null");
 
         this.userValidator = Objects.requireNonNull(userValidator, "UserValidator cannot be null");
         this.friendshipValidator = Objects.requireNonNull(friendshipValidator, "FriendshipValidator cannot be null");
+
+        this.communityAnalyzer = Objects.requireNonNull(communityAnalyzer,"CommunityAnalyzer cannot be null");
 
         for (User user : userRepository.findAll()) {
             if (user.getId() >= nextUserId) {
@@ -154,6 +157,27 @@ public class SocialNetworkService {
         }
 
         return user;
+    }
+
+    private FriendshipGraph buildFriendshipGraph() {
+        return new FriendshipGraph(
+                userRepository.findAll(),
+                friendshipRepository.findAll()
+        );
+    }
+
+    public List<Community> getCommunities() {
+        return communityAnalyzer.findCommunities(buildFriendshipGraph());
+    }
+
+    public int getCommunityCount() {
+        return getCommunities().size();
+    }
+
+    public Community getMostSociableCommunity() {
+        return communityAnalyzer.findMostSociableCommunity(buildFriendshipGraph()).orElseThrow(() ->
+                new ServiceException("Nu exista comunitati in retea.")
+        );
     }
 
 }

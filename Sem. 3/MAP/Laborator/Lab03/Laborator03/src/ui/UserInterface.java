@@ -1,5 +1,6 @@
 package ui;
 
+import domain.Community;
 import domain.Friendship;
 import domain.User;
 import repository.RepositoryException;
@@ -49,6 +50,15 @@ public class UserInterface {
                     case "6":
                         showFriendships();
                         break;
+                    case "7":
+                        showCommunityCount();
+                        break;
+                    case "8":
+                        showMostSociableCommunity();
+                        break;
+                    case "9":
+                        showCommunities();
+                        break;
                     case "0":
                         running = false;
                         break;
@@ -73,6 +83,9 @@ public class UserInterface {
         System.out.println("4. Adauga prietenie");
         System.out.println("5. Sterge prietenie");
         System.out.println("6. Afiseaza prieteniile");
+        System.out.println("7. Afiseaza numarul de comunitati");
+        System.out.println("8. Afiseaza comunitatea cea mai sociabila");
+        System.out.println("9. Afiseaza toate comunitatile");
         System.out.println("0. Iesire");
         System.out.print("Optiune: ");
     }
@@ -131,6 +144,28 @@ public class UserInterface {
 
         service.removeFriendship(id);
         System.out.println("Prietenie stearsa.");
+    }
+
+    private void showCommunityCount() {
+        System.out.println("Numar de comunitati: " + service.getCommunityCount());
+    }
+
+    private void showMostSociableCommunity() {
+        System.out.println("Comunitatea cea mai sociabila: "
+                + service.getMostSociableCommunity());
+    }
+
+    private void showCommunities() {
+        boolean found = false;
+
+        for (Community community : service.getCommunities()) {
+            System.out.println(community);
+            found = true;
+        }
+
+        if (!found) {
+            System.out.println("Nu exista comunitati in retea.");
+        }
     }
 
     private void showFriendships() {

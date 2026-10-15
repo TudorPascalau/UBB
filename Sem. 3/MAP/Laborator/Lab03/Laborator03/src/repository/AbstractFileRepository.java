@@ -2,7 +2,6 @@ package repository;
 
 import domain.Entity;
 import validation.ValidationException;
-import validation.Validator;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

@@ -1,3 +1,4 @@
+import domain.CommunityAnalyzer;
 import domain.Friendship;
 import domain.FriendshipId;
 import domain.User;
@@ -18,7 +19,8 @@ public class Main {
                 userRepository,
                 friendshipRepository,
                 new UserValidator(),
-                new FriendshipValidator()
+                new FriendshipValidator(),
+                new CommunityAnalyzer()
         );
 
         new UserInterface(service).run();

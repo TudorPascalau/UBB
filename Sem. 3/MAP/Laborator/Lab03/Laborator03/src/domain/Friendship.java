@@ -20,8 +20,8 @@ public class Friendship extends Entity<FriendshipId> {
 
     @Override
     public String toString() {
-        return "Friendship{id=" + getNumericId()
-                + ", firstUsername=" + getFirstUsername()
-                + ", secondUsername=" + getSecondUsername() + "}";
+        return "Friendship: " + getNumericId()
+                + ", firstUsername = " + getFirstUsername()
+                + ", secondUsername = " + getSecondUsername();
     }
 }
