@@ -29,6 +29,6 @@ public class User extends Entity<Long> {
 
     @Override
     public String toString() {
-        return "User{" + "firstName=" + firstName + ", lastName=" + lastName + '}';
+        return "User{id=" + getId() + ", firstName=" + firstName + ", lastName=" + lastName + '}';
     }
 }

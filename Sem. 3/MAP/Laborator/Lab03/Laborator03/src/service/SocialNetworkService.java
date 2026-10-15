@@ -13,15 +13,7 @@ public class SocialNetworkService {
 
     private final Repository<Long, User> userRepository;
     private final Repository<FriendshipId, Friendship> friendshipRepository;
-
-    private User requireUser(Long id){
-        User user = userRepository.findOne(id);
-        if(user == null) {
-            throw new ServiceException("User with id " + id + " not found");
-        }
-
-        return user;
-    }
+    private long nextUserId = 1;
 
     public SocialNetworkService(
             Repository<Long, User> userRepository,
@@ -29,15 +21,20 @@ public class SocialNetworkService {
 
         this.userRepository = Objects.requireNonNull(userRepository, "UserRepository cannot be null");
         this.friendshipRepository = Objects.requireNonNull(friendshipRepository, "FriendshipRepository cannot be null");
-
+        for (User user : userRepository.findAll()) {
+            if (user.getId() >= nextUserId) {
+                nextUserId = user.getId() + 1;
+            }
+        }
     }
 
-    public void addUser(Long id, String firstName, String lastName) {
-        User user = new User(id, firstName, lastName);
+    public void addUser(String firstName, String lastName) {
+        User user = new User(nextUserId, firstName, lastName);
 
         if(userRepository.save(user) != null) {
-            throw new ServiceException("User already exists with id: " + id);
+            throw new ServiceException("User already exists with id: " + nextUserId);
         }
+        nextUserId++;
     }
 
     public void removeUser(Long id) {
@@ -86,6 +83,16 @@ public class SocialNetworkService {
 
     public Iterable<Friendship> getFriendships() {
         return friendshipRepository.findAll();
+    }
+
+
+    private User requireUser(Long id){
+        User user = userRepository.findOne(id);
+        if(user == null) {
+            throw new ServiceException("User with id " + id + " not found");
+        }
+
+        return user;
     }
 
 }
