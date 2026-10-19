@@ -162,7 +162,7 @@ public class SocialNetworkService {
      */
     public Community getMostSociableCommunity() {
         Optional<Community> result = communityAnalyzer.findMostSociableCommunity(buildFriendshipGraph());
-        if (result.isEmpty()) throw new ServiceException("Nu exista comunitati in retea.");
+        if (result.isEmpty()) throw new ServiceException("No communities found in the network.");
         return result.get();
     }
 }

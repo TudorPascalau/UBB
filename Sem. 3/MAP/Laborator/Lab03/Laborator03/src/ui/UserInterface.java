@@ -36,7 +36,7 @@ public class UserInterface {
             new UserInterface(service).run();
         } catch (RepositoryException | ValidationException | ServiceException
                 | IllegalArgumentException e) {
-            System.out.println("Aplicatia nu poate porni: " + e.getMessage());
+            System.out.println("Unable to start the application: " + e.getMessage());
         }
     }
 
@@ -103,11 +103,11 @@ public class UserInterface {
                 }
             }
             catch (java.util.NoSuchElementException e) {
-                System.out.println("Intrarea a fost inchisa. Aplicatia se opreste.");
+                System.out.println("Input was closed. Exiting the application.");
                 return;
             }
             catch (NumberFormatException e) {
-                System.out.println("ID has to be a number");
+                System.out.println("ID must be a number.");
             }
             catch (ValidationException | ServiceException | RepositoryException
                     | IllegalArgumentException e) {
@@ -118,17 +118,17 @@ public class UserInterface {
 
     private void printMenu() {
         System.out.println();
-        System.out.println("1. Adauga utilizator");
-        System.out.println("2. Sterge utilizator");
-        System.out.println("3. Afiseaza utilizatorii");
-        System.out.println("4. Adauga prietenie");
-        System.out.println("5. Sterge prietenie");
-        System.out.println("6. Afiseaza prieteniile");
-        System.out.println("7. Afiseaza numarul de comunitati");
-        System.out.println("8. Afiseaza comunitatea cea mai sociabila");
-        System.out.println("9. Afiseaza toate comunitatile");
-        System.out.println("0. Iesire");
-        System.out.print("Optiune: ");
+        System.out.println("1. Add user");
+        System.out.println("2. Remove user");
+        System.out.println("3. Show users");
+        System.out.println("4. Add friendship");
+        System.out.println("5. Remove friendship");
+        System.out.println("6. Show friendships");
+        System.out.println("7. Show community count");
+        System.out.println("8. Show the most sociable community");
+        System.out.println("9. Show all communities");
+        System.out.println("0. Exit");
+        System.out.print("Option: ");
     }
 
     private Long readId(String prompt) {
@@ -137,21 +137,21 @@ public class UserInterface {
     }
 
     private void addUser() {
-        System.out.print("Prenume: ");
+        System.out.print("First name: ");
         String firstName = scanner.nextLine().trim();
 
-        System.out.print("Nume: ");
+        System.out.print("Last name: ");
         String lastName = scanner.nextLine().trim();
 
         service.addUser(firstName, lastName);
-        System.out.println("Utilizator adaugat.");
+        System.out.println("User added.");
     }
 
     private void removeUser() {
-        Long id = readId("ID utilizator: ");
+        Long id = readId("User ID: ");
 
         service.removeUser(id);
-        System.out.println("Utilizator sters.");
+        System.out.println("User removed.");
     }
 
     private void showUsers() {
@@ -163,30 +163,30 @@ public class UserInterface {
         }
 
         if (!found) {
-            System.out.println("Nu exista utilizatori.");
+            System.out.println("No users found.");
         }
     }
 
     private void addFriendship() {
-        Long first = readId("ID primul utilizator: ");
-        Long second = readId("ID al doilea utilizator: ");
+        Long first = readId("First user ID: ");
+        Long second = readId("Second user ID: ");
         service.addFriendship(first, second);
-        System.out.println("Prietenie adaugata.");
+        System.out.println("Friendship added.");
     }
 
     private void removeFriendship() {
-        Long first = readId("ID primul utilizator: ");
-        Long second = readId("ID al doilea utilizator: ");
+        Long first = readId("First user ID: ");
+        Long second = readId("Second user ID: ");
         service.removeFriendship(first, second);
-        System.out.println("Prietenie stearsa.");
+        System.out.println("Friendship removed.");
     }
 
     private void showCommunityCount() {
-        System.out.println("Numar de comunitati: " + service.getCommunityCount());
+        System.out.println("Number of communities: " + service.getCommunityCount());
     }
 
     private void showMostSociableCommunity() {
-        System.out.println("Comunitatea cea mai sociabila: "
+        System.out.println("Most sociable community: "
                 + service.getMostSociableCommunity());
     }
 
@@ -199,7 +199,7 @@ public class UserInterface {
         }
 
         if (!found) {
-            System.out.println("Nu exista comunitati in retea.");
+            System.out.println("No communities found in the network.");
         }
     }
 
@@ -212,7 +212,7 @@ public class UserInterface {
         }
 
         if (!found) {
-            System.out.println("Nu exista prietenii.");
+            System.out.println("No friendships found.");
         }
     }
 }
