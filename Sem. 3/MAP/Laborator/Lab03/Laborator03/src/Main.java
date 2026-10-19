@@ -1,29 +1,15 @@
-import domain.CommunityAnalyzer;
-import domain.Friendship;
-import domain.FriendshipId;
-import domain.User;
-import repository.FriendshipFileRepository;
-import repository.Repository;
-import repository.UserFileRepository;
-import service.SocialNetworkService;
 import ui.UserInterface;
-import validation.FriendshipValidator;
-import validation.UserValidator;
 
-public class Main {
+/**
+ * Application entry point.
+ */
+public final class Main {
+    private Main() {}
+    /**
+     * Starts the application.
+     * @param args unused command-line arguments
+     */
     public static void main(String[] args) {
-        Repository<Long, User> userRepository = new UserFileRepository("src/data/users.csv");
-        Repository<FriendshipId, Friendship> friendshipRepository = new FriendshipFileRepository("src/data/friendships.csv");
-
-        SocialNetworkService service = new SocialNetworkService(
-                userRepository,
-                friendshipRepository,
-                new UserValidator(),
-                new FriendshipValidator(),
-                new CommunityAnalyzer()
-        );
-
-        new UserInterface(service).run();
-
+        UserInterface.start();
     }
 }

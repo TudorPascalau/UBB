@@ -1,50 +1,28 @@
 package repository;
-
 import domain.User;
+import validation.Validator;
 
-public class UserFileRepository extends AbstractFileRepository<Long, User> {
-
-    public UserFileRepository(String fileName) {
-        super(fileName);
-        loadFromFile();
+/**
+ * Converts id;firstName;lastName text records.
+ */
+public final class UserFileRepository extends AbstractFileRepository<Long, User> {
+    /**
+     * Creates a user file repository.
+     * @param validator user validator
+     * @throws RepositoryException if input cannot be read or contains corrupt records
+     * @throws IllegalArgumentException if validator is null
+     */
+    public UserFileRepository(Validator<User> validator) {
+        super(validator, "data/users.csv");
+        loadData();
     }
-
-    @Override
-    protected User fromCsv(String line) {
-        String[] fields = line.split(",", -1);
-
-        if (fields.length != 4) {
-            throw new IllegalArgumentException(
-                    "Format asteptat: id,username,firstName,lastName"
-            );
-        }
-
-        return new User(
-                Long.parseLong(fields[0].trim()),
-                fields[1],
-                fields[2],
-                fields[3]
-        );
+    @Override protected User extractEntity(String line) {
+        String[] fields = line.split(";", -1);
+        if (fields.length != 3)
+            throw new IllegalArgumentException("Expected id;firstName;lastName");
+        return new User(Long.parseLong(fields[0].trim()), fields[1], fields[2]);
     }
-
-    @Override
-    protected String toCsv(User user) {
-        requireSimpleCsvField(user.getUsername());
-        requireSimpleCsvField(user.getFirstName());
-        requireSimpleCsvField(user.getLastName());
-
-        return user.getId() + ","
-                + user.getUsername() + ","
-                + user.getFirstName() + ","
-                + user.getLastName();
-    }
-
-    private void requireSimpleCsvField(String value) {
-        if (value.contains(",")
-                || value.contains("\n")
-                || value.contains("\r")
-                || value.contains("\"")) {
-            throw new RepositoryException("Formatul CSV simplificat nu permite virgule, ghilimele sau linii noi in campuri.");
-        }
+    @Override protected String createEntityAsString(User user) {
+        return user.getId() + ";" + user.getFirstName() + ";" + user.getLastName();
     }
 }

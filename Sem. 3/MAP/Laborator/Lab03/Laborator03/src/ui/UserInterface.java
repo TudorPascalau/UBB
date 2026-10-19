@@ -1,6 +1,13 @@
 package ui;
 
 import domain.Community;
+import domain.CommunityAnalyzer;
+import repository.UserFileRepository;
+import repository.FriendshipFileRepository;
+import repository.Repository;
+import domain.FriendshipId;
+import validation.UserValidator;
+import validation.FriendshipValidator;
 import domain.Friendship;
 import domain.User;
 import repository.RepositoryException;
@@ -10,15 +17,44 @@ import validation.ValidationException;
 
 import java.util.Scanner;
 
+/**
+ * Console presentation and startup error handling.
+ */
 public class UserInterface {
+    /**
+     * Builds the file-backed application and reports startup failures.
+     */
+    public static void start() {
+        try {
+            UserValidator userValidator = new UserValidator();
+            Repository<Long, User> users = new UserFileRepository(userValidator);
+            FriendshipValidator friendshipValidator = new FriendshipValidator(users);
+            Repository<FriendshipId, Friendship> friendships =
+                    new FriendshipFileRepository(friendshipValidator);
+            SocialNetworkService service = new SocialNetworkService(users, friendships,
+                    userValidator, friendshipValidator, new CommunityAnalyzer());
+            new UserInterface(service).run();
+        } catch (RepositoryException | ValidationException | ServiceException
+                | IllegalArgumentException e) {
+            System.out.println("Aplicatia nu poate porni: " + e.getMessage());
+        }
+    }
+
     private final SocialNetworkService service;
     private final Scanner scanner;
 
+    /**
+     * Creates a user interface.
+     * @param service network operations
+     */
     public UserInterface(SocialNetworkService service) {
         this.service = service;
         this.scanner = new Scanner(System.in);
     }
 
+    /**
+     * Runs the menu; invalid operations are reported without stopping the menu.
+     */
     public void run() {
         boolean running = true;
         while (running) {
@@ -66,10 +102,15 @@ public class UserInterface {
                         System.out.println("Invalid option");
                 }
             }
+            catch (java.util.NoSuchElementException e) {
+                System.out.println("Intrarea a fost inchisa. Aplicatia se opreste.");
+                return;
+            }
             catch (NumberFormatException e) {
                 System.out.println("ID has to be a number");
             }
-            catch (ValidationException | ServiceException | RepositoryException e) {
+            catch (ValidationException | ServiceException | RepositoryException
+                    | IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }
         }
@@ -96,16 +137,13 @@ public class UserInterface {
     }
 
     private void addUser() {
-        System.out.print("Username: ");
-        String username = scanner.nextLine().trim();
-
         System.out.print("Prenume: ");
         String firstName = scanner.nextLine().trim();
 
         System.out.print("Nume: ");
         String lastName = scanner.nextLine().trim();
 
-        service.addUser(username, firstName, lastName);
+        service.addUser(firstName, lastName);
         System.out.println("Utilizator adaugat.");
     }
 
@@ -130,19 +168,16 @@ public class UserInterface {
     }
 
     private void addFriendship() {
-        System.out.print("Username primul utilizator: ");
-        String firstUsername = scanner.nextLine().trim();
-        System.out.print("Username al doilea utilizator: ");
-        String secondUsername = scanner.nextLine().trim();
-
-        service.addFriendship(firstUsername, secondUsername);
+        Long first = readId("ID primul utilizator: ");
+        Long second = readId("ID al doilea utilizator: ");
+        service.addFriendship(first, second);
         System.out.println("Prietenie adaugata.");
     }
 
     private void removeFriendship() {
-        Long id = readId("ID prietenie: ");
-
-        service.removeFriendship(id);
+        Long first = readId("ID primul utilizator: ");
+        Long second = readId("ID al doilea utilizator: ");
+        service.removeFriendship(first, second);
         System.out.println("Prietenie stearsa.");
     }
 

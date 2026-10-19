@@ -5,52 +5,68 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Immutable undirected graph keyed by user IDs.
+ */
 public final class FriendshipGraph {
-    private final Map<String, Set<String>> adjacency;
+    private final Map<Long, Set<Long>> adjacency;
 
+    /**
+     * Creates a friendship graph.
+     * @param users graph vertices
+     * @param friendships undirected edges
+     * @throws IllegalArgumentException if an edge references an absent user
+     */
     public FriendshipGraph(
             Iterable<User> users,
             Iterable<Friendship> friendships
     ) {
-        Map<String, Set<String>> neighbors = new HashMap<>();
+        Map<Long, Set<Long>> neighbors = new HashMap<>();
 
         for (User user : users) {
-            neighbors.put(user.getUsername(), new HashSet<>());
+            neighbors.put(user.getId(), new HashSet<>());
         }
 
         for (Friendship friendship : friendships) {
-            String firstUsername = friendship.getFirstUsername();
-            String secondUsername = friendship.getSecondUsername();
+            Long firstUserId = friendship.getFirstUserId();
+            Long secondUserId = friendship.getSecondUserId();
 
-            if (!neighbors.containsKey(firstUsername) || !neighbors.containsKey(secondUsername)) {
+            if (!neighbors.containsKey(firstUserId) || !neighbors.containsKey(secondUserId)) {
                 throw new IllegalArgumentException("Friendship references a user outside the network");
             }
 
-            neighbors.get(firstUsername).add(secondUsername);
-            neighbors.get(secondUsername).add(firstUsername);
+            neighbors.get(firstUserId).add(secondUserId);
+            neighbors.get(secondUserId).add(firstUserId);
         }
 
-        Map<String, Set<String>> immutableNeighbors = new HashMap<>();
+        Map<Long, Set<Long>> immutableNeighbors = new HashMap<>();
 
-        for (Map.Entry<String, Set<String>> entry : neighbors.entrySet()) {
-            immutableNeighbors.put(
-                    entry.getKey(),
-                    Set.copyOf(entry.getValue())
-            );
+        for (Map.Entry<Long, Set<Long>> entry : neighbors.entrySet()) {
+            immutableNeighbors.put(entry.getKey(), Set.copyOf(entry.getValue()));
         }
 
         adjacency = Map.copyOf(immutableNeighbors);
     }
 
-    public Set<String> getUsernames() {
+    /**
+     * Returns the member identifiers.
+     * @return all vertex IDs
+     */
+    public Set<Long> getUserIds() {
         return adjacency.keySet();
     }
 
-    public Set<String> getNeighbors(String username) {
-        Set<String> neighbors = adjacency.get(username);
+    /**
+     * Returns adjacent vertex IDs.
+     * @param userId vertex ID
+     * @return adjacent vertex IDs
+     * @throws IllegalArgumentException if the vertex is absent
+     */
+    public Set<Long> getNeighbors(Long userId) {
+        Set<Long> neighbors = adjacency.get(userId);
 
         if (neighbors == null) {
-            throw new IllegalArgumentException("User does not exist in graph: " + username);
+            throw new IllegalArgumentException("User does not exist in graph: " + userId);
         }
 
         return neighbors;

@@ -1,39 +1,33 @@
 package repository;
-
 import domain.Friendship;
 import domain.FriendshipId;
+import validation.Validator;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-public class FriendshipFileRepository
-        extends AbstractFileRepository<FriendshipId, Friendship> {
-
-    public FriendshipFileRepository(String fileName) {
-        super(fileName);
-        loadFromFile();
+/**
+ * Converts firstUserId;secondUserId;ISO-date text records.
+ */
+public final class FriendshipFileRepository extends AbstractFileRepository<FriendshipId, Friendship> {
+    /**
+     * Creates a friendship file repository.
+     * @param validator friendship validator
+     * @throws RepositoryException if input cannot be read or contains corrupt records
+     * @throws IllegalArgumentException if validator is null
+     */
+    public FriendshipFileRepository(Validator<Friendship> validator) {
+        super(validator, "data/friendships.csv");
+        loadData();
     }
-
-    @Override
-    protected Friendship fromCsv(String line) {
-        String[] fields = line.split(",", -1);
-
-        if (fields.length != 3) {
-            throw new IllegalArgumentException("Format asteptat: id,firstUsername,secondUsername");
-        }
-
-        return new Friendship(Long.parseLong(fields[0].trim()), fields[1], fields[2]);
+    @Override protected Friendship extractEntity(String line) {
+        String[] fields = line.split(";", -1);
+        if (fields.length != 3)
+            throw new IllegalArgumentException("Expected firstUserId;secondUserId;ISO-date");
+        return new Friendship(Long.parseLong(fields[0].trim()), Long.parseLong(fields[1].trim()),
+                LocalDateTime.parse(fields[2], DateTimeFormatter.ISO_LOCAL_DATE_TIME));
     }
-
-    @Override
-    protected String toCsv(Friendship friendship) {
-        requireSimpleCsvField(friendship.getFirstUsername());
-        requireSimpleCsvField(friendship.getSecondUsername());
-        return friendship.getNumericId() + ","
-                + friendship.getFirstUsername() + "," + friendship.getSecondUsername();
-    }
-
-    private void requireSimpleCsvField(String value) {
-        if (value.contains(",") || value.contains("\"")
-                || value.contains("\n") || value.contains("\r")) {
-            throw new RepositoryException("Username cannot be represented in simplified CSV");
-        }
+    @Override protected String createEntityAsString(Friendship friendship) {
+        return friendship.getFirstUserId() + ";" + friendship.getSecondUserId() + ";"
+                + friendship.getFriendsSince().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 }

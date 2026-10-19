@@ -1,33 +1,39 @@
 package domain;
 
+/**
+ * A user identified by an immutable numeric ID.
+ */
 public class User extends Entity<Long> {
-
-    private final String username;
     private final String firstName;
     private final String lastName;
 
-    public User(Long id, String username, String firstName, String lastName) {
+    /**
+     * Creates a user.
+     * @param id user ID
+     * @param firstName given name
+     * @param lastName family name
+     * @throws IllegalArgumentException if the ID is null
+     */
+    public User(Long id, String firstName, String lastName) {
         super(id);
-        this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
     }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    @Override
-    public String toString() {
-        return "User: " + getId() + ", username = " + username
-                + ", firstName = " + firstName + ", lastName = " + lastName;
+    /**
+     * Returns the given name.
+     * @return the given name
+     */
+    public String getFirstName() { return firstName; }
+    /**
+     * Returns the family name.
+     * @return the family name
+     */
+    public String getLastName() { return lastName; }
+    /**
+     * Returns a readable description.
+     * @return a readable description
+     */
+    @Override public String toString() {
+        return "User: " + getId() + ", " + firstName + " " + lastName;
     }
 }

@@ -2,182 +2,167 @@ package service;
 
 import domain.*;
 import repository.Repository;
+import repository.RepositoryException;
 import validation.Validator;
-
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
+/**
+ * Coordinates network operations independently of the persistence backend.
+ */
 public class SocialNetworkService {
-
     private final Repository<Long, User> userRepository;
     private final Repository<FriendshipId, Friendship> friendshipRepository;
-
     private final Validator<User> userValidator;
     private final Validator<Friendship> friendshipValidator;
-
     private final CommunityAnalyzer communityAnalyzer;
-
     private long nextUserId = 1;
-    private long nextFriendshipId = 1;
 
-    public SocialNetworkService(
-            Repository<Long, User> userRepository,
+    /**
+     * Creates a social network service.
+     * @param userRepository user storage
+     * @param friendshipRepository friendship storage
+     * @param userValidator user validation strategy
+     * @param friendshipValidator friendship validation strategy
+     * @param communityAnalyzer graph analysis
+     * @throws IllegalArgumentException if any dependency is null
+     * @throws RepositoryException if storage cannot be accessed
+     */
+    public SocialNetworkService(Repository<Long, User> userRepository,
             Repository<FriendshipId, Friendship> friendshipRepository,
-            Validator<User> userValidator,
-            Validator<Friendship> friendshipValidator,
+            Validator<User> userValidator, Validator<Friendship> friendshipValidator,
             CommunityAnalyzer communityAnalyzer) {
-
-        this.userRepository = Objects.requireNonNull(userRepository, "UserRepository cannot be null");
-        this.friendshipRepository = Objects.requireNonNull(friendshipRepository, "FriendshipRepository cannot be null");
-
-        this.userValidator = Objects.requireNonNull(userValidator, "UserValidator cannot be null");
-        this.friendshipValidator = Objects.requireNonNull(friendshipValidator, "FriendshipValidator cannot be null");
-
-        this.communityAnalyzer = Objects.requireNonNull(communityAnalyzer,"CommunityAnalyzer cannot be null");
-
+        if (userRepository == null || friendshipRepository == null || userValidator == null
+                || friendshipValidator == null || communityAnalyzer == null)
+            throw new IllegalArgumentException("Service dependencies cannot be null");
+        this.userRepository = userRepository;
+        this.friendshipRepository = friendshipRepository;
+        this.userValidator = userValidator;
+        this.friendshipValidator = friendshipValidator;
+        this.communityAnalyzer = communityAnalyzer;
         for (User user : userRepository.findAll()) {
-            if (user.getId() >= nextUserId) {
-                nextUserId = user.getId() + 1;
-            }
-        }
-        for (Friendship friendship : friendshipRepository.findAll()) {
-            if (friendship.getNumericId() >= nextFriendshipId) {
-                nextFriendshipId = friendship.getNumericId() + 1;
-            }
+            if (user.getId() >= nextUserId) nextUserId = user.getId() + 1;
         }
     }
-
-    public void addUser(String username, String firstName, String lastName) {
-        String normalizedUsername = username == null ? null : username.trim();
-        User user = new User(nextUserId, normalizedUsername, firstName, lastName);
-
+    /**
+     * Adds a valid new user.
+     * @param firstName given name
+     * @param lastName family name
+     * @throws validation.ValidationException if the user is invalid
+     * @throws ServiceException if the generated ID already exists
+     * @throws RepositoryException if persistence fails
+     */
+    public void addUser(String firstName, String lastName) {
+        User user = new User(nextUserId, firstName, lastName);
         userValidator.validate(user);
-
-        if (findUserByUsername(normalizedUsername) != null) {
-            throw new ServiceException("Username already exists: " + normalizedUsername);
-        }
-
-        if (userRepository.save(user) != null) {
-            throw new ServiceException(
-                    "User already exists with id: " + nextUserId
-            );
-        }
-
+        if (userRepository.save(user) != null)
+            throw new ServiceException("User already exists with id " + nextUserId);
         nextUserId++;
     }
-
+    /**
+     * Removes the user and all incident friendships. Rollback is attempted on persistence failure.
+     * @param id user ID
+     * @throws IllegalArgumentException if id is null
+     * @throws ServiceException if the user does not exist
+     * @throws RepositoryException if persistence or rollback fails
+     */
     public void removeUser(Long id) {
-        User user = requireUser(id);
-
-        List<FriendshipId> friendshipsToDelete = new ArrayList<>();
-        for (Friendship friendship : friendshipRepository.findAll()) {
-            if (friendship.getFirstUsername().equalsIgnoreCase(user.getUsername())
-                    || friendship.getSecondUsername().equalsIgnoreCase(user.getUsername())) {
-                friendshipsToDelete.add(friendship.getId());
+        requireUser(id);
+        List<Friendship> removed = new ArrayList<>();
+        try {
+            for (Friendship friendship : friendshipRepository.findAll()) {
+                if (friendship.getFirstUserId().equals(id) || friendship.getSecondUserId().equals(id)) {
+                    friendshipRepository.delete(friendship.getId());
+                    removed.add(friendship);
+                }
             }
+            userRepository.delete(id);
+        } catch (RepositoryException e) {
+            // Recovery, not presentation: preserve references if the multi-file operation fails.
+            for (Friendship friendship : removed) {
+                try { friendshipRepository.save(friendship); }
+                catch (RepositoryException recoveryError) { e.addSuppressed(recoveryError); }
+            }
+            if (e.getSuppressed().length > 0)
+                throw new RepositoryException("Removal failed and rollback was incomplete; inspect both files", e);
+            throw e;
         }
-
-        for(FriendshipId friendshipId : friendshipsToDelete) {
-            friendshipRepository.delete(friendshipId);
-        }
-
-        userRepository.delete(id);
     }
-
-    public Iterable<User> getUsers() {
-        return userRepository.findAll();
-    }
-
-    public void addFriendship(String firstUsername, String secondUsername) {
-        User firstUser = requireUserByUsername(firstUsername);
-        User secondUser = requireUserByUsername(secondUsername);
-
-        Friendship friendship =
-                new Friendship(nextFriendshipId, firstUser.getUsername(), secondUser.getUsername());
-
+    /**
+     * Returns current users.
+     * @return current users
+     * @throws RepositoryException if storage fails
+     */
+    public Iterable<User> getUsers() { return userRepository.findAll(); }
+    /**
+     * Adds a friendship between existing users.
+     * @param firstUserId first participant
+     * @param secondUserId second participant
+     * @throws IllegalArgumentException if either ID is null
+     * @throws ServiceException if a user is absent or the friendship exists
+     * @throws validation.ValidationException if the friendship is invalid
+     * @throws RepositoryException if persistence fails
+     */
+    public void addFriendship(Long firstUserId, Long secondUserId) {
+        requireUser(firstUserId);
+        requireUser(secondUserId);
+        Friendship friendship = new Friendship(firstUserId, secondUserId,
+                LocalDateTime.now().withSecond(0).withNano(0));
         friendshipValidator.validate(friendship);
-
-        for (Friendship existing : friendshipRepository.findAll()) {
-            boolean sameOrder = existing.getFirstUsername().equalsIgnoreCase(friendship.getFirstUsername())
-                    && existing.getSecondUsername().equalsIgnoreCase(friendship.getSecondUsername());
-            boolean reverseOrder = existing.getFirstUsername().equalsIgnoreCase(friendship.getSecondUsername())
-                    && existing.getSecondUsername().equalsIgnoreCase(friendship.getFirstUsername());
-            if (sameOrder || reverseOrder) {
-                throw new ServiceException("Prietenia există deja.");
-            }
-        }
-
-        if (friendshipRepository.save(friendship) != null) {
-            throw new ServiceException("Prietenia există deja.");
-        }
-        nextFriendshipId++;
+        if (friendshipRepository.save(friendship) != null)
+            throw new ServiceException("Friendship already exists: " + friendship.getId());
     }
-
-    public void removeFriendship(Long id) {
-        for (Friendship friendship : friendshipRepository.findAll()) {
-            if (friendship.getNumericId().equals(id)) {
-                friendshipRepository.delete(friendship.getId());
-                return;
-            }
-        }
-        throw new ServiceException("Prietenia nu există.");
+    /**
+     * Removes a friendship by its participant IDs.
+     * @param firstUserId first participant
+     * @param secondUserId second participant
+     * @throws IllegalArgumentException if either ID is null
+     * @throws ServiceException if the friendship does not exist
+     * @throws RepositoryException if persistence fails
+     */
+    public void removeFriendship(Long firstUserId, Long secondUserId) {
+        if (friendshipRepository.delete(new FriendshipId(firstUserId, secondUserId)) == null)
+            throw new ServiceException("Friendship does not exist");
     }
-
-    public Iterable<Friendship> getFriendships() {
-        return friendshipRepository.findAll();
-    }
-
-
-    private User findUserByUsername(String username) {
-        if (username == null) {
-            return null;
-        }
-
-        for (User user : userRepository.findAll()) {
-            if (user.getUsername().equalsIgnoreCase(username.trim())) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    private User requireUserByUsername(String username) {
-        User user = findUserByUsername(username);
-        if (user == null) {
-            throw new ServiceException("User with username " + username + " not found");
-        }
-        return user;
-    }
-
-    private User requireUser(Long id){
+    /**
+     * Returns current friendships.
+     * @return current friendships
+     * @throws RepositoryException if storage fails
+     */
+    public Iterable<Friendship> getFriendships() { return friendshipRepository.findAll(); }
+    private User requireUser(Long id) {
         User user = userRepository.findOne(id);
-        if (user == null) {
-            throw new ServiceException("User with id " + id + " not found");
-        }
-
+        if (user == null) throw new ServiceException("User with id " + id + " not found");
         return user;
     }
-
     private FriendshipGraph buildFriendshipGraph() {
-        return new FriendshipGraph(
-                userRepository.findAll(),
-                friendshipRepository.findAll()
-        );
+        return new FriendshipGraph(userRepository.findAll(), friendshipRepository.findAll());
     }
-
+    /**
+     * Finds communities in the network.
+     * @return connected components
+     * @throws RepositoryException if storage fails
+     */
     public List<Community> getCommunities() {
         return communityAnalyzer.findCommunities(buildFriendshipGraph());
     }
-
-    public int getCommunityCount() {
-        return getCommunities().size();
-    }
-
+    /**
+     * Counts communities.
+     * @return number of connected components
+     * @throws RepositoryException if storage fails
+     */
+    public int getCommunityCount() { return getCommunities().size(); }
+    /**
+     * Finds the most sociable community.
+     * @return the component with the longest simple path
+     * @throws ServiceException if the network is empty
+     * @throws RepositoryException if storage fails
+     */
     public Community getMostSociableCommunity() {
-        return communityAnalyzer.findMostSociableCommunity(buildFriendshipGraph()).orElseThrow(() ->
-                new ServiceException("Nu exista comunitati in retea.")
-        );
+        Optional<Community> result = communityAnalyzer.findMostSociableCommunity(buildFriendshipGraph());
+        if (result.isEmpty()) throw new ServiceException("Nu exista comunitati in retea.");
+        return result.get();
     }
-
 }

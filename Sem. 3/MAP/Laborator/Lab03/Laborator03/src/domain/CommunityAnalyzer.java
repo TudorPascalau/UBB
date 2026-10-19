@@ -9,17 +9,30 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Finds connected components and longest simple paths using explicit loops.
+ */
 public final class CommunityAnalyzer {
+    /**
+     * Creates a graph analyzer.
+     */
+    public CommunityAnalyzer() {}
 
+    /**
+     * Finds all connected components.
+     * @param graph network graph
+     * @return connected components
+     * @throws NullPointerException if graph is null
+     */
     public List<Community> findCommunities(FriendshipGraph graph) {
         Objects.requireNonNull(graph, "Graph cannot be null");
 
-        Set<String> visited = new HashSet<>();
+        Set<Long> visited = new HashSet<>();
         List<Community> communities = new ArrayList<>();
 
-        for (String username : graph.getUsernames()) {
-            if (!visited.contains(username)) {
-                Set<String> members = collectComponent(graph, username, visited);
+        for (Long userId : graph.getUserIds()) {
+            if (!visited.contains(userId)) {
+                Set<Long> members = collectComponent(graph, userId, visited);
 
                 communities.add(new Community(members));
             }
@@ -28,18 +41,18 @@ public final class CommunityAnalyzer {
         return List.copyOf(communities);
     }
 
-    private Set<String> collectComponent(FriendshipGraph graph, String startUsername, Set<String> visited) {
-        Set<String> members = new HashSet<>();
-        Deque<String> stack = new ArrayDeque<>();
+    private Set<Long> collectComponent(FriendshipGraph graph, Long startUserId, Set<Long> visited) {
+        Set<Long> members = new HashSet<>();
+        Deque<Long> stack = new ArrayDeque<>();
 
-        visited.add(startUsername);
-        stack.push(startUsername);
+        visited.add(startUserId);
+        stack.push(startUserId);
 
         while (!stack.isEmpty()) {
-            String currentUsername = stack.pop();
-            members.add(currentUsername);
+            Long currentUserId = stack.pop();
+            members.add(currentUserId);
 
-            for (String neighbor : graph.getNeighbors(currentUsername)) {
+            for (Long neighbor : graph.getNeighbors(currentUserId)) {
                 if (visited.add(neighbor)) {
                     stack.push(neighbor);
                 }
@@ -49,6 +62,12 @@ public final class CommunityAnalyzer {
         return members;
     }
 
+    /**
+     * Finds the component with the longest simple path.
+     * @param graph network graph
+     * @return the component with the longest simple path, or empty for an empty graph
+     * @throws NullPointerException if graph is null
+     */
     public Optional<Community> findMostSociableCommunity(FriendshipGraph graph) {
         List<Community> communities = findCommunities(graph);
 
@@ -69,14 +88,10 @@ public final class CommunityAnalyzer {
 
     private int longestPathLength(FriendshipGraph graph, Community community) {
         int maximumLength = 0;
-        Set<String> currentPath = new HashSet<>();
+        Set<Long> currentPath = new HashSet<>();
 
-        for (String username : community.getUsernames()) {
-            int length = longestPathFrom(
-                    graph,
-                    username,
-                    currentPath
-            );
+        for (Long userId : community.getUserIds()) {
+            int length = longestPathFrom(graph, userId, currentPath);
 
             maximumLength = Math.max(maximumLength, length);
 
@@ -89,23 +104,19 @@ public final class CommunityAnalyzer {
         return maximumLength;
     }
 
-    private int longestPathFrom(FriendshipGraph graph, String currentUsername, Set<String> currentPath) {
-        currentPath.add(currentUsername);
+    private int longestPathFrom(FriendshipGraph graph, Long currentUserId, Set<Long> currentPath) {
+        currentPath.add(currentUserId);
         int maximumLength = 0;
 
-        for (String neighbor : graph.getNeighbors(currentUsername)) {
+        for (Long neighbor : graph.getNeighbors(currentUserId)) {
             if (!currentPath.contains(neighbor)) {
-                int length = 1 + longestPathFrom(
-                        graph,
-                        neighbor,
-                        currentPath
-                );
+                int length = 1 + longestPathFrom(graph, neighbor, currentPath);
 
                 maximumLength = Math.max(maximumLength, length);
             }
         }
 
-        currentPath.remove(currentUsername);
+        currentPath.remove(currentUserId);
         return maximumLength;
     }
 }
