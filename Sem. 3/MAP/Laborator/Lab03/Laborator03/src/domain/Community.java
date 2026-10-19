@@ -49,9 +49,8 @@ public final class Community {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Community)) return false;
+        if (!(o instanceof Community community)) return false;
 
-        Community community = (Community) o;
         return userIds.equals(community.userIds);
     }
 

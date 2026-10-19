@@ -3,8 +3,8 @@ package validation;
 /**
  * Invalid entity data.
  */
+@SuppressWarnings("serial")
 public class ValidationException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
     /**
      * Creates an exception with failure details.
      * @param message description of the failure

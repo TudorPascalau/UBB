@@ -69,7 +69,7 @@ public class SocialNetworkService {
      * @throws RepositoryException if persistence or rollback fails
      */
     public void removeUser(Long id) {
-        requireUser(id);
+        ensureUserExists(id);
         List<Friendship> removed = new ArrayList<>();
         try {
             for (Friendship friendship : friendshipRepository.findAll()) {
@@ -106,8 +106,8 @@ public class SocialNetworkService {
      * @throws RepositoryException if persistence fails
      */
     public void addFriendship(Long firstUserId, Long secondUserId) {
-        requireUser(firstUserId);
-        requireUser(secondUserId);
+        ensureUserExists(firstUserId);
+        ensureUserExists(secondUserId);
         Friendship friendship = new Friendship(firstUserId, secondUserId,
                 LocalDateTime.now().withSecond(0).withNano(0));
         friendshipValidator.validate(friendship);
@@ -132,10 +132,10 @@ public class SocialNetworkService {
      * @throws RepositoryException if storage fails
      */
     public Iterable<Friendship> getFriendships() { return friendshipRepository.findAll(); }
-    private User requireUser(Long id) {
+
+    private void ensureUserExists(Long id) {
         User user = userRepository.findOne(id);
         if (user == null) throw new ServiceException("User with id " + id + " not found");
-        return user;
     }
     private FriendshipGraph buildFriendshipGraph() {
         return new FriendshipGraph(userRepository.findAll(), friendshipRepository.findAll());

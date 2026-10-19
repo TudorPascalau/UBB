@@ -38,8 +38,7 @@ public final class FriendshipId {
      */
     @Override public boolean equals(Object other) {
         if (this == other) return true;
-        if (!(other instanceof FriendshipId)) return false;
-        FriendshipId pair = (FriendshipId) other;
+        if (!(other instanceof FriendshipId pair)) return false;
         return firstUserId.equals(pair.firstUserId) && secondUserId.equals(pair.secondUserId);
     }
     /**

@@ -3,8 +3,8 @@ package service;
 /**
  * Invalid network operation.
  */
+@SuppressWarnings("serial")
 public class ServiceException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
     /**
      * Creates an exception with failure details.
      * @param message description of the failure

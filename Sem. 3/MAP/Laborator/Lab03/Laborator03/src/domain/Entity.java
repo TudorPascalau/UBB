@@ -28,8 +28,7 @@ public abstract class Entity<ID> {
      */
     @Override public final boolean equals(Object other) {
         if (this == other) return true;
-        if (other == null || getClass() != other.getClass()) return false;
-        Entity<?> entity = (Entity<?>) other;
+        if (!(other instanceof Entity<?> entity) || getClass() != other.getClass()) return false;
         return id.equals(entity.id);
     }
     /**
