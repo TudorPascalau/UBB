@@ -3,7 +3,6 @@ package repository;
 /**
  * Persistence failure with optional original cause.
  */
-@SuppressWarnings("serial")
 public class RepositoryException extends RuntimeException {
     /**
      * Creates an exception with failure details.

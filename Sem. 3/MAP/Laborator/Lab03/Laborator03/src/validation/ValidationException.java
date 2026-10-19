@@ -3,7 +3,6 @@ package validation;
 /**
  * Invalid entity data.
  */
-@SuppressWarnings("serial")
 public class ValidationException extends RuntimeException {
     /**
      * Creates an exception with failure details.

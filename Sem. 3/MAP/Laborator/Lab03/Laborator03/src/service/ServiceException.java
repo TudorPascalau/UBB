@@ -3,7 +3,6 @@ package service;
 /**
  * Invalid network operation.
  */
-@SuppressWarnings("serial")
 public class ServiceException extends RuntimeException {
     /**
      * Creates an exception with failure details.
