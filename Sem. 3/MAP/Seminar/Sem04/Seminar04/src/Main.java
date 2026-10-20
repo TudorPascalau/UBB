@@ -5,7 +5,12 @@ import domain.validators.ValidationException;
 import domain.validators.Validator;
 import repository.InMemoryRepository;
 import repository.Repository;
+import repository.factory.RepositoryFactory;
 import repository.file.UserFileRepository;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -14,6 +19,7 @@ public class Main {
         requirement1();
         requirement2();
         requirement3();
+        requirement4();
     }
 
     // ---------------- Requirement 1- Valid User ----------------
@@ -156,5 +162,29 @@ public class Main {
         // file not found -> empty repository, program continues
         Repository<Long, User> repoGol = new UserFileRepository(new UserValidator(), "data/inexistent.txt");
         System.out.println("File not found:   " + repoGol.findAll());
+    }
+
+    static void requirement4() {
+        System.out.println("=== Requirement4 ===");
+        Properties props = loadConfig("/resources/config.properties");
+        RepositoryFactory factory = new RepositoryFactory(props);
+        Repository<Long, User> userRepository = factory.createUserRepository(new UserValidator());
+        System.out.println("Repository type:" + userRepository.getClass().getSimpleName());
+        System.out.println("Find all:" + userRepository.findAll());
+
+    }
+
+    private static Properties loadConfig(String resource) {
+        Properties props = new Properties();
+        try(InputStream is = Main.class.getResourceAsStream(resource)) {
+            if(is == null)
+                throw new IllegalArgumentException("Resource not found: " + resource);
+            props.load(is);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return props;
     }
 }

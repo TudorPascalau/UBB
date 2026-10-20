@@ -1,18 +1,15 @@
-package home;
+package repository.db;
 
 import domain.User;
 import domain.validators.Validator;
 import repository.Repository;
 
-/**
- * Requirement 4: database repository skeleton, to be implemented with JDBC later.
- * The database is the source of data, so this class does not extend InMemoryRepository.
- */
 public class UserDbRepository implements Repository<Long, User> {
-    private final Validator<User> validator;
-    private final String url;
-    private final String user;
-    private final String password;
+
+    private Validator<User> validator;
+    private String url;
+    private String user;
+    private String password;
 
     public UserDbRepository(Validator<User> validator, String url, String user, String password) {
         this.validator = validator;
@@ -22,7 +19,7 @@ public class UserDbRepository implements Repository<Long, User> {
     }
 
     @Override
-    public User findOne(Long id) {
+    public User findOne(Long aLong) {
         throw new UnsupportedOperationException("findOne nu este implementat inca");
     }
 
@@ -37,7 +34,7 @@ public class UserDbRepository implements Repository<Long, User> {
     }
 
     @Override
-    public User delete(Long id) {
+    public User delete(Long aLong) {
         throw new UnsupportedOperationException("delete nu este implementat inca");
     }
 
