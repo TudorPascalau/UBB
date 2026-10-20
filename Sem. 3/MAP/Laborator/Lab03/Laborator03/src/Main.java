@@ -4,7 +4,6 @@ import ui.UserInterface;
  * Application entry point.
  */
 public final class Main {
-    private Main() {}
     /**
      * Starts the application.
      * @param args unused command-line arguments

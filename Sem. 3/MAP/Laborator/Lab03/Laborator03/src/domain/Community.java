@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Immutable connected component represented by user IDs.
+ * Immutable connected component of users sharing friendships, represented by user IDs.
  */
 public final class Community {
     private final Set<Long> userIds;
@@ -37,7 +37,7 @@ public final class Community {
      * Returns the number of members.
      * @return number of members
      */
-    public int  size() {
+    public int size() {
         return userIds.size();
     }
 

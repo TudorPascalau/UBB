@@ -1,6 +1,6 @@
-package repository;
+package repository.file;
 import domain.User;
-import validation.Validator;
+import repository.RepositoryException;
 
 /**
  * Converts id;firstName;lastName text records.
@@ -8,12 +8,10 @@ import validation.Validator;
 public final class UserFileRepository extends AbstractFileRepository<Long, User> {
     /**
      * Creates a user file repository.
-     * @param validator user validator
      * @throws RepositoryException if input cannot be read or contains corrupt records
-     * @throws IllegalArgumentException if validator is null
      */
-    public UserFileRepository(Validator<User> validator) {
-        super(validator, "data/users.csv");
+    public UserFileRepository() {
+        super("data/users.csv");
         loadData();
     }
     @Override protected User extractEntity(String line) {

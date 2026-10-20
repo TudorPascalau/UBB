@@ -8,7 +8,7 @@ import java.util.Objects;
 public abstract class Entity<ID> {
     private final ID id;
     /**
-     * Creates a entity.
+     * Creates an entity.
      * @param id immutable identifier
      * @throws IllegalArgumentException if id is null
      */

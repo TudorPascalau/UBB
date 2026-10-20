@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Finds connected components and longest simple paths using explicit loops.
+ * Finds connected components and longest simple paths
  */
 public final class CommunityAnalyzer {
     /**
@@ -41,6 +41,7 @@ public final class CommunityAnalyzer {
         return List.copyOf(communities);
     }
 
+    // DFS with stack
     private Set<Long> collectComponent(FriendshipGraph graph, Long startUserId, Set<Long> visited) {
         Set<Long> members = new HashSet<>();
         Deque<Long> stack = new ArrayDeque<>();
@@ -95,7 +96,7 @@ public final class CommunityAnalyzer {
 
             maximumLength = Math.max(maximumLength, length);
 
-            // Simple path cant be larger than max members - 1
+            // Max size = n - 1
             if (maximumLength == community.size() - 1) {
                 break;
             }
@@ -104,6 +105,7 @@ public final class CommunityAnalyzer {
         return maximumLength;
     }
 
+    // DFS backtracking
     private int longestPathFrom(FriendshipGraph graph, Long currentUserId, Set<Long> currentPath) {
         currentPath.add(currentUserId);
         int maximumLength = 0;

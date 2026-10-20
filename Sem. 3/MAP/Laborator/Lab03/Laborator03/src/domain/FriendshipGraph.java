@@ -17,10 +17,7 @@ public final class FriendshipGraph {
      * @param friendships undirected edges
      * @throws IllegalArgumentException if an edge references an absent user
      */
-    public FriendshipGraph(
-            Iterable<User> users,
-            Iterable<Friendship> friendships
-    ) {
+    public FriendshipGraph(Iterable<User> users, Iterable<Friendship> friendships) {
         Map<Long, Set<Long>> neighbors = new HashMap<>();
 
         for (User user : users) {

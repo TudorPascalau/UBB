@@ -1,8 +1,8 @@
-package repository;
+package repository.file;
 
 import domain.Entity;
-import validation.Validator;
-import validation.ValidationException;
+import repository.InMemoryRepository;
+import repository.RepositoryException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Map;
 
 /**
- * Template Method for UTF-8 text persistence; rejects corrupt input as a whole.
+ * Template Method for UTF-8 text persistence; rejects malformed records and duplicate IDs.
  * @param <ID> identifier type
  * @param <E> entity type
  */
@@ -21,12 +21,10 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
 
     /**
      * Does not call overridable conversion methods during base construction.
-     * @param validator validation strategy
      * @param fileName relative text file path
-     * @throws IllegalArgumentException if the path is absolute or validator is null
+     * @throws IllegalArgumentException if the path is absolute
      */
-    protected AbstractFileRepository(Validator<E> validator, String fileName) {
-        super(validator);
+    protected AbstractFileRepository(String fileName) {
         file = Path.of(fileName);
         if (file.isAbsolute()) throw new IllegalArgumentException("Use a relative data path");
     }
@@ -61,7 +59,8 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
                     // Deliberately bypass file save: loading must not rewrite the input.
                     if (super.save(entity) != null)
                         throw new IllegalArgumentException("Duplicate ID: " + entity.getId());
-                } catch (ValidationException | IllegalArgumentException | DateTimeParseException e) {
+                }
+                catch (IllegalArgumentException | DateTimeParseException e) {
                     throw new RepositoryException("Invalid data in " + file + " at line "
                             + number + ": " + e.getMessage(), e);
                 }
@@ -77,6 +76,8 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
             throw e;
         }
     }
+
+
     private void writeToFile() {
         Path temporary = null;
         try {
@@ -84,15 +85,17 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
             if (parent == null) parent = Path.of(".");
             Files.createDirectories(parent);
             temporary = Files.createTempFile(parent, "repository-", ".tmp");
+
             try (BufferedWriter writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
                 for (E entity : findAll()) {
                     writer.write(createEntityAsString(entity));
                     writer.newLine();
                 }
             }
-            Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING,
-                    StandardCopyOption.ATOMIC_MOVE);
-        } catch (IOException e) {
+            Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+
+        }
+        catch (IOException e) {
             if (temporary != null) {
                 try { Files.deleteIfExists(temporary); }
                 catch (IOException cleanupError) { e.addSuppressed(cleanupError); }
@@ -100,33 +103,29 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
             throw new RepositoryException("Error saving " + file, e);
         }
     }
-    /**
-     * {@inheritDoc}
-     */
+
     @Override public E save(E entity) {
         Map<ID, E> previous = snapshot();
         E result = super.save(entity);
         if (result == null) persistOrRestore(previous);
         return result;
     }
-    /**
-     * {@inheritDoc}
-     */
+
     @Override public E update(E entity) {
         Map<ID, E> previous = snapshot();
         E result = super.update(entity);
         if (result == null) persistOrRestore(previous);
         return result;
     }
-    /**
-     * {@inheritDoc}
-     */
+
     @Override public E delete(ID id) {
         Map<ID, E> previous = snapshot();
         E result = super.delete(id);
         if (result != null) persistOrRestore(previous);
         return result;
     }
+
+
     private void persistOrRestore(Map<ID, E> previous) {
         try { writeToFile(); }
         catch (RepositoryException e) {

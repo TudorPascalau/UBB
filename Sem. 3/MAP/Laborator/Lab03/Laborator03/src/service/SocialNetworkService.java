@@ -28,6 +28,8 @@ public class SocialNetworkService {
      * @param friendshipValidator friendship validation strategy
      * @param communityAnalyzer graph analysis
      * @throws IllegalArgumentException if any dependency is null
+     * @throws validation.ValidationException if loaded entities are invalid
+     * @throws ServiceException if a loaded friendship references a missing user
      * @throws RepositoryException if storage cannot be accessed
      */
     public SocialNetworkService(Repository<Long, User> userRepository,
@@ -37,11 +39,15 @@ public class SocialNetworkService {
         if (userRepository == null || friendshipRepository == null || userValidator == null
                 || friendshipValidator == null || communityAnalyzer == null)
             throw new IllegalArgumentException("Service dependencies cannot be null");
+
         this.userRepository = userRepository;
         this.friendshipRepository = friendshipRepository;
         this.userValidator = userValidator;
         this.friendshipValidator = friendshipValidator;
         this.communityAnalyzer = communityAnalyzer;
+
+        validateLoadedData();
+
         for (User user : userRepository.findAll()) {
             if (user.getId() >= nextUserId) nextUserId = user.getId() + 1;
         }
@@ -106,11 +112,11 @@ public class SocialNetworkService {
      * @throws RepositoryException if persistence fails
      */
     public void addFriendship(Long firstUserId, Long secondUserId) {
-        ensureUserExists(firstUserId);
-        ensureUserExists(secondUserId);
         Friendship friendship = new Friendship(firstUserId, secondUserId,
                 LocalDateTime.now().withSecond(0).withNano(0));
         friendshipValidator.validate(friendship);
+        ensureUserExists(firstUserId);
+        ensureUserExists(secondUserId);
         if (friendshipRepository.save(friendship) != null)
             throw new ServiceException("Friendship already exists: " + friendship.getId());
     }
@@ -132,6 +138,18 @@ public class SocialNetworkService {
      * @throws RepositoryException if storage fails
      */
     public Iterable<Friendship> getFriendships() { return friendshipRepository.findAll(); }
+
+    private void validateLoadedData() {
+        for (User user : userRepository.findAll())
+            userValidator.validate(user);
+
+        for (Friendship friendship : friendshipRepository.findAll()) {
+            friendshipValidator.validate(friendship);
+
+            ensureUserExists(friendship.getFirstUserId());
+            ensureUserExists(friendship.getSecondUserId());
+        }
+    }
 
     private void ensureUserExists(Long id) {
         User user = userRepository.findOne(id);

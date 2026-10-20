@@ -22,20 +22,18 @@ public interface Repository<ID, E extends Entity<ID>> {
      */
     Iterable<E> findAll();
     /**
-     * Validates and inserts an entity.
+     * Inserts an entity.
      * @param entity entity to add
      * @return null on success, or the existing entity for a duplicate ID
      * @throws IllegalArgumentException if entity is null
-     * @throws validation.ValidationException if entity is invalid
      * @throws RepositoryException if persistence fails
      */
     E save(E entity);
     /**
-     * Validates and replaces an existing entity.
+     * Replaces an existing entity.
      * @param entity replacement entity
      * @return null on success, or the supplied entity if absent
      * @throws IllegalArgumentException if entity is null
-     * @throws validation.ValidationException if entity is invalid
      * @throws RepositoryException if persistence fails
      */
     E update(E entity);

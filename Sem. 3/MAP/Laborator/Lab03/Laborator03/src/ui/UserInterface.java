@@ -2,8 +2,8 @@ package ui;
 
 import domain.Community;
 import domain.CommunityAnalyzer;
-import repository.UserFileRepository;
-import repository.FriendshipFileRepository;
+import repository.file.UserFileRepository;
+import repository.file.FriendshipFileRepository;
 import repository.Repository;
 import domain.FriendshipId;
 import validation.UserValidator;
@@ -27,15 +27,17 @@ public class UserInterface {
     public static void start() {
         try {
             UserValidator userValidator = new UserValidator();
-            Repository<Long, User> users = new UserFileRepository(userValidator);
-            FriendshipValidator friendshipValidator = new FriendshipValidator(users);
-            Repository<FriendshipId, Friendship> friendships =
-                    new FriendshipFileRepository(friendshipValidator);
+            Repository<Long, User> users = new UserFileRepository();
+
+            FriendshipValidator friendshipValidator = new FriendshipValidator();
+            Repository<FriendshipId, Friendship> friendships = new FriendshipFileRepository();
+
             SocialNetworkService service = new SocialNetworkService(users, friendships,
-                    userValidator, friendshipValidator, new CommunityAnalyzer());
+                                            userValidator, friendshipValidator, new CommunityAnalyzer());
+
             new UserInterface(service).run();
-        } catch (RepositoryException | ValidationException | ServiceException
-                | IllegalArgumentException e) {
+        }
+        catch (RepositoryException | ValidationException | ServiceException | IllegalArgumentException e) {
             System.out.println("Unable to start the application: " + e.getMessage());
         }
     }
