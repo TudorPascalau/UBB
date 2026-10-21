@@ -7,6 +7,7 @@ import java.util.Map;
 
 /**
  * In-memory storage; entity validation belongs to the service.
+ *
  * @param <ID> identifier type
  * @param <E> entity type
  */
@@ -48,7 +49,7 @@ public class InMemoryRepository<ID, E extends Entity<ID>> implements Repository<
 
     /**
      * Copies the current state for rollback.
-     * @return a detached map of the current immutable entities
+     * @return a separate map with the current identifier-to-entity associations
      */
     protected final Map<ID, E> snapshot() { return new HashMap<>(entities); }
     /**

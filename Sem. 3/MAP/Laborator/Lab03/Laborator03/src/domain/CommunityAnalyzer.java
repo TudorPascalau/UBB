@@ -10,18 +10,18 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Finds connected components and longest simple paths
+ * Identifies and analyzes friendship communities.
  */
 public final class CommunityAnalyzer {
     /**
-     * Creates a graph analyzer.
+     * Creates a community analyzer.
      */
     public CommunityAnalyzer() {}
 
     /**
-     * Finds all connected components.
+     * Finds maximal groups in which every user is connected to every other by friendships.
      * @param graph network graph
-     * @return connected components
+     * @return an unmodifiable list of communities, including isolated users; empty for an empty network
      * @throws NullPointerException if graph is null
      */
     public List<Community> findCommunities(FriendshipGraph graph) {
@@ -64,9 +64,9 @@ public final class CommunityAnalyzer {
     }
 
     /**
-     * Finds the component with the longest simple path.
+     * Finds the community with the longest chain of friendships without repeated users.
      * @param graph network graph
-     * @return the component with the longest simple path, or empty for an empty graph
+     * @return a community with a longest such chain (any in case of a tie), or empty for an empty network
      * @throws NullPointerException if graph is null
      */
     public Optional<Community> findMostSociableCommunity(FriendshipGraph graph) {

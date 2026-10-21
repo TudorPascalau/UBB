@@ -2,7 +2,7 @@ package repository;
 import domain.Entity;
 
 /**
- * CRUD contract shared by all persistence implementations.
+ * Stores and retrieves entities by unique identifier.
  * @param <ID> identifier type
  * @param <E> entity type
  */
@@ -16,13 +16,13 @@ public interface Repository<ID, E extends Entity<ID>> {
      */
     E findOne(ID id);
     /**
-     * Returns a snapshot of stored entities.
-     * @return a snapshot of all entities
+     * Returns all stored entities at the time of the call.
+     * @return all stored entities, unaffected by later additions or removals; empty if none exist
      * @throws RepositoryException if persistence fails
      */
     Iterable<E> findAll();
     /**
-     * Inserts an entity.
+     * Adds an entity if its identifier is absent; otherwise leaves storage unchanged.
      * @param entity entity to add
      * @return null on success, or the existing entity for a duplicate ID
      * @throws IllegalArgumentException if entity is null
@@ -30,9 +30,9 @@ public interface Repository<ID, E extends Entity<ID>> {
      */
     E save(E entity);
     /**
-     * Replaces an existing entity.
+     * Replaces the entity with the same identifier; leaves storage unchanged if none exists.
      * @param entity replacement entity
-     * @return null on success, or the supplied entity if absent
+     * @return null on success, or the supplied entity if its identifier is absent
      * @throws IllegalArgumentException if entity is null
      * @throws RepositoryException if persistence fails
      */

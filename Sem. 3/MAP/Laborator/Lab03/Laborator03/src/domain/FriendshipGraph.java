@@ -6,16 +6,17 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Immutable undirected graph keyed by user IDs.
+ * An immutable view of users and their mutual friendships in graph format.
  */
 public final class FriendshipGraph {
     private final Map<Long, Set<Long>> adjacency;
 
     /**
      * Creates a friendship graph.
-     * @param users graph vertices
-     * @param friendships undirected edges
-     * @throws IllegalArgumentException if an edge references an absent user
+     * @throws NullPointerException if either input is null or contains null
+     * @param users users in the network
+     * @param friendships friendships between network users
+     * @throws IllegalArgumentException if a friendship references a user outside the network
      */
     public FriendshipGraph(Iterable<User> users, Iterable<Friendship> friendships) {
         Map<Long, Set<Long>> neighbors = new HashMap<>();
@@ -47,17 +48,18 @@ public final class FriendshipGraph {
 
     /**
      * Returns the member identifiers.
-     * @return all vertex IDs
+     * @return an unmodifiable set of all user identifiers
      */
     public Set<Long> getUserIds() {
         return adjacency.keySet();
     }
 
     /**
-     * Returns adjacent vertex IDs.
-     * @param userId vertex ID
-     * @return adjacent vertex IDs
-     * @throws IllegalArgumentException if the vertex is absent
+     * Returns the identifiers of a user's friends.
+     * @throws NullPointerException if userId is null
+     * @param userId identifier of a user in the network
+     * @return an unmodifiable set of friend identifiers, empty for a user without friends
+     * @throws IllegalArgumentException if the user is absent
      */
     public Set<Long> getNeighbors(Long userId) {
         Set<Long> neighbors = adjacency.get(userId);

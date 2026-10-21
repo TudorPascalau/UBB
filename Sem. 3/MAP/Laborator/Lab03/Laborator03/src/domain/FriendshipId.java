@@ -3,7 +3,7 @@ package domain;
 import java.util.Objects;
 
 /**
- * Immutable unordered pair of user IDs; the smaller ID is stored first.
+ * An immutable friendship identifier; reversing the participants gives an equal identifier.
  */
 public final class FriendshipId {
     private final Long firstUserId;
@@ -32,7 +32,7 @@ public final class FriendshipId {
      */
     public Long getSecondUserId() { return secondUserId; }
     /**
-     * Compares object values.
+     * Compares friendship identifiers independently of participant order.
      * @param other object to compare
      * @return whether both IDs match
      */

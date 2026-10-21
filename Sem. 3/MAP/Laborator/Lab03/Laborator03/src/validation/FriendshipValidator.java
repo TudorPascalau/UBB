@@ -3,7 +3,7 @@ package validation;
 import domain.Friendship;
 
 /**
- * Validates friendship fields; the service checks participant existence.
+ * Requires distinct positive participant IDs and a friendship date.
  */
 public class FriendshipValidator implements Validator<Friendship> {
 
@@ -11,11 +11,6 @@ public class FriendshipValidator implements Validator<Friendship> {
      * Creates a friendship validator.
      */
     public FriendshipValidator() {}
-    /**
-     * Checks entity validity.
-     * @param friendship friendship to validate
-     * @throws ValidationException if friendship fields are invalid
-     */
     @Override public void validate(Friendship friendship) {
         if (friendship == null) throw new ValidationException("Friendship cannot be null");
         StringBuilder errors = new StringBuilder();

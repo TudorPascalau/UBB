@@ -2,18 +2,13 @@ package validation;
 import domain.User;
 
 /**
- * Checks user identity and required text fields.
+ * Requires a positive user ID and nonempty first and last names containing only letters.
  */
 public class UserValidator implements Validator<User> {
     /**
      * Creates the user validation strategy.
      */
     public UserValidator() {}
-    /**
-     * Checks entity validity.
-     * @param user user to validate
-     * @throws ValidationException if any user field is invalid
-     */
     @Override public void validate(User user) {
         if (user == null) throw new ValidationException("User cannot be null");
         StringBuilder errors = new StringBuilder();

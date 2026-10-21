@@ -25,6 +25,7 @@ public class UserInterface {
      * Builds the file-backed application and reports startup failures.
      */
     public static void start() {
+        UserInterface ui;
         try {
             UserValidator userValidator = new UserValidator();
             Repository<Long, User> users = new UserFileRepository();
@@ -35,11 +36,13 @@ public class UserInterface {
             SocialNetworkService service = new SocialNetworkService(users, friendships,
                                             userValidator, friendshipValidator, new CommunityAnalyzer());
 
-            new UserInterface(service).run();
+            ui = new UserInterface(service);
         }
         catch (RepositoryException | ValidationException | ServiceException | IllegalArgumentException e) {
             System.out.println("Unable to start the application: " + e.getMessage());
+            return;
         }
+        ui.run();
     }
 
     private final SocialNetworkService service;
@@ -111,9 +114,17 @@ public class UserInterface {
             catch (NumberFormatException e) {
                 System.out.println("ID must be a number.");
             }
-            catch (ValidationException | ServiceException | RepositoryException
-                    | IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+            catch (IllegalArgumentException e) {
+                System.out.println("Invalid argument: " + e.getMessage());
+            }
+            catch (ValidationException e) {
+                System.out.println("Invalid data: " + e.getMessage());
+            }
+            catch (ServiceException e) {
+                System.out.println("Operation could not be completed: " + e.getMessage());
+            }
+            catch (RepositoryException e) {
+                System.out.println("Error storing data: " + e.getMessage());
             }
         }
     }

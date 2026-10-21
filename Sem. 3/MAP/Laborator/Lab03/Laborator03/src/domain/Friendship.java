@@ -3,7 +3,7 @@ package domain;
 import java.time.LocalDateTime;
 
 /**
- * A friendship between two users, identified by their normalized pair of IDs.
+ * A friendship identified by its two participants, regardless of their order.
  */
 public class Friendship extends Entity<FriendshipId> {
     private final LocalDateTime friendsSince;

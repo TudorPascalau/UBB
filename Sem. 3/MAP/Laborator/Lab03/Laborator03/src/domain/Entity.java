@@ -2,7 +2,7 @@ package domain;
 import java.util.Objects;
 
 /**
- * Immutable entity identity.
+ * An entity whose identity is determined by its concrete type and identifier.
  * @param <ID> identifier type
  */
 public abstract class Entity<ID> {
@@ -22,7 +22,7 @@ public abstract class Entity<ID> {
      */
     public ID getId() { return id; }
     /**
-     * Compares object values.
+     * Compares entities by concrete type and identifier.
      * @param other object to compare
      * @return whether class and ID match
      */

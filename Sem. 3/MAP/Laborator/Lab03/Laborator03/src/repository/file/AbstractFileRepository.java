@@ -12,7 +12,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Map;
 
 /**
- * Template Method for UTF-8 text persistence; rejects malformed records and duplicate IDs.
+ * Stores entities in a UTF-8 text file; rejects malformed records and duplicate identifiers.
  * @param <ID> identifier type
  * @param <E> entity type
  */
@@ -20,7 +20,7 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
     private final Path file;
 
     /**
-     * Does not call overridable conversion methods during base construction.
+     * Creates a repository for the given file; subclasses must call loadData after initialization.
      * @param fileName relative text file path
      * @throws IllegalArgumentException if the path is absolute
      */
@@ -44,7 +44,8 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
     protected abstract String createEntityAsString(E entity);
 
     /**
-     * Called only after subclass initialization; missing files mean empty repositories.
+     * Loads stored entities after subclass initialization. A missing file leaves the repository unchanged.
+     * @throws RepositoryException if reading fails or a record is invalid or duplicates an identifier
      */
     protected final void loadData() {
         Map<ID, E> previous = snapshot();

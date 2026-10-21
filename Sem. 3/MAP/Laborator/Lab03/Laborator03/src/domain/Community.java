@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Immutable connected component of users sharing friendships, represented by user IDs.
+ * An immutable group of users belonging to the same friendship community.
  */
 public final class Community {
     private final Set<Long> userIds;
@@ -12,7 +12,7 @@ public final class Community {
     /**
      * Creates a community.
      * @param userIds component members
-     * @throws NullPointerException if members are null
+     * @throws NullPointerException if the member set is null or contains null
      * @throws IllegalArgumentException if members are empty
      */
     public Community(Set<Long> userIds) {
@@ -27,7 +27,7 @@ public final class Community {
 
     /**
      * Returns the member identifiers.
-     * @return component members
+     * @return an unmodifiable set of member identifiers
      */
     public Set<Long> getUserIds() {
         return userIds;
@@ -42,7 +42,7 @@ public final class Community {
     }
 
     /**
-     * Compares object values.
+     * Compares communities by their members.
      * @param o compared object
      * @return whether members match
      */
@@ -65,7 +65,7 @@ public final class Community {
 
     /**
      * Returns a readable description.
-     * @return component members as text
+     * @return an unmodifiable set of member identifiers as text
      */
     @Override
     public String toString() {
