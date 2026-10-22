@@ -1,9 +1,6 @@
 USE LaboratorGestiuneJocuri;
 GO
 
-SET XACT_ABORT ON;
-BEGIN TRANSACTION;
-
 -- 1. Users: IDs 1-10.
 INSERT INTO Users (username, email, password_hash)
 VALUES
@@ -29,7 +26,6 @@ VALUES
         CONVERT(VARCHAR(64), HASHBYTES('SHA2_256', 'ResidentEvil10!'), 2));
 
 -- 2. Games: IDs 1-8.
--- Prices and descriptions are sample data.
 INSERT INTO Games (title, description, release_date, price)
 VALUES
     (N'Portal',
@@ -70,9 +66,9 @@ VALUES
 -- 4. Platforms: IDs 1-3.
 INSERT INTO Platforms (name)
 VALUES
-    (N'PC'),
-    (N'PlayStation 4'),
-    (N'Xbox One');
+    (N'Windows'),
+    (N'Linux'),
+    (N'Mac OS');
 
 -- 5. Companies: IDs 1-4.
 INSERT INTO Companies (name, country, website)
@@ -83,7 +79,6 @@ VALUES
     (N'Bandai Namco', N'Japan',         NULL);
 
 -- 6. Game-company relationships.
--- The primary key permits only one role per game-company pair.
 INSERT INTO GameCompanies (game_id, company_id, role)
 VALUES
     (1, 1, 'developer'),
@@ -178,9 +173,7 @@ VALUES
     (9, 1, 9.99),
     (10, 5, 39.99);
 
--- 13. User libraries.
--- Each collection belongs to the specified user.
--- Only completed orders add games to these sample libraries.
+-- 13. User games.
 INSERT INTO UserGames (user_id, game_id, collection_id, added_at)
 VALUES
     (1, 1, 1, '2026-10-01T10:05:00'),
@@ -196,7 +189,6 @@ VALUES
     (8, 8, 8, '2026-10-08T17:05:00');
 
 -- 14. Game sessions.
--- The final session is still in progress.
 INSERT INTO GameSessions (user_id, game_id, started_at, ended_at)
 VALUES
     (1, 1, '2026-10-11T10:00:00', '2026-10-11T11:30:00'),
@@ -252,7 +244,6 @@ VALUES
 
 -- 17. Friendships.
 -- user_id_1 < user_id_2.
--- requested_by must be one of the two users.
 INSERT INTO Friendships
     (user_id_1, user_id_2, requested_by, status, requested_at, responded_at)
 VALUES
@@ -275,5 +266,3 @@ VALUES
     (8, 10, 8, 'accepted',
      '2026-10-18T10:00:00', '2026-10-18T11:00:00');
 
-COMMIT TRANSACTION;
-GO
