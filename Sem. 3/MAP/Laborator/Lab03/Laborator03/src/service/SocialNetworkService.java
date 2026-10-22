@@ -85,7 +85,8 @@ public class SocialNetworkService {
                 }
             }
             userRepository.delete(id);
-        } catch (RepositoryException e) {
+        }
+        catch (RepositoryException e) {
             // Recovery, not presentation: preserve references if the multi-file operation fails.
             for (Friendship friendship : removed) {
                 try { friendshipRepository.save(friendship); }
