@@ -2,6 +2,7 @@ package repository.file;
 import domain.Friendship;
 import domain.FriendshipId;
 import repository.RepositoryException;
+import validation.Validator;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -11,10 +12,12 @@ import java.time.format.DateTimeFormatter;
 public final class FriendshipFileRepository extends AbstractFileRepository<FriendshipId, Friendship> {
     /**
      * Creates a friendship file repository.
+     * @param fileName relative friendship data path
+     * @param validator friendship validation strategy
      * @throws RepositoryException if input cannot be read or contains corrupt records
      */
-    public FriendshipFileRepository() {
-        super("data/friendships.csv");
+    public FriendshipFileRepository(String fileName, Validator<Friendship> validator) {
+        super(fileName, validator);
         loadData();
     }
     @Override protected Friendship extractEntity(String line) {

@@ -1,13 +1,6 @@
 package ui;
 
 import domain.Community;
-import service.CommunityAnalyzer;
-import repository.file.UserFileRepository;
-import repository.file.FriendshipFileRepository;
-import repository.Repository;
-import domain.FriendshipId;
-import validation.UserValidator;
-import validation.FriendshipValidator;
 import domain.Friendship;
 import domain.User;
 import repository.RepositoryException;
@@ -18,41 +11,19 @@ import validation.ValidationException;
 import java.util.Scanner;
 
 /**
- * Console presentation and startup error handling.
+ * Console presentation using the supplied application service.
  */
 public class UserInterface {
-    /**
-     * Builds the file-backed application and reports startup failures.
-     */
-    public static void start() {
-        UserInterface ui;
-        try {
-            UserValidator userValidator = new UserValidator();
-            Repository<Long, User> users = new UserFileRepository();
-
-            FriendshipValidator friendshipValidator = new FriendshipValidator();
-            Repository<FriendshipId, Friendship> friendships = new FriendshipFileRepository();
-
-            SocialNetworkService service = new SocialNetworkService(users, friendships,
-                                            userValidator, friendshipValidator, new CommunityAnalyzer());
-
-            ui = new UserInterface(service);
-        }
-        catch (RepositoryException | ValidationException | ServiceException | IllegalArgumentException e) {
-            System.out.println("Unable to start the application: " + e.getMessage());
-            return;
-        }
-        ui.run();
-    }
-
     private final SocialNetworkService service;
     private final Scanner scanner;
 
     /**
-     * Creates a user interface.
+     * Creates a user interface using an already configured service.
      * @param service network operations
+     * @throws IllegalArgumentException if the service is null
      */
     public UserInterface(SocialNetworkService service) {
+        if (service == null) throw new IllegalArgumentException("Service cannot be null");
         this.service = service;
         this.scanner = new Scanner(System.in);
     }
