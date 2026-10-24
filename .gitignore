@@ -28,6 +28,7 @@ $RECYCLE.BIN/
 # JetBrains IDEs
 .idea/
 *.iml
+*.class
 
 
 # ============================================================
@@ -40,3 +41,4 @@ $RECYCLE.BIN/
 *~
 *.swp
 *.swo
+*.properties
