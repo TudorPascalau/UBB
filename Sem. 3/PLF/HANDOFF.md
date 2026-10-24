@@ -55,16 +55,13 @@ Pentru a), în chat au fost date exemple pentru lista vidă, apariții multiple,
 
 ## Ultima sesiune
 
-- **Data:** 7 octombrie 2026.
-- **Proiect sursă și cale:** PLF, `E:\Facultate\UBB\Sem. 3\PLF`.
-- **Obiectiv:** crearea unui handoff similar celui din MAP, cu contextul discuției și informațiile din README.
-- **Realizat:** creat acest document; inclusă nota despre exemplele didactice, starea fișierelor și contextul problemei P1/12.
-- **Fișiere modificate:** `HANDOFF.md` (nou).
-- **Verificări:** citite handoff-ul MAP, README-ul PLF și sursele curente `Lab02.pl` și `ex.pl`; documentul verificat după scriere. Nu s-a executat cod Prolog.
-- **Decizii relevante:** README-ul și sursele au fost păstrate; soluțiile explicate în chat sunt diferențiate de ceea ce există efectiv în fișiere.
-- **Probleme / informații lipsă:** documentația și exemplele de testare pentru a) lipsesc din sursa actuală; b) nu este implementat în fișierul observat.
-- **Următorul pas concret:** la continuarea laboratorului, documentarea lui `substitute/4` în formatul cerut și verificarea exemplelor în SWI-Prolog; apoi abordarea subpunctului b), după cererea utilizatorului.
-
+- **Data:** 24 octombrie 2026.
+- **Obiectiv:** verificarea implementarii laboratorului 3.
+- **Realizat:** analizat `Laborator/Lab03/lab03.pl` comparativ cu P2, problema 15 a) si b). Logica este corecta pentru intrari complet instantiate de numere intregi; egalitatile aleg prima secventa maxima. Complexitate patratica in cazul defavorabil.
+- **Verificari:** citite enuntul si cerintele VIII.2; executia testelor a fost incercata, dar SWI-Prolog nu a pornit (Illegal System DLL Relocation). Nu sunt rezultate de teste executate.
+- **Documentatie:** sursa include semnificatia argumentelor si modele de flux; lipsesc modelele recursive formale si exemplele de testare din fisier.
+- **Fisiere modificate:** doar `HANDOFF.md`; implementarea pastrata.
+- **Urmatorul pas:** completarea documentatiei si rularea exemplelor intr-un SWI-Prolog functional.
 ## Model pentru actualizări viitoare
 
 Actualizează starea curentă și înlocuiește secțiunea „Ultima sesiune” cu datele reale. Păstrează un istoric scurt numai când ajută continuarea.
@@ -85,3 +82,4 @@ Următorul pas concret:
 
 - 2026-10-06–2026-10-07 — Discutate modelele pentru P1/12, codul pentru a), formatul specificației, unificarea și instanțierea; soluțiile și exemplele au fost prezentate în chat.
 - 2026-10-07 — Creat handoff-ul PLF pe baza modelului MAP și a stării curente a proiectului.
+
