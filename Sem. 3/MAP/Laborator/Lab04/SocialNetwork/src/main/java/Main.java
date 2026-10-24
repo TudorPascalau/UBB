@@ -15,7 +15,12 @@ import java.io.IOException;
  */
 public final class Main {
     /**
-     * Starts the application.
+     * Prevents instantiation of the application entry point.
+     */
+    private Main() {}
+
+    /**
+     * Starts the application and reports expected initialization failures.
      * @param args unused command-line arguments
      */
     public static void main(String[] args) {

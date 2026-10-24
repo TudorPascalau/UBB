@@ -14,6 +14,8 @@ public final class FriendshipFileRepository extends AbstractFileRepository<Frien
      * Creates a friendship file repository.
      * @param fileName relative friendship data path
      * @param validator friendship validation strategy
+     * @throws IllegalArgumentException if the path or validator is null, or the path is absolute
+     * @throws java.nio.file.InvalidPathException if the path is invalid
      * @throws RepositoryException if input cannot be read or contains corrupt records
      */
     public FriendshipFileRepository(String fileName, Validator<Friendship> validator) {

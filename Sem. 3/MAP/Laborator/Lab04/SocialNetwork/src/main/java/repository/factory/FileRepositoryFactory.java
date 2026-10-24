@@ -17,8 +17,10 @@ public final class FileRepositoryFactory implements RepositoryFactory {
     private final String friendshipsPath;
 
     /**
+     * Stores the paths; their format and file contents are checked when repositories are created.
      * @param usersPath relative path to user data
      * @param friendshipsPath relative path to friendship data
+     * @throws NullPointerException if either path is null
      */
     public FileRepositoryFactory(String usersPath, String friendshipsPath) {
         this.usersPath = Objects.requireNonNull(usersPath);

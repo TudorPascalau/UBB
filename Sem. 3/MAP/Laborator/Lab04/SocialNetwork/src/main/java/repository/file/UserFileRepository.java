@@ -11,6 +11,8 @@ public final class UserFileRepository extends AbstractFileRepository<Long, User>
      * Creates a user file repository.
      * @param fileName relative user data path
      * @param validator user validation strategy
+     * @throws IllegalArgumentException if the path or validator is null, or the path is absolute
+     * @throws java.nio.file.InvalidPathException if the path is invalid
      * @throws RepositoryException if input cannot be read or contains corrupt records
      */
     public UserFileRepository(String fileName, Validator<User> validator) {

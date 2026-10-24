@@ -7,9 +7,10 @@ import repository.factory.FileRepositoryFactory;
 import repository.factory.DbRepositoryFactory;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
-/** Reads application properties and selects a repository family. */
+/** Reads UTF-8 application properties and selects a repository family. */
 public final class ConfigLoader {
     private ConfigLoader() {}
 
@@ -22,7 +23,7 @@ public final class ConfigLoader {
      */
     public static RepositoryFactory loadFactory(String fileName) throws IOException {
         Properties properties = new Properties();
-        try (FileReader reader = new FileReader(fileName)) {
+        try (FileReader reader = new FileReader(fileName, StandardCharsets.UTF_8)) {
             properties.load(reader);
         }
 

@@ -26,7 +26,8 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
      * Creates a repository for the given file; subclasses must call loadData after initialization.
      * @param fileName relative text file path
      * @param validator validation strategy for loaded entities
-     * @throws IllegalArgumentException if the path is absolute or null
+     * @throws IllegalArgumentException if the path or validator is null, or the path is absolute
+     * @throws InvalidPathException if the path cannot be converted to a file-system path
      */
     protected AbstractFileRepository(String fileName, Validator<E> validator) {
         if (fileName == null || validator == null)
@@ -51,7 +52,11 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
     protected abstract String createEntityAsString(E entity);
 
     /**
-     * Loads stored entities after subclass initialization. A missing file leaves the repository unchanged.
+     * Loads stored entities after subclass initialization, ignoring blank lines.
+     * A missing file leaves the repository unchanged (empty during construction).
+     * The first invalid record stops loading; the exception identifies the file and
+     * physical line number and retains the original parsing or validation cause.
+     * A failed load restores the state from before loading.
      * @throws RepositoryException if reading fails or a record is invalid or duplicates an identifier
      */
     protected final void loadData() {
@@ -87,6 +92,11 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
     }
 
 
+    /**
+     * Writes the complete state to a temporary UTF-8 file and atomically replaces the target.
+     * If cleanup also fails, its exception is suppressed on the original I/O cause.
+     * @throws RepositoryException if writing or replacing the target fails, retaining the I/O cause
+     */
     private void writeToFile() {
         Path temporary = null;
         try {
@@ -135,6 +145,11 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
     }
 
 
+    /**
+     * Persists a change, restoring the previous in-memory state if persistence fails.
+     * @param previous state before the operation
+     * @throws RepositoryException the original persistence failure, after restoring memory
+     */
     private void persistOrRestore(Map<ID, E> previous) {
         try { writeToFile(); }
         catch (RepositoryException e) {

@@ -18,9 +18,11 @@ public final class DbRepositoryFactory implements RepositoryFactory {
     private final String password;
 
     /**
+     * Stores connection parameters without opening a database connection.
      * @param url database connection URL
      * @param user database username
      * @param password database password
+     * @throws NullPointerException if any connection parameter is null
      */
     public DbRepositoryFactory(String url, String user, String password) {
         this.url = Objects.requireNonNull(url);
