@@ -15,25 +15,32 @@ import java.util.Objects;
 public final class FileRepositoryFactory implements RepositoryFactory {
     private final String usersPath;
     private final String friendshipsPath;
+    private final Validator<User> userValidator;
+    private final Validator<Friendship> friendshipValidator;
 
     /**
-     * Stores the paths; their format and file contents are checked when repositories are created.
+     * Stores paths and validators; path format and file contents are checked when repositories are created.
      * @param usersPath relative path to user data
      * @param friendshipsPath relative path to friendship data
-     * @throws NullPointerException if either path is null
+     * @param userValidator user validation strategy
+     * @param friendshipValidator friendship validation strategy
+     * @throws NullPointerException if any argument is null
      */
-    public FileRepositoryFactory(String usersPath, String friendshipsPath) {
+    public FileRepositoryFactory(String usersPath, String friendshipsPath,
+                                 Validator<User> userValidator, Validator<Friendship> friendshipValidator) {
         this.usersPath = Objects.requireNonNull(usersPath);
         this.friendshipsPath = Objects.requireNonNull(friendshipsPath);
+        this.userValidator = Objects.requireNonNull(userValidator);
+        this.friendshipValidator = Objects.requireNonNull(friendshipValidator);
     }
 
     @Override
-    public Repository<Long, User> createUserRepository(Validator<User> validator) {
-        return new UserFileRepository(usersPath, validator);
+    public Repository<Long, User> createUserRepository() {
+        return new UserFileRepository(usersPath, userValidator);
     }
 
     @Override
-    public Repository<FriendshipId, Friendship> createFriendshipRepository(Validator<Friendship> validator) {
-        return new FriendshipFileRepository(friendshipsPath, validator);
+    public Repository<FriendshipId, Friendship> createFriendshipRepository() {
+        return new FriendshipFileRepository(friendshipsPath, friendshipValidator);
     }
 }
