@@ -20,19 +20,18 @@ import java.util.Map;
  */
 public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends InMemoryRepository<ID, E> {
     private final Path file;
-    private final Validator<E> validator;
 
     /**
      * Creates a repository for the given file; subclasses must call loadData after initialization.
      * @param fileName relative text file path
-     * @param validator validation strategy for loaded entities
+     * @param validator entity validation strategy
      * @throws IllegalArgumentException if the path or validator is null, or the path is absolute
      * @throws InvalidPathException if the path cannot be converted to a file-system path
      */
     protected AbstractFileRepository(String fileName, Validator<E> validator) {
-        if (fileName == null || validator == null)
-            throw new IllegalArgumentException("File path and validator cannot be null");
-        this.validator = validator;
+        super(validator);
+        if (fileName == null)
+            throw new IllegalArgumentException("File path cannot be null");
         file = Path.of(fileName);
         if (file.isAbsolute()) throw new IllegalArgumentException("Use a relative data path");
     }
@@ -69,8 +68,7 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
                 if (line.isBlank()) continue;
                 try {
                     E entity = extractEntity(line);
-                    validator.validate(entity);
-                    // Deliberately bypass file save: loading must not rewrite the input.
+                    // Validate and store without rewriting the input file.
                     if (super.save(entity) != null)
                         throw new IllegalArgumentException("Duplicate ID: " + entity.getId());
                 }

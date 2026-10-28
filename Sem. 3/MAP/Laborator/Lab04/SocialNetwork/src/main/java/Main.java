@@ -51,7 +51,7 @@ public final class Main {
             SocialNetworkService service = new SocialNetworkService(
                     factory.createUserRepository(userValidator),
                     factory.createFriendshipRepository(friendshipValidator),
-                    userValidator, friendshipValidator, new CommunityAnalyzer());
+                    new CommunityAnalyzer());
 
             return new UserInterface(service);
         }

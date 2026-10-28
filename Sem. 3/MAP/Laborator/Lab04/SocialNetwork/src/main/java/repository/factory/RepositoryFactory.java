@@ -12,7 +12,6 @@ import repository.file.FriendshipFileRepository;
 import repository.db.UserDbRepository;
 import repository.db.FriendshipDbRepository;
 import validation.Validator;
-import java.util.Objects;
 import java.util.Properties;
 
 /** Creates user and friendship repositories for the configured persistence backend. */
@@ -32,17 +31,21 @@ public final class RepositoryFactory {
         }
         this.properties = new Properties();
         this.properties.putAll(properties);
+
         String configuredType = required("repository.type");
         try {
             type = RepositoryType.valueOf(configuredType);
-        } catch (IllegalArgumentException e) {
+        }
+        catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Unknown repository.type: " + configuredType
                     + ". Expected MEMORY, FILE or DATABASE", e);
         }
+
         if (type == RepositoryType.FILE) {
             required("repository.users.file");
             required("repository.friendships.file");
-        } else if (type == RepositoryType.DATABASE) {
+        }
+        else if (type == RepositoryType.DATABASE) {
             required("db.url");
             required("db.user");
             required("db.password");
@@ -53,16 +56,14 @@ public final class RepositoryFactory {
      * Creates a user repository for this factory's persistence backend.
      * @param validator user validation strategy
      * @return a new user repository
-     * @throws IllegalArgumentException if the validator is null for FILE or DATABASE,
+     * @throws IllegalArgumentException if the validator is null,
      *         or the configured FILE path is absolute or invalid
-     * @throws NullPointerException if the validator is null for MEMORY
      * @throws RepositoryException if FILE data cannot be read or contains invalid or duplicate records
      * */
     public Repository<Long, User> createUserRepository(Validator<User> validator) {
         switch (type) {
             case MEMORY:
-                Objects.requireNonNull(validator, "User validator cannot be null");
-                return new InMemoryRepository<>();
+                return new InMemoryRepository<>(validator);
             case FILE:
                 return new UserFileRepository(required("repository.users.file"), validator);
             case DATABASE:
@@ -77,16 +78,14 @@ public final class RepositoryFactory {
      * Creates a friendship repository for this factory's persistence backend.
      * @param validator friendship validation strategy
      * @return a new friendship repository
-     * @throws IllegalArgumentException if the validator is null for FILE or DATABASE,
+     * @throws IllegalArgumentException if the validator is null,
      *         or the configured FILE path is absolute or invalid
-     * @throws NullPointerException if the validator is null for MEMORY
      * @throws RepositoryException if FILE data cannot be read or contains invalid or duplicate records
      * */
     public Repository<FriendshipId, Friendship> createFriendshipRepository(Validator<Friendship> validator) {
         switch (type) {
             case MEMORY:
-                Objects.requireNonNull(validator, "Friendship validator cannot be null");
-                return new InMemoryRepository<>();
+                return new InMemoryRepository<>(validator);
             case FILE:
                 return new FriendshipFileRepository(required("repository.friendships.file"), validator);
             case DATABASE:

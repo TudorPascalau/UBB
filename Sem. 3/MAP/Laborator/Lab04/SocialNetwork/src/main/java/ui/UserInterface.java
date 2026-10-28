@@ -78,12 +78,12 @@ public class UserInterface {
                         System.out.println("Invalid option");
                 }
             }
-            catch (java.util.NoSuchElementException e) {
-                System.out.println("Input was closed. Exiting the application.");
-                return;
-            }
-            catch (NumberFormatException e) {
-                System.out.println("ID must be a number.");
+            catch (UIException e) {
+                System.out.println(e.getMessage());
+
+                if (e.getCause() instanceof java.util.NoSuchElementException) {
+                    return;
+                }
             }
             catch (IllegalArgumentException e) {
                 System.out.println("Invalid argument: " + e.getMessage());
@@ -115,17 +115,30 @@ public class UserInterface {
         System.out.print("Option: ");
     }
 
-    private Long readId(String prompt) {
+    private String readLine(String prompt) {
         System.out.print(prompt);
-        return Long.parseLong(scanner.nextLine().trim());
+
+        try {
+            return scanner.nextLine().trim();
+        } catch (java.util.NoSuchElementException e) {
+            throw new UIException("Input ended.", e);
+        }
     }
 
-    private void addUser() {
-        System.out.print("First name: ");
-        String firstName = scanner.nextLine().trim();
+    private Long readId(String prompt) {
+        String input = readLine(prompt);
 
-        System.out.print("Last name: ");
-        String lastName = scanner.nextLine().trim();
+        try {
+            return Long.parseLong(input);
+        } catch (NumberFormatException e) {
+            throw new UIException("ID must be a valid integer.", e);
+        }
+    }
+
+
+    private void addUser() {
+        String firstName = readLine("First name: ");
+        String lastName = readLine("Last name: ");
 
         service.addUser(firstName, lastName);
         System.out.println("User added.");

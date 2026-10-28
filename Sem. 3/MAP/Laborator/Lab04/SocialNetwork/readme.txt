@@ -27,8 +27,8 @@ concrete repositories.
 The factory copies the properties and validates the type and required parameters
 at construction, without opening data files or database connections. Only the
 selected backend requires its parameters. File paths and database parameters
-remain in configuration, not hardcoded in Java. Factory methods receive the same
-validator instances used by the service and create repositories only when called.
+remain in configuration, not hardcoded in Java. Factory methods receive entity validators and create repositories only when called.
+The service receives repositories and the community analyzer, without validators.
 Database classes implement Repository directly; their operations still throw
 UnsupportedOperationException. Switching to DATABASE requires implementing these
 operations and changing configuration, without changing Main, service or UI.
@@ -58,8 +58,24 @@ message includes the file name, physical line number and reason, and the origina
 exception is retained as the cause. A failed load restores the previous state.
 We stop loading rather than skip invalid records to avoid starting the application
 with an incomplete or inconsistent social network. The reported location allows
-the input to be corrected before restarting. The service also validates loaded
-entities and verifies that both participants of every friendship exist.
+the input to be corrected before restarting. The service verifies that both
+participants of every loaded friendship exist.
+
+Entity validation belongs to the repository. Data loaded from files must be
+validated anyway, so the same validation policy is applied to entities in general
+at the storage boundary. InMemoryRepository receives a Validator<E> through its
+constructor and calls it before save and update. AbstractFileRepository reuses
+this validation through super.save when loading, without rewriting the input file.
+Validation rules remain in the existing validator classes (Strategy Pattern);
+the repository only invokes them. Database repository skeletons will follow the
+same contract when implemented.
+
+The service performs only business checks involving the network: a friendship
+requires existing users, and removing a user also removes incident friendships.
+It checks loaded relationships at startup but does not repeat entity validation.
+This separates entity validity from consistency between repositories. Removing
+validator dependencies from the service is an explicit architectural refactoring,
+separate from adding file persistence.
 
 Exception handling
 ==================

@@ -3,7 +3,6 @@ package service;
 import domain.*;
 import repository.Repository;
 import repository.RepositoryException;
-import validation.Validator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +14,6 @@ import java.util.Optional;
 public class SocialNetworkService {
     private final Repository<Long, User> userRepository;
     private final Repository<FriendshipId, Friendship> friendshipRepository;
-    private final Validator<User> userValidator;
-    private final Validator<Friendship> friendshipValidator;
     private final CommunityAnalyzer communityAnalyzer;
     private long nextUserId = 1;
 
@@ -24,29 +21,22 @@ public class SocialNetworkService {
      * Creates a social network service.
      * @param userRepository user storage
      * @param friendshipRepository friendship storage
-     * @param userValidator user validation strategy
-     * @param friendshipValidator friendship validation strategy
      * @param communityAnalyzer graph analysis
      * @throws IllegalArgumentException if any dependency is null
-     * @throws validation.ValidationException if loaded entities are invalid
      * @throws ServiceException if a loaded friendship references a missing user
      * @throws RepositoryException if storage cannot be accessed
      */
     public SocialNetworkService(Repository<Long, User> userRepository,
             Repository<FriendshipId, Friendship> friendshipRepository,
-            Validator<User> userValidator, Validator<Friendship> friendshipValidator,
             CommunityAnalyzer communityAnalyzer) {
-        if (userRepository == null || friendshipRepository == null || userValidator == null
-                || friendshipValidator == null || communityAnalyzer == null)
+        if (userRepository == null || friendshipRepository == null || communityAnalyzer == null)
             throw new IllegalArgumentException("Service dependencies cannot be null");
 
         this.userRepository = userRepository;
         this.friendshipRepository = friendshipRepository;
-        this.userValidator = userValidator;
-        this.friendshipValidator = friendshipValidator;
         this.communityAnalyzer = communityAnalyzer;
 
-        validateLoadedData();
+        validateLoadedRelationships();
 
         for (User user : userRepository.findAll()) {
             if (user.getId() >= nextUserId) nextUserId = user.getId() + 1;
@@ -62,7 +52,6 @@ public class SocialNetworkService {
      */
     public void addUser(String firstName, String lastName) {
         User user = new User(nextUserId, firstName, lastName);
-        userValidator.validate(user);
         if (userRepository.save(user) != null)
             throw new ServiceException("User already exists with id " + nextUserId);
         nextUserId++;
@@ -115,7 +104,6 @@ public class SocialNetworkService {
     public void addFriendship(Long firstUserId, Long secondUserId) {
         Friendship friendship = new Friendship(firstUserId, secondUserId,
                 LocalDateTime.now().withSecond(0).withNano(0));
-        friendshipValidator.validate(friendship);
         ensureUserExists(firstUserId);
         ensureUserExists(secondUserId);
         if (friendshipRepository.save(friendship) != null)
@@ -140,13 +128,8 @@ public class SocialNetworkService {
      */
     public Iterable<Friendship> getFriendships() { return friendshipRepository.findAll(); }
 
-    private void validateLoadedData() {
-        for (User user : userRepository.findAll())
-            userValidator.validate(user);
-
+    private void validateLoadedRelationships() {
         for (Friendship friendship : friendshipRepository.findAll()) {
-            friendshipValidator.validate(friendship);
-
             ensureUserExists(friendship.getFirstUserId());
             ensureUserExists(friendship.getSecondUserId());
         }

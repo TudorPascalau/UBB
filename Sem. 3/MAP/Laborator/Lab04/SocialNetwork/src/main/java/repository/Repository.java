@@ -23,6 +23,7 @@ public interface Repository<ID, E extends Entity<ID>> {
     Iterable<E> findAll();
     /**
      * Adds an entity if its identifier is absent; otherwise leaves storage unchanged.
+     * @throws validation.ValidationException if the entity violates validation rules
      * @param entity entity to add
      * @return null on success, or the existing entity for a duplicate ID
      * @throws IllegalArgumentException if entity is null
@@ -31,6 +32,7 @@ public interface Repository<ID, E extends Entity<ID>> {
     E save(E entity);
     /**
      * Replaces the entity with the same identifier; leaves storage unchanged if none exists.
+     * @throws validation.ValidationException if the entity violates validation rules
      * @param entity replacement entity
      * @return null on success, or the supplied entity if its identifier is absent
      * @throws IllegalArgumentException if entity is null
