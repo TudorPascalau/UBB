@@ -1,11 +1,11 @@
 Configuration
 =============
 ConfigLoader reads src/main/resources/config.properties through
-Properties.load(Reader), using FileReader in try-with-resources. No InputStream
+Properties.load(Reader), using BufferedReader over FileReader in try-with-resources. No InputStream
 or Stream API is used. repository.type accepts MEMORY, FILE or DATABASE.
 RepositoryFactory validates the loaded properties. Missing or blank properties
-required by the selected backend, and unknown types, stop startup with a clear message. File paths are relative to the working
-directory; start the application from SocialNetwork.
+required by the selected backend, and unknown types, stop startup with a clear
+message. File paths are relative to the working directory; start the application from SocialNetwork.
 DATABASE creates repository skeletons without opening a JDBC connection. At the
 first read, the application reports that DATABASE persistence is not implemented.
 
@@ -82,8 +82,10 @@ as its cause and preserves recovery failures as suppressed exceptions.
 The UI reports invalid numeric input, invalid arguments, validation errors,
 invalid network operations and persistence failures, then continues the menu.
 Closed input during an operation is reported and ends the UI cleanly.
-Main reports initialization failures because the UI cannot be constructed until
-repositories and the service are ready; it then stops startup in a controlled way.
+Main.initializeApplication wraps expected initialization failures in
+ApplicationInitializationException, preserving the original cause. Main.main
+reports this exception and stops startup in a controlled way. The UI runs only
+after initialization succeeds; runtime UI errors are not wrapped as startup errors.
 No empty catch blocks, generic catch(Exception)/catch(Throwable), or
 printStackTrace-only handling are used.
 

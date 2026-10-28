@@ -1,4 +1,5 @@
 import ui.UserInterface;
+import application.ApplicationInitializationException;
 import repository.RepositoryException;
 import config.ConfigLoader;
 import repository.factory.RepositoryFactory;
@@ -26,26 +27,46 @@ public final class Main {
     public static void main(String[] args) {
         UserInterface ui;
         try {
-            RepositoryFactory factory = new RepositoryFactory(
-                    ConfigLoader.load("src/main/resources/config.properties"));
+            ui = initializeApplication();
+        }
+        catch (ApplicationInitializationException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+        ui.run();
+    }
+
+    /**
+     * Builds repositories, validates loaded data and assembles the user interface.
+     * @return the initialized user interface
+     * @throws ApplicationInitializationException if configuration, persistence or initial validation fails
+     */
+    private static UserInterface initializeApplication() {
+        try {
             UserValidator userValidator = new UserValidator();
             FriendshipValidator friendshipValidator = new FriendshipValidator();
+            RepositoryFactory factory = new RepositoryFactory(
+                    ConfigLoader.load("src/main/resources/config.properties"));
+
             SocialNetworkService service = new SocialNetworkService(
                     factory.createUserRepository(userValidator),
                     factory.createFriendshipRepository(friendshipValidator),
                     userValidator, friendshipValidator, new CommunityAnalyzer());
-            ui = new UserInterface(service);
-        } catch (IOException e) {
-            System.out.println("Unable to read src/main/resources/config.properties: " + e.getMessage());
-            return;
-        } catch (UnsupportedOperationException e) {
-            System.out.println("Unable to start the application: DATABASE persistence is not implemented yet.");
-            return;
-        } catch (RepositoryException | ValidationException | ServiceException | IllegalArgumentException e) {
-            System.out.println("Unable to start the application: " + e.getMessage());
-            return;
+
+            return new UserInterface(service);
         }
-        ui.run();
+        catch (IOException e) {
+            throw new ApplicationInitializationException(
+                    "Unable to read src/main/resources/config.properties: " + e.getMessage(), e);
+        }
+        catch (UnsupportedOperationException e) {
+            throw new ApplicationInitializationException(
+                    "Unable to start the application: DATABASE persistence is not implemented yet.", e);
+        }
+        catch (RepositoryException | ValidationException | ServiceException | IllegalArgumentException e) {
+            throw new ApplicationInitializationException(
+                    "Unable to start the application: " + e.getMessage(), e);
+        }
     }
 
 }

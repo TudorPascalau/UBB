@@ -9,7 +9,9 @@ public class UserValidator implements Validator<User> {
      * Creates the user validation strategy.
      */
     public UserValidator() {}
-    @Override public void validate(User user) {
+
+    @Override
+    public void validate(User user) {
         if (user == null) throw new ValidationException("User cannot be null");
         StringBuilder errors = new StringBuilder();
         if (user.getId() <= 0) errors.append("User ID must be positive. ");
