@@ -78,6 +78,10 @@ VALUES
     (N'FromSoftware', N'Japan',         NULL),
     (N'Bandai Namco', N'Japan',         NULL);
 
+UPDATE Companies
+SET website = 'valve.com'
+WHERE name = 'Valve';
+
 -- 6. Game-company relationships.
 INSERT INTO GameCompanies (game_id, company_id, role)
 VALUES
