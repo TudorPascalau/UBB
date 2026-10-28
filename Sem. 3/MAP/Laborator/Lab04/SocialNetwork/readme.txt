@@ -3,34 +3,48 @@ Configuration
 ConfigLoader reads src/main/resources/config.properties through
 Properties.load(Reader), using FileReader in try-with-resources. No InputStream
 or Stream API is used. repository.type accepts MEMORY, FILE or DATABASE.
-Missing or blank properties required by the selected backend, and unknown types,
-stop startup with a clear message. File paths are relative to the working
+RepositoryFactory validates the loaded properties. Missing or blank properties
+required by the selected backend, and unknown types, stop startup with a clear message. File paths are relative to the working
 directory; start the application from SocialNetwork.
 DATABASE creates repository skeletons without opening a JDBC connection. At the
 first read, the application reports that DATABASE persistence is not implemented.
 
-Abstract Factory and OCP
-========================
-RepositoryFactory defines the creation of a family of user and friendship
-repositories. MemoryRepositoryFactory, FileRepositoryFactory and
-DbRepositoryFactory each create the corresponding persistence family.
-Main uses the factory to create repositories and assemble the service.
-The UI receives only SocialNetworkService.
-Factory methods receive validators as parameters. Main creates the validators
-and passes the same instances to repositories and the service. ConfigLoader
-selects the persistence configuration without creating validators.
-The database classes implement Repository directly, without a shared base class;
-all their repository operations throw UnsupportedOperationException.
+Simple Factory and OCP
+======================
+RepositoryFactory is a concrete Simple Factory and the only application class
+that knows the concrete repository implementations. Its two creation methods use
+classic switches and return Repository<Long, User> and
+Repository<FriendshipId, Friendship>. Both use the same configured RepositoryType.
+The former MemoryRepositoryFactory, FileRepositoryFactory and DbRepositoryFactory
+classes have been removed.
 
-A Simple Factory using a switch would require changes to its creation methods
-for each new persistence backend. Its advantages are simplicity and fewer classes.
-Abstract Factory allows a new factory to be added without changing existing
-factories, supporting OCP at the cost of more classes.
+ConfigLoader.load reads and returns Properties; it does not select a backend or
+create factories. Main passes these properties to new RepositoryFactory(...),
+creates validators, and assembles the service using the factory methods.
+The UI receives only SocialNetworkService. Main, service and UI do not instantiate
+concrete repositories.
 
-Family selection is centralized in ConfigLoader. Adding a backend requires a new
-factory, an update to its configuration switch and a new RepositoryType value.
-This design does not eliminate every change when extending persistence, but keeps
-existing factories, the UI and the service unchanged.
+The factory copies the properties and validates the type and required parameters
+at construction, without opening data files or database connections. Only the
+selected backend requires its parameters. File paths and database parameters
+remain in configuration, not hardcoded in Java. Factory methods receive the same
+validator instances used by the service and create repositories only when called.
+Database classes implement Repository directly; their operations still throw
+UnsupportedOperationException. Switching to DATABASE requires implementing these
+operations and changing configuration, without changing Main, service or UI.
+
+Simple Factory centralizes creation and uses fewer classes than Abstract Factory.
+Adding a persistence backend requires a new RepositoryType value, updates to the
+creation switches and any backend-specific configuration validation. Consequently,
+the factory is not closed to modification under OCP. Abstract Factory, the previous
+alternative, allows new concrete factories without modifying existing ones, but
+still needs a mechanism to select the configured factory and adds more classes.
+The Simple Factory follows the laboratory's main structure and provides the
+starting point for replacing both switches with maps of creation functions in
+the next laboratory. No functional interfaces or lambdas are introduced here.
+
+SRP separates configuration reading (ConfigLoader) from repository creation
+(RepositoryFactory). Service code depends on Repository abstractions (DIP).
 No Singleton is used: the factory instance is created once at startup.
 
 Loading and validation policy

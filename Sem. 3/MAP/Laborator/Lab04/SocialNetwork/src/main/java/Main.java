@@ -26,7 +26,8 @@ public final class Main {
     public static void main(String[] args) {
         UserInterface ui;
         try {
-            RepositoryFactory factory = ConfigLoader.loadFactory("src/main/resources/config.properties");
+            RepositoryFactory factory = new RepositoryFactory(
+                    ConfigLoader.load("src/main/resources/config.properties"));
             UserValidator userValidator = new UserValidator();
             FriendshipValidator friendshipValidator = new FriendshipValidator();
             SocialNetworkService service = new SocialNetworkService(
