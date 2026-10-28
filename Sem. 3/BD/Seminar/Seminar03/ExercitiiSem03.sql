@@ -30,25 +30,23 @@ SELECT * FROM Vizitatori;
 GO
 
 -- Ex 1.3
--- Să se creeze o procedură stocată care returnează numele vizitatorului, adresa de email și numărul total de note pentru toți vizitatorii care au dat cel puțin o notă unei atracții.
-CREATE OR ALTER PROCEDURE AfiseazaVizitatoriCuNote @nume VARCHAR(100) OUTPUT, @email VARCHAR(100) OUTPUT, @numarNote INT OUTPUT
+-- Să se creeze o procedură stocată care returnează numele vizitatorului, adresa de email și numărul total de note pentru toți vizitatorii
+-- care au dat cel puțin o notă unei atracții.
+CREATE OR ALTER PROCEDURE AfiseazaVizitatoriCuNote
 AS
 BEGIN
-SET NOCOUNT ON;
-SELECT @nume = v.nume, @email = v.email, @numarNote = COUNT(n.id_vizitator)
-FROM Vizitatori v
-JOIN Note n ON v.id_vizitator = n.id_vizitator
-GROUP BY v.nume, v.email;
+    SET NOCOUNT ON;
+
+    SELECT v.nume AS NumeVizitator,
+           v.email AS EmailVizitator,
+           COUNT(n.id_vizitator) AS NumarTotalNote
+    FROM Vizitatori v
+    JOIN Note n ON v.id_vizitator = n.id_vizitator
+    GROUP BY v.id_vizitator, v.nume, v.email;
 END;
 GO
 
-SELECT * FROM Note
-SELECT * FROM Vizitatori
-GO
-
-DECLARE @nume VARCHAR(100), @email VARCHAR(100), @numarNote INT;
-EXEC AfiseazaVizitatoriCuNote @nume = @nume OUTPUT, @email = @email OUTPUT, @numarNote = @numarNote OUTPUT;
-SELECT @nume AS NumeVizitator, @email AS EmailVizitator, @numarNote AS NumarTotalNote;
+EXEC AfiseazaVizitatoriCuNote;
 GO
 
 -- Ex 2.1
