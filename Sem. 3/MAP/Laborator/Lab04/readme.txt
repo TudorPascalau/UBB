@@ -1,5 +1,14 @@
-Rețea de socializare — Laboratorul 3
+Rețea de socializare — Laboratorul 4
 ====================================
+
+Interfețe funcționale și compunerea validatorilor
+================================================
+Validator<T> este adnotată cu @FunctionalInterface și păstrează o singură metodă abstractă: validate(T).
+Metoda default andThen(Validator<T> other) întoarce un validator nou, exprimat ca lambda, care execută validatorul curent și apoi validatorul primit. Dacă primul aruncă o excepție, al doilea nu se execută. Un validator other null este respins imediat cu IllegalArgumentException.
+În Main, Validator<User> nameLengthValidator este o regulă lambda care limitează numele și prenumele la câte 100 de caractere. Această limită este o alegere demonstrativă pentru regula nouă, nu o valoare impusă de enunț.
+Regula se compune prin new UserValidator().andThen(nameLengthValidator), fără modificarea clasei UserValidator și fără clase noi. Validatorul existent verifică mai întâi entitatea și numele nenule, astfel încât regula suplimentară poate apela length() în siguranță în această compunere.
+Repository-ul primește validatorul compus prin interfața Validator<User>; regula suplimentară se aplică atât la save/update, cât și la încărcarea datelor din fișier. Datele care depășesc limita nouă sunt respinse; celelalte reguli și formatul fișierelor rămân cele existente.
+Secțiunile de mai jos descriu baza de la laboratorul 3 și vor fi actualizate pe măsura refactorizării.
 
 Configurare și pornire
 ======================

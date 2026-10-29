@@ -1,4 +1,5 @@
 import ui.UserInterface;
+import domain.User;
 import application.ApplicationInitializationException;
 import repository.RepositoryException;
 import config.ConfigLoader;
@@ -9,6 +10,7 @@ import service.CommunityAnalyzer;
 import validation.UserValidator;
 import validation.FriendshipValidator;
 import validation.ValidationException;
+import validation.Validator;
 import java.io.IOException;
 
 /**
@@ -43,8 +45,15 @@ public final class Main {
      */
     private static UserInterface initializeApplication() {
         try {
-            UserValidator userValidator = new UserValidator();
+            Validator<User> nameLengthValidator = user -> {
+                if (user.getFirstName().length() > 100 || user.getLastName().length() > 100) {
+                    throw new ValidationException("First and last names must not exceed 100 characters.");
+                }
+            };
+            Validator<User> userValidator = new UserValidator().andThen(nameLengthValidator);
+
             FriendshipValidator friendshipValidator = new FriendshipValidator();
+
             RepositoryFactory factory = new RepositoryFactory(
                     ConfigLoader.load("src/main/resources/config.properties"));
 

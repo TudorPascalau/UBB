@@ -22,10 +22,11 @@ public class UserValidator implements Validator<User> {
 
         if (!errors.isEmpty()) throw new ValidationException(errors.toString().trim());
     }
+
     private void checkName(String name, String label, StringBuilder errors) {
         if (name == null || name.isBlank()) errors.append(label).append(" cannot be empty. ");
-        else if (!name.matches("\\p{L}+")) {
-            errors.append(label).append(" must contain only letters. ");
+        else if (!name.matches("\\p{L}+(-\\p{L}+)*")) {
+            errors.append(label).append(" must contain only letters, optionally separated by hyphens. ");
         }
     }
 }
