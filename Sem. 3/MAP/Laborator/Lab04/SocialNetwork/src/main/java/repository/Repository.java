@@ -1,6 +1,11 @@
 package repository;
 import domain.Entity;
 
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 /**
  * Stores and retrieves entities by unique identifier.
  * @param <ID> identifier type
@@ -21,6 +26,22 @@ public interface Repository<ID, E extends Entity<ID>> {
      * @throws RepositoryException if persistence fails
      */
     Iterable<E> findAll();
+
+    /**
+     * Finds all entities matching the supplied condition.
+     * @param filter condition used to select entities
+     * @return a list containing the matching entities; empty if none match
+     * @throws IllegalArgumentException if filter is null
+     * @throws RepositoryException if persistence fails
+     */
+    default List<E> findAll(Predicate<E> filter) {
+        if (filter == null) {
+            throw new IllegalArgumentException("Filter cannot be null");
+        }
+
+        return StreamSupport.stream(findAll().spliterator(), false).filter(filter).collect(Collectors.toList());
+    }
+
     /**
      * Adds an entity if its identifier is absent; otherwise leaves storage unchanged.
      * @throws validation.ValidationException if the entity violates validation rules
