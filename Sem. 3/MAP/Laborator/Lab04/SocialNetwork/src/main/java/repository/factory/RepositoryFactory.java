@@ -12,12 +12,22 @@ import repository.file.FriendshipFileRepository;
 import repository.db.UserDbRepository;
 import repository.db.FriendshipDbRepository;
 import validation.Validator;
+
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.function.Function;
 
 /** Creates user and friendship repositories for the configured persistence backend. */
 public final class RepositoryFactory {
     private final Properties properties;
     private final RepositoryType type;
+
+    private final Map<RepositoryType, Function<Validator<User>, Repository<Long, User>>
+                > userCreators = new EnumMap<>(RepositoryType.class);
+
+    private final Map<RepositoryType, Function<Validator<Friendship>, Repository<FriendshipId, Friendship>>
+                > friendshipCreators = new EnumMap<>(RepositoryType.class);
 
     /**
      * Copies configuration and validates the properties required by the selected backend.
@@ -50,50 +60,78 @@ public final class RepositoryFactory {
             required("db.user");
             required("db.password");
         }
+
+        userCreators.put(RepositoryType.MEMORY, InMemoryRepository::new);
+
+        userCreators.put(RepositoryType.FILE, validator -> new UserFileRepository(
+                        required("repository.users.file"),
+                        validator)
+        );
+
+        userCreators.put(RepositoryType.DATABASE,  validator -> new UserDbRepository(
+                        validator,
+                        required("db.url"),
+                        required("db.user"),
+                        required("db.password"))
+        );
+
+        friendshipCreators.put(RepositoryType.MEMORY, InMemoryRepository::new);
+
+        friendshipCreators.put(RepositoryType.FILE, validator -> new FriendshipFileRepository(
+                        required("repository.friendships.file"),
+                        validator)
+        );
+
+        friendshipCreators.put(RepositoryType.DATABASE, validator -> new FriendshipDbRepository(
+                        validator,
+                        required("db.url"),
+                        required("db.user"),
+                        required("db.password"))
+        );
     }
 
     /**
-     * Creates a user repository for this factory's persistence backend.
-     * @param validator user validation strategy
+     * Creates a user repository for the configured persistence backend.
+     *
+     * @param validator user validation strategy passed to the selected creator
      * @return a new user repository
-     * @throws IllegalArgumentException if the validator is null,
+     * @throws IllegalArgumentException if validator is null,
+     *         a required property is missing or blank,
      *         or the configured FILE path is absolute or invalid
-     * @throws RepositoryException if FILE data cannot be read or contains invalid or duplicate records
-     * */
+     * @throws RepositoryException if FILE data cannot be read
+     *         or contains invalid or duplicate records
+     */
     public Repository<Long, User> createUserRepository(Validator<User> validator) {
-        switch (type) {
-            case MEMORY:
-                return new InMemoryRepository<>(validator);
-            case FILE:
-                return new UserFileRepository(required("repository.users.file"), validator);
-            case DATABASE:
-                return new UserDbRepository(validator, required("db.url"),
-                        required("db.user"), required("db.password"));
-            default:
-                throw new IllegalArgumentException("Unsupported repository type: " + type);
+
+        Function<Validator<User>, Repository<Long, User>> creator = userCreators.get(type);
+
+        if (creator == null) {
+            throw new IllegalArgumentException("Unsupported repository type: " + type);
         }
+
+        return creator.apply(validator);
     }
 
     /**
-     * Creates a friendship repository for this factory's persistence backend.
-     * @param validator friendship validation strategy
+     * Creates a friendship repository for the configured persistence backend.
+     *
+     * @param validator friendship validation strategy passed to the selected creator
      * @return a new friendship repository
-     * @throws IllegalArgumentException if the validator is null,
+     * @throws IllegalArgumentException if validator is null,
+     *         a required property is missing or blank,
      *         or the configured FILE path is absolute or invalid
-     * @throws RepositoryException if FILE data cannot be read or contains invalid or duplicate records
-     * */
+     * @throws RepositoryException if FILE data cannot be read
+     *         or contains invalid or duplicate records
+     */
     public Repository<FriendshipId, Friendship> createFriendshipRepository(Validator<Friendship> validator) {
-        switch (type) {
-            case MEMORY:
-                return new InMemoryRepository<>(validator);
-            case FILE:
-                return new FriendshipFileRepository(required("repository.friendships.file"), validator);
-            case DATABASE:
-                return new FriendshipDbRepository(validator, required("db.url"),
-                        required("db.user"), required("db.password"));
-            default:
-                throw new IllegalArgumentException("Unsupported repository type: " + type);
+
+        Function<Validator<Friendship>, Repository<FriendshipId, Friendship>> creator =friendshipCreators.get(type);
+
+        if (creator == null) {
+            throw new IllegalArgumentException("Unsupported repository type: " + type);
         }
+
+        return creator.apply(validator);
     }
 
     private String required(String key) {

@@ -2,7 +2,6 @@ package repository.db;
 
 import domain.Friendship;
 import domain.FriendshipId;
-import domain.User;
 import validation.Validator;
 import repository.Repository;
 
