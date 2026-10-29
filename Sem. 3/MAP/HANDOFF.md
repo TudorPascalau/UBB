@@ -1,8 +1,9 @@
 # MAP — predare între proiectele locale
 
-Ultima actualizare: 15 octombrie 2026  
-Folder MAP curent: `C:\Users\tudor\Documents\UBB\Sem. 3\MAP`  
-Folder MAP anterior, menționat în istoricul proiectului: `E:\Facultate\UBB\Sem. 3\MAP`  
+Ultima actualizare: 29 octombrie 2026  
+Folder MAP curent: `E:\Facultate\UBB\Sem. 3\MAP`  
+Alt folder MAP menționat în istoric, neverificat în sesiunea curentă: `C:\Users\tudor\Documents\UBB\Sem. 3\MAP`  
+Proiect activ: `Laborator/Lab04/SocialNetwork` (Gradle, surse în `src/main/java`).  
 Celălalt proiect local: numele și calea nu au fost încă precizate.
 
 ## Scop și utilizare
@@ -16,10 +17,11 @@ Din celălalt proiect, folosește fișierul din folderul MAP curent indicat mai 
 - Nu modifica fișiere fără aprobarea explicită a utilizatorului. Pentru schimbări de cod, prezintă mai întâi planul și codul în chat și așteaptă aprobarea aplicării.
 - Folosește cerințele PDF ale laboratorului și principiile și exemplele din PDF-urile de curs.
 - Cererea din 15 octombrie de actualizare a acestui handoff autorizează modificarea documentului, nu remedieri suplimentare în cod.
+- În conversația din 29 octombrie, utilizatorul a cerut explicații și fragmente de cod pentru a implementa personal schimbările. Continuă acest stil: verifică sursele și explică, fără aplicarea schimbărilor în cod până la o cerere explicită. Cererea curentă autorizează actualizarea acestui handoff.
 
 ## Starea curentă observată
 
-Inventarul inițial este din 3 octombrie 2026; starea laboratorului de rețea de socializare a fost actualizată prin citirea surselor la 15 octombrie 2026. Observațiile vechi despre celelalte proiecte trebuie reverificate înainte de continuare.
+Inventarul inițial este din 3 octombrie 2026. Starea proiectului activ Lab04 a fost actualizată prin citirea surselor la 29 octombrie 2026 și este descrisă în „Ultima sesiune”. Tabelul de mai jos este un inventar istoric; observațiile despre Lab03 și celelalte proiecte trebuie reverificate înainte de continuare și nu descriu starea Lab04.
 
 | Zonă | Ce există | Stare observată |
 | --- | --- | --- |
@@ -46,6 +48,52 @@ Inventarul inițial este din 3 octombrie 2026; starea laboratorului de rețea de
 - Clarificarea utilizării parametrului de capacitate din constructorul `StackContainer`.
 
 ## Ultima sesiune
+
+- **Data și proiect:** 29 octombrie 2026, `E:\Facultate\UBB\Sem. 3\MAP\Laborator\Lab04\SocialNetwork`.
+- **Obiectiv:** parcurgerea pedagogică a cerințelor Lab04 și refactorizarea soluției Lab03 cu interfețe funcționale, predicate, Optional și Stream API. PDF-ul de referință este `Laborator/Lab04/Lab4_2026-2027_InterfeteFunctionale.pdf`. Utilizatorul confirmă că proiectul este versionat în Git.
+- **Autorizarea acestei actualizări:** modificarea `HANDOFF.md`; nu sunt autorizate prin această cerere remedieri în surse sau actualizarea readme-ului.
+
+### Schimbări confirmate în sursele actuale
+
+1. **Validatori:** `Validator<T>` are `@FunctionalInterface` și `default andThen(Validator<T>)`. Validatorul compus execută întâi strategia existentă, apoi regula suplimentară; la prima excepție se oprește. Un validator suplimentar null este respins imediat. În `Main`, o lambda limitează numele și prenumele la câte 100 de caractere și este compusă cu `UserValidator`; limita este demonstrativă, nu impusă de PDF. `UserValidator` acceptă acum și nume cu cratimă între grupuri de litere, prin regex-ul Java `"\\p{L}+(-\\p{L}+)*"`; cratimele inițiale/finale și cele consecutive sunt respinse.
+2. **Filtrare:** `Repository.findAll()` rămâne `Iterable<E>`, prin decizia explicită a utilizatorului. Noua metodă default `List<E> findAll(Predicate<E>)` respinge predicatul null și construiește rezultatul cu `filter` și `collect(Collectors.toList())`. `service.UserCriteria` furnizează `lastNameEquals` și `firstNameEquals`, cu verificarea argumentelor și comparații case-insensitive. `SocialNetworkService.findUsers(Predicate<User>)` deleagă către repository.
+3. **Meniu:** opțiunea 10 deschide filtrările după nume, prenume, AND, OR, negare prin `negate()` și `Predicate.not`. Rezultatele sunt afișate prin `forEach(System.out::println)`. Nu s-au introdus metode specifice precum `findByLastName` în repository.
+4. **Optional:** contractele `findOne`, `save`, `update`, `delete` întorc `Optional<E>`, inclusiv în memoria internă, repository-ul abstract pe fișier și scheletele DATABASE. Javadoc-ul interfeței descrie noile rezultate. `findOne`/`delete`: empty înseamnă absent; valoarea prezentă este entitatea găsită/eliminată. `save`/`update`: empty înseamnă succes; valoarea prezentă este entitatea existentă la duplicat, respectiv entitatea propusă dacă ID-ul de actualizat lipsește. Verificările din încărcare/persistență și service au fost adaptate la `isPresent`, `isEmpty`, `orElseThrow`. Nu întoarce null în loc de Optional.
+5. **Factory:** două `EnumMap` asociază `RepositoryType` cu `Function<Validator<...>, Repository<...>>`, pentru utilizatori și prietenii. Constructorul înregistrează funcțiile; metodele publice aleg funcția și execută `apply(validator)`. MEMORY folosește `InMemoryRepository::new`; FILE/DATABASE folosesc lambda-uri cu proprietățile necesare. Se construiește doar repository-ul selectat. Validarea configurației pentru backend-ul ales este păstrată. Supplier nu este necesar suplimentar: Function este alternativa acceptată de enunț.
+6. **Template Method păstrat:** utilizatorul a ales explicit să mențină `AbstractFileRepository` și subclasele cu `extractEntity`/`createEntityAsString`, în locul unui repository generic parametrizat cu Function pentru conversii.
+7. **Helper de stream:** clasa reală se numește `util.StreamHelper` (nu `Streams`, numele din exemplul inițial). `StreamHelper.stream(Iterable<T>)` centralizează singurul apel `StreamSupport.stream(source.spliterator(), false)`. Este importată static unde este folosită și întoarce de fiecare dată un stream secvențial nou.
+8. **Service:** următorul ID se calculează prin `mapToLong(User::getId).max().orElse(0L) + 1`. Verificarea relațiilor încărcate folosește `flatMap` către cele două ID-uri și `forEach(this::ensureUserExists)`. Ștergerea utilizatorului selectează mai întâi prieteniile într-o listă, apoi le șterge și păstrează separat jurnalul ștergerilor reușite pentru rollback. `removed.add(...)` din `forEach` servește jurnalului operațional, nu construirii rezultatelor filtrării; explică această distincție la evaluare. `getMostSociableCommunity` extrage rezultatul cu `orElseThrow`. `getCommunityCount()` folosește încă `getCommunities().size()`; alternativa cu stream/count a fost propusă, dar nu este implementată.
+9. **Fișiere:** citire cu `Files.lines` în try-with-resources, materializarea liniilor într-o listă și `IntStream.range` pentru numerele fizice ale liniilor. `loadLine` ignoră liniile goale, validează prin `super.save`, detectează duplicatele și raportează fișierul/linia/cauza. Sunt tratate IOException și UncheckedIOException și restaurată starea la eșec. Scrierea transformă entitățile prin `map(this::createEntityAsString)` și `collect`, apoi folosește `Files.write` în fișierul temporar; mutarea atomică și rollback-ul sunt păstrate. DATABASE rămâne schelet cu UnsupportedOperationException.
+10. **Graful:** `FriendshipGraph` colectează ID-urile, validează referințele, produce cele două sensuri ale fiecărei prietenii cu `flatMap`, grupează vecinii prin `groupingBy`/`mapping`/`toSet` și construiește harta finală cu `toMap`. Include utilizatorii izolați și expune structuri nemodificabile.
+11. **Comunitățile:** `findCommunities` utilizează colectare cu supplier/accumulator/combiner și o mulțime comună `visited`; DFS este acum recursiv prin `visitComponent`, cu vecinii procesați prin `filter` și `forEach`. Acest algoritm depinde de execuția secvențială; nu folosi parallelStream. Pentru comunitatea cea mai sociabilă, `map` asociază fiecare comunitate cu lungimea celui mai lung drum, calculată o singură dată; `max(Comparator.comparingInt(...))` alege scorul maxim și `map(Map.Entry::getKey)` extrage comunitatea.
+12. **Bucle rămase:** `longestPathLength` și `longestPathFrom` păstrează buclele algoritmului de backtracking, inclusiv oprirea anticipată la n-1 muchii. S-a convenit păstrarea lor cu justificare în readme, conform excepției din PDF. `while (running)` din UI controlează meniul și nu parcurge o colecție.
+
+### Explicații și decizii discutate
+
+- Stream este un pipeline, nu o colecție; operațiile intermediare sunt leneșe, iar operația terminală declanșează prelucrarea. Un stream se consumă o singură dată.
+- Predicate reprezintă o condiție `T -> boolean`; Collectors furnizează strategii de colectare. StreamSupport creează un stream dintr-un Spliterator, chiar și pentru procesare secvențială.
+- Iterable a fost păstrat deliberat. List ar permite `.stream()` direct, dar ar restrânge contractul; implementarea actuală în memorie întoarce deja o copie ArrayList.
+- Recomandarea PDF pentru comunități este respectată prin varianta DFS cu vecini procesați prin stream, nu prin atribuirea unui ID de componentă și groupingBy. `groupingBy` din FriendshipGraph grupează vecinii după utilizator, nu comunitățile. Cele două alternative din PDF nu sunt obligatorii simultan.
+- Criteriul pentru comunitatea cea mai sociabilă rămâne lungimea celui mai lung drum simplu, nu numărul membrilor. Backtracking-ul poate fi foarte costisitor; DFS recursiv poate depăși stiva pentru grafuri foarte adânci.
+
+### Verificări și limite
+
+- La actualizarea curentă s-au citit sursele pentru confirmarea implementării; nu s-au compilat și nu s-au executat teste pentru versiunea completă după refactorizarea cu stream-uri. Nu considera confirmarea structurală o validare completă a laboratorului.
+- La începutul conversației, etapa Validator a fost compilată direct cu JDK 21 și verificată printr-un program temporar: compunere, oprire după eșec, validator null; o intrare de 101 caractere a fost respinsă din UI. Acele verificări nu certifică schimbările ulterioare.
+- Gradle a întâmpinat acces refuzat la fișierul de lock din cache-ul utilizatorului. JDK-ul folosit cu succes direct: `C:/Program Files/Java/jdk-21.0.12/bin`. Java din PATH a rămas blocat în încercările inițiale; folosește calea explicită dacă problema reapare.
+- Unele colectări actuale folosesc `Stream.toList()` (Java 16+), deși materialul și cerința de colectare insistă pe `collect(Collectors.toList())`. Proiectul folosește și alte API-uri ulterioare Java 8; nu presupune că trebuie convertit integral la Java 8. Verifică separat respectarea cerinței pedagogice pentru collect.
+- Citirea tuturor liniilor înainte de validare schimbă prioritatea erorilor în cazul rar al unei linii invalide urmate de o eroare fizică de citire; acest detaliu a fost explicat, nu testat.
+
+### Ce rămâne de făcut
+
+1. Compilează și verifică versiunea actuală pe date temporare: rețea goală, utilizatori izolați, componente multiple, lanț versus stea, filtrări simple/compuse, duplicate, fișier lipsă, linii corupte cu număr fizic corect, reîncărcare și ștergere în cascadă; verifică și rollback-ul la erori de persistență. Nu modifica datele utilizatorului pentru teste.
+2. Actualizează `Laborator/Lab04/readme.txt`: încă are explicații despre switch și convențiile null din Lab03. Documentează Optional, Function în factory, păstrarea Template Method, criteriile, helper-ul, minimum cinci bucle înainte/după și justificarea buclelor de backtracking. Această actualizare nu a fost aplicată prin cererea pentru handoff.
+3. Auditează cerințele încă neacoperite explicit: prietenii unui utilizator în service, operațiile Stream API și colectorii enumerați în PDF, sortări cu Comparator și toate cele patru forme de referințe la metode. Nu declara laboratorul complet pe baza refactorizării de până acum.
+4. Revizuiește lambda-urile care doar apelează metode: de exemplu, `entry -> entry.getKey()`, `entry -> entry.getValue()` și combiner-ul `left.addAll(right)` pot deveni referințe la metode acolo unde inferența tipurilor permite.
+5. Curăță documentația: comentariul `DFS with stack` din CommunityAnalyzer este depășit după trecerea la recursivitate; descrierea clasei UserValidator trebuie să menționeze și cratimele. Verifică Javadoc/doclint pentru metodele noi și pregătește cel puțin trei exemple înainte/după pentru demonstrație.
+- **Următorul pas concret:** verificarea compilării și a comportamentului codului actual, apoi compararea cerințelor PDF cu implementarea și completarea documentației. Continuă să oferi explicații și cod în chat înainte de orice modificare în surse.
+
+## Sesiunea anterioară — tratarea erorilor în UI
 
 - **Data și proiect:** 21 octombrie 2026, `E:\Facultate\UBB\Sem. 3\MAP`.
 - **Obiectiv autorizat:** tratarea IllegalArgumentException în UI.
@@ -149,6 +197,7 @@ Următorul pas concret:
 
 ## Istoric scurt
 
+- 2026-10-29 — Lab04: validatori compuși, căutări cu Predicate și meniu de filtrare, contracte Optional, factory cu Function/EnumMap, helper StreamHelper și refactorizarea colecțiilor, fișierelor și comunităților cu stream-uri; starea verificată prin citirea surselor. Compilarea și testarea întregii versiuni și documentația finală rămân de făcut. Actualizat doar handoff-ul în această etapă.
 - 2026-10-03 — Document inițial creat în rădăcina MAP; starea surselor inventariată, fără modificări de cod.
 - 2026-10-04 — Completarea claselor și a enumerării din `Lab02.mdj` conform codului Java, fără relații.
 - 2026-10-04 — Ajustarea relațiilor adăugate de utilizator, fără legături suplimentare ale fabricii către clasele concrete.
