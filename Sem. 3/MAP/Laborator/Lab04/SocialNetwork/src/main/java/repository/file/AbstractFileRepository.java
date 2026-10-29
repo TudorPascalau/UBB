@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Stores entities in a UTF-8 text file; rejects malformed records and duplicate identifiers.
@@ -69,8 +70,10 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
                 try {
                     E entity = extractEntity(line);
                     // Validate and store without rewriting the input file.
-                    if (super.save(entity) != null)
-                        throw new IllegalArgumentException("Duplicate ID: " + entity.getId());
+                    if (super.save(entity).isPresent()) {
+                        throw new IllegalArgumentException(
+                                "Duplicate ID: " + entity.getId());
+                    }
                 }
                 catch (IllegalArgumentException | DateTimeParseException | ValidationException e) {
                     throw new RepositoryException("Invalid data in " + file + " at line "
@@ -121,24 +124,39 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
         }
     }
 
-    @Override public E save(E entity) {
+    @Override
+    public Optional<E> save(E entity) {
         Map<ID, E> previous = snapshot();
-        E result = super.save(entity);
-        if (result == null) persistOrRestore(previous);
+        Optional<E> result = super.save(entity);
+
+        if (result.isEmpty()) {
+            persistOrRestore(previous);
+        }
+
         return result;
     }
 
-    @Override public E update(E entity) {
+    @Override
+    public Optional<E> update(E entity) {
         Map<ID, E> previous = snapshot();
-        E result = super.update(entity);
-        if (result == null) persistOrRestore(previous);
+        Optional<E> result = super.update(entity);
+
+        if (result.isEmpty()) {
+            persistOrRestore(previous);
+        }
+
         return result;
     }
 
-    @Override public E delete(ID id) {
+    @Override
+    public Optional<E> delete(ID id) {
         Map<ID, E> previous = snapshot();
-        E result = super.delete(id);
-        if (result != null) persistOrRestore(previous);
+        Optional<E> result = super.delete(id);
+
+        if (result.isPresent()) {
+            persistOrRestore(previous);
+        }
+
         return result;
     }
 

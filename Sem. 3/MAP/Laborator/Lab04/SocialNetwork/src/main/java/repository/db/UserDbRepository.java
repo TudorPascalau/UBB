@@ -4,6 +4,8 @@ import domain.User;
 import validation.Validator;
 import repository.Repository;
 
+import java.util.Optional;
+
 /**
  * Database repository for users.
  */
@@ -34,7 +36,7 @@ public final class UserDbRepository implements Repository<Long, User> {
 
     /** @throws UnsupportedOperationException because database access is not implemented */
     @Override
-    public User findOne(Long id) {
+    public Optional<User> findOne(Long id) {
         throw new UnsupportedOperationException("Database access is not implemented yet");
     }
 
@@ -46,19 +48,19 @@ public final class UserDbRepository implements Repository<Long, User> {
 
     /** @throws UnsupportedOperationException because database access is not implemented */
     @Override
-    public User save(User entity) {
+    public Optional<User> save(User entity) {
         throw new UnsupportedOperationException("Database access is not implemented yet");
     }
 
     /** @throws UnsupportedOperationException because database access is not implemented */
     @Override
-    public User update(User entity) {
+    public Optional<User> update(User entity) {
         throw new UnsupportedOperationException("Database access is not implemented yet");
     }
 
     /** @throws UnsupportedOperationException because database access is not implemented */
     @Override
-    public User delete(Long id) {
+    public Optional<User> delete(Long id) {
         throw new UnsupportedOperationException("Database access is not implemented yet");
     }
 }

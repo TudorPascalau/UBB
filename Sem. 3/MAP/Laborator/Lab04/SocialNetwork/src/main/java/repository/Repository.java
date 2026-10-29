@@ -2,6 +2,7 @@ package repository;
 import domain.Entity;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -12,14 +13,57 @@ import java.util.stream.StreamSupport;
  * @param <E> entity type
  */
 public interface Repository<ID, E extends Entity<ID>> {
+
     /**
      * Finds an entity by identifier.
-     * @param id identifier
-     * @return matching entity or null
+     *
+     * @param id identifier of the entity to find
+     * @return an Optional containing the matching entity,
+     *         or an empty Optional if no entity exists with the given identifier
      * @throws IllegalArgumentException if id is null
      * @throws RepositoryException if persistence fails
      */
-    E findOne(ID id);
+    Optional<E> findOne(ID id);
+
+    /**
+     * Adds an entity if its identifier is absent;
+     * otherwise leaves storage unchanged.
+     *
+     * @param entity entity to add
+     * @return an empty Optional if the entity was added,
+     *         or an Optional containing the existing entity
+     *         if its identifier is already present
+     * @throws IllegalArgumentException if entity is null
+     * @throws validation.ValidationException if the entity violates validation rules
+     * @throws RepositoryException if persistence fails
+     */
+    Optional<E> save(E entity);
+
+    /**
+     * Replaces the entity with the same identifier;
+     * otherwise leaves storage unchanged.
+     *
+     * @param entity replacement entity
+     * @return an empty Optional if the entity was updated,
+     *         or an Optional containing the supplied entity
+     *         if its identifier is absent
+     * @throws IllegalArgumentException if entity is null
+     * @throws validation.ValidationException if the entity violates validation rules
+     * @throws RepositoryException if persistence fails
+     */
+    Optional<E> update(E entity);
+
+    /**
+     * Removes an entity by identifier.
+     *
+     * @param id identifier of the entity to remove
+     * @return an Optional containing the removed entity,
+     *         or an empty Optional if no entity exists with the given identifier
+     * @throws IllegalArgumentException if id is null
+     * @throws RepositoryException if persistence fails
+     */
+    Optional<E> delete(ID id);
+
     /**
      * Returns all stored entities at the time of the call.
      * @return all stored entities, unaffected by later additions or removals; empty if none exist
@@ -42,30 +86,4 @@ public interface Repository<ID, E extends Entity<ID>> {
         return StreamSupport.stream(findAll().spliterator(), false).filter(filter).collect(Collectors.toList());
     }
 
-    /**
-     * Adds an entity if its identifier is absent; otherwise leaves storage unchanged.
-     * @throws validation.ValidationException if the entity violates validation rules
-     * @param entity entity to add
-     * @return null on success, or the existing entity for a duplicate ID
-     * @throws IllegalArgumentException if entity is null
-     * @throws RepositoryException if persistence fails
-     */
-    E save(E entity);
-    /**
-     * Replaces the entity with the same identifier; leaves storage unchanged if none exists.
-     * @throws validation.ValidationException if the entity violates validation rules
-     * @param entity replacement entity
-     * @return null on success, or the supplied entity if its identifier is absent
-     * @throws IllegalArgumentException if entity is null
-     * @throws RepositoryException if persistence fails
-     */
-    E update(E entity);
-    /**
-     * Removes an entity by identifier.
-     * @param id identifier
-     * @return removed entity, or null if absent
-     * @throws IllegalArgumentException if id is null
-     * @throws RepositoryException if persistence fails
-     */
-    E delete(ID id);
 }

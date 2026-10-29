@@ -2,8 +2,11 @@ package repository.db;
 
 import domain.Friendship;
 import domain.FriendshipId;
+import domain.User;
 import validation.Validator;
 import repository.Repository;
+
+import java.util.Optional;
 
 /**
  * Database repository for friendships.
@@ -35,7 +38,7 @@ public final class FriendshipDbRepository implements Repository<FriendshipId, Fr
 
     /** @throws UnsupportedOperationException because database access is not implemented */
     @Override
-    public Friendship findOne(FriendshipId id) {
+    public Optional<Friendship> findOne(FriendshipId id) {
         throw new UnsupportedOperationException("Database access is not implemented yet");
     }
 
@@ -47,19 +50,19 @@ public final class FriendshipDbRepository implements Repository<FriendshipId, Fr
 
     /** @throws UnsupportedOperationException because database access is not implemented */
     @Override
-    public Friendship save(Friendship entity) {
+    public Optional<Friendship> save(Friendship entity) {
         throw new UnsupportedOperationException("Database access is not implemented yet");
     }
 
     /** @throws UnsupportedOperationException because database access is not implemented */
     @Override
-    public Friendship update(Friendship entity) {
+    public Optional<Friendship> update(Friendship entity) {
         throw new UnsupportedOperationException("Database access is not implemented yet");
     }
 
     /** @throws UnsupportedOperationException because database access is not implemented */
     @Override
-    public Friendship delete(FriendshipId id) {
+    public Optional<Friendship> delete(FriendshipId id) {
         throw new UnsupportedOperationException("Database access is not implemented yet");
     }
 }

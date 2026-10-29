@@ -53,8 +53,9 @@ public class SocialNetworkService {
      */
     public void addUser(String firstName, String lastName) {
         User user = new User(nextUserId, firstName, lastName);
-        if (userRepository.save(user) != null)
+        if (userRepository.save(user).isPresent()) {
             throw new ServiceException("User already exists with id " + nextUserId);
+        }
         nextUserId++;
     }
     /**
@@ -119,8 +120,9 @@ public class SocialNetworkService {
                 LocalDateTime.now().withSecond(0).withNano(0));
         ensureUserExists(firstUserId);
         ensureUserExists(secondUserId);
-        if (friendshipRepository.save(friendship) != null)
+        if (friendshipRepository.save(friendship).isPresent()) {
             throw new ServiceException("Friendship already exists: " + friendship.getId());
+        }
     }
     /**
      * Removes a friendship by its participant IDs.
@@ -131,8 +133,8 @@ public class SocialNetworkService {
      * @throws RepositoryException if persistence fails
      */
     public void removeFriendship(Long firstUserId, Long secondUserId) {
-        if (friendshipRepository.delete(new FriendshipId(firstUserId, secondUserId)) == null)
-            throw new ServiceException("Friendship does not exist");
+        friendshipRepository.delete(new FriendshipId(firstUserId, secondUserId)).orElseThrow(() ->
+                        new ServiceException("Friendship does not exist"));
     }
     /**
      * Returns current friendships.
@@ -149,9 +151,10 @@ public class SocialNetworkService {
     }
 
     private void ensureUserExists(Long id) {
-        User user = userRepository.findOne(id);
-        if (user == null) throw new ServiceException("User with id " + id + " not found");
+        userRepository.findOne(id).orElseThrow(() ->
+                        new ServiceException("User with id " + id + " not found"));
     }
+
     private FriendshipGraph buildFriendshipGraph() {
         return new FriendshipGraph(userRepository.findAll(), friendshipRepository.findAll());
     }
