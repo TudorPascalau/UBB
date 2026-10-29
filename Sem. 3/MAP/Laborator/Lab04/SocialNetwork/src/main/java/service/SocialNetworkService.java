@@ -6,9 +6,7 @@ import repository.RepositoryException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static util.StreamHelper.stream;
 
@@ -19,7 +17,7 @@ public class SocialNetworkService {
     private final Repository<Long, User> userRepository;
     private final Repository<FriendshipId, Friendship> friendshipRepository;
     private final CommunityAnalyzer communityAnalyzer;
-    private long nextUserId = 1;
+    private long nextUserId;
 
     /**
      * Creates a social network service.
