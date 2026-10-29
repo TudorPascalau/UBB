@@ -8,11 +8,18 @@ import validation.ValidationException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static util.StreamHelper.stream;
 
 /**
  * Stores entities in a UTF-8 text file; rejects malformed records and duplicate identifiers.
@@ -61,34 +68,58 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
      */
     protected final void loadData() {
         Map<ID, E> previous = snapshot();
-        try (BufferedReader reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            String line;
-            int number = 0;
-            while ((line = reader.readLine()) != null) {
-                number++;
-                if (line.isBlank()) continue;
-                try {
-                    E entity = extractEntity(line);
-                    // Validate and store without rewriting the input file.
-                    if (super.save(entity).isPresent()) {
-                        throw new IllegalArgumentException(
-                                "Duplicate ID: " + entity.getId());
-                    }
-                }
-                catch (IllegalArgumentException | DateTimeParseException | ValidationException e) {
-                    throw new RepositoryException("Invalid data in " + file + " at line "
-                            + number + ": " + e.getMessage(), e);
-                }
-            }
-        } catch (NoSuchFileException e) {
+
+        try (Stream<String> lines = Files.lines(file, StandardCharsets.UTF_8)) {
+            List<String> records = lines.toList();
+
+            IntStream.range(0, records.size()).forEach(index -> loadLine(records.get(index), index + 1));
+        }
+        catch (NoSuchFileException e) {
             restore(previous);
-            // Missing input is an expected empty state; first save creates the file.
-        } catch (IOException e) {
+        }
+        catch (UncheckedIOException e) {
+            restore(previous);
+            throw new RepositoryException("Error reading " + file, e.getCause());
+        }
+        catch (IOException e) {
             restore(previous);
             throw new RepositoryException("Error reading " + file, e);
-        } catch (RepositoryException e) {
+        }
+        catch (RepositoryException e) {
             restore(previous);
             throw e;
+        }
+    }
+
+    /**
+     * Validates and stores one physical line without rewriting the file.
+     *
+     * @param line text record
+     * @param number one-based physical line number
+     * @throws RepositoryException if the record is malformed,
+     *         invalid or duplicates an identifier
+     */
+    private void loadLine(String line, int number) {
+        if (line.isBlank()) {
+            return;
+        }
+
+        try {
+            E entity = extractEntity(line);
+
+            if (super.save(entity).isPresent()) {
+                throw new IllegalArgumentException(
+                        "Duplicate ID: " + entity.getId());
+            }
+        }
+        catch (IllegalArgumentException
+               | DateTimeParseException
+               | ValidationException e) {
+
+            throw new RepositoryException(
+                    "Invalid data in " + file + " at line "
+                            + number + ": " + e.getMessage(),
+                    e);
         }
     }
 
@@ -106,12 +137,11 @@ public abstract class AbstractFileRepository<ID, E extends Entity<ID>> extends I
             Files.createDirectories(parent);
             temporary = Files.createTempFile(parent, "repository-", ".tmp");
 
-            try (BufferedWriter writer = Files.newBufferedWriter(temporary, StandardCharsets.UTF_8)) {
-                for (E entity : findAll()) {
-                    writer.write(createEntityAsString(entity));
-                    writer.newLine();
-                }
-            }
+            List<String> lines = stream(findAll())
+                    .map(this::createEntityAsString)
+                    .collect(Collectors.toList());
+
+            Files.write(temporary, lines, StandardCharsets.UTF_8);
             Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 
         }

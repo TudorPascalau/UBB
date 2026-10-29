@@ -3,14 +3,7 @@ package service;
 import domain.Community;
 import domain.FriendshipGraph;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Identifies and analyzes friendship communities.
@@ -31,39 +24,57 @@ public final class CommunityAnalyzer {
         Objects.requireNonNull(graph, "Graph cannot be null");
 
         Set<Long> visited = new HashSet<>();
-        List<Community> communities = new ArrayList<>();
 
-        for (Long userId : graph.getUserIds()) {
-            if (!visited.contains(userId)) {
-                Set<Long> members = collectComponent(graph, userId, visited);
+        List<Community> communities = graph.getUserIds().stream()
+                .collect(
+                        ArrayList<Community>::new,
+                        (result, userId) -> {
+                            if (!visited.contains(userId)) {
+                                Set<Long> members =
+                                        collectComponent(graph, userId, visited);
 
-                communities.add(new Community(members));
-            }
-        }
+                                result.add(new Community(members));
+                            }
+                        },
+                        (left, right) -> left.addAll(right));
 
         return List.copyOf(communities);
     }
 
     // DFS with stack
-    private Set<Long> collectComponent(FriendshipGraph graph, Long startUserId, Set<Long> visited) {
+    private Set<Long> collectComponent(
+            FriendshipGraph graph,
+            Long startUserId,
+            Set<Long> visited) {
+
         Set<Long> members = new HashSet<>();
-        Deque<Long> stack = new ArrayDeque<>();
+        visitComponent(graph, startUserId, visited, members);
+        return members;
+    }
 
-        visited.add(startUserId);
-        stack.push(startUserId);
+    /**
+     * Visits the users reachable from the supplied user.
+     *
+     * @param graph network graph
+     * @param userId user to visit
+     * @param visited identifiers already visited across components
+     * @param members identifiers collected for the current component
+     */
+    private void visitComponent(
+            FriendshipGraph graph,
+            Long userId,
+            Set<Long> visited,
+            Set<Long> members) {
 
-        while (!stack.isEmpty()) {
-            Long currentUserId = stack.pop();
-            members.add(currentUserId);
-
-            for (Long neighbor : graph.getNeighbors(currentUserId)) {
-                if (visited.add(neighbor)) {
-                    stack.push(neighbor);
-                }
-            }
+        if (!visited.add(userId)) {
+            return;
         }
 
-        return members;
+        members.add(userId);
+
+        graph.getNeighbors(userId).stream()
+                .filter(neighbor -> !visited.contains(neighbor))
+                .forEach(neighbor -> visitComponent(graph, neighbor, visited, members));
     }
 
     /**
@@ -72,22 +83,18 @@ public final class CommunityAnalyzer {
      * @return a community with a longest such chain (any in case of a tie), or empty for an empty network
      * @throws NullPointerException if graph is null
      */
-    public Optional<Community> findMostSociableCommunity(FriendshipGraph graph) {
-        List<Community> communities = findCommunities(graph);
+    public Optional<Community> findMostSociableCommunity(
+            FriendshipGraph graph) {
 
-        Community mostSociable = null;
-        int maximumLength = -1;
-
-        for (Community community : communities) {
-            int length = longestPathLength(graph, community);
-
-            if (length > maximumLength) {
-                maximumLength = length;
-                mostSociable = community;
-            }
-        }
-
-        return Optional.ofNullable(mostSociable);
+        return findCommunities(graph).stream()
+                .map(community ->
+                        new AbstractMap.SimpleImmutableEntry<>(
+                                community,
+                                longestPathLength(graph, community)))
+                .max(Comparator.comparingInt(
+                        (Map.Entry<Community, Integer> entry) ->
+                                entry.getValue()))
+                .map(Map.Entry::getKey);
     }
 
     private int longestPathLength(FriendshipGraph graph, Community community) {

@@ -1,9 +1,10 @@
 package domain;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static util.StreamHelper.stream;
 
 /**
  * An immutable view of users and their mutual friendships in graph format.
@@ -18,30 +19,44 @@ public final class FriendshipGraph {
      * @param friendships friendships between network users
      * @throws IllegalArgumentException if a friendship references a user outside the network
      */
-    public FriendshipGraph(Iterable<User> users, Iterable<Friendship> friendships) {
-        Map<Long, Set<Long>> neighbors = new HashMap<>();
+    public FriendshipGraph(
+            Iterable<User> users,
+            Iterable<Friendship> friendships) {
 
-        for (User user : users) {
-            neighbors.put(user.getId(), new HashSet<>());
-        }
+        Set<Long> userIds = stream(users)
+                .map(User::getId)
+                .collect(Collectors.toSet());
 
-        for (Friendship friendship : friendships) {
-            Long firstUserId = friendship.getFirstUserId();
-            Long secondUserId = friendship.getSecondUserId();
+        List<Friendship> friendshipList = stream(friendships).toList();
 
-            if (!neighbors.containsKey(firstUserId) || !neighbors.containsKey(secondUserId)) {
-                throw new IllegalArgumentException("Friendship references a user outside the network");
+        friendshipList.forEach(friendship -> {
+            if (!userIds.contains(friendship.getFirstUserId())
+                    || !userIds.contains(friendship.getSecondUserId())) {
+
+                throw new IllegalArgumentException(
+                        "Friendship references a user outside the network");
             }
+        });
 
-            neighbors.get(firstUserId).add(secondUserId);
-            neighbors.get(secondUserId).add(firstUserId);
-        }
+        Map<Long, Set<Long>> neighbors = friendshipList.stream()
+                .flatMap(friendship -> Stream.of(
+                        Map.entry(
+                                friendship.getFirstUserId(),
+                                friendship.getSecondUserId()),
+                        Map.entry(
+                                friendship.getSecondUserId(),
+                                friendship.getFirstUserId())))
+                .collect(Collectors.groupingBy(
+                        entry -> entry.getKey(),
+                        Collectors.mapping(
+                                entry -> entry.getValue(),
+                                Collectors.toSet())));
 
-        Map<Long, Set<Long>> immutableNeighbors = new HashMap<>();
-
-        for (Map.Entry<Long, Set<Long>> entry : neighbors.entrySet()) {
-            immutableNeighbors.put(entry.getKey(), Set.copyOf(entry.getValue()));
-        }
+        Map<Long, Set<Long>> immutableNeighbors = userIds.stream()
+                .collect(Collectors.toMap(
+                        id -> id,
+                        id -> Set.copyOf(
+                                neighbors.getOrDefault(id, Set.of()))));
 
         adjacency = Map.copyOf(immutableNeighbors);
     }

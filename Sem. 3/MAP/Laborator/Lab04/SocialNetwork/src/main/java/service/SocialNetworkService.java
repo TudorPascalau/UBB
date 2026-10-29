@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static util.StreamHelper.stream;
 
 /**
  * Coordinates network operations independently of the persistence backend.
@@ -39,9 +42,10 @@ public class SocialNetworkService {
 
         validateLoadedRelationships();
 
-        for (User user : userRepository.findAll()) {
-            if (user.getId() >= nextUserId) nextUserId = user.getId() + 1;
-        }
+        nextUserId = stream(userRepository.findAll())
+                .mapToLong(User::getId)
+                .max()
+                .orElse(0L) + 1;
     }
     /**
      * Adds a valid new user.
@@ -67,27 +71,40 @@ public class SocialNetworkService {
      */
     public void removeUser(Long id) {
         ensureUserExists(id);
+
+        List<Friendship> incidentFriendships =stream(friendshipRepository.findAll()).filter(friendship ->
+                                friendship.getFirstUserId().equals(id) || friendship.getSecondUserId().equals(id)).toList();
+
         List<Friendship> removed = new ArrayList<>();
+
         try {
-            for (Friendship friendship : friendshipRepository.findAll()) {
-                if (friendship.getFirstUserId().equals(id) || friendship.getSecondUserId().equals(id)) {
-                    friendshipRepository.delete(friendship.getId());
-                    removed.add(friendship);
-                }
-            }
+            incidentFriendships.forEach(friendship -> {
+                friendshipRepository.delete(friendship.getId());
+
+                // Track only deletions that completed successfully.
+                removed.add(friendship);
+            });
+
             userRepository.delete(id);
         }
         catch (RepositoryException e) {
-            // Recovery, not presentation: preserve references if the multi-file operation fails.
-            for (Friendship friendship : removed) {
-                try { friendshipRepository.save(friendship); }
-                catch (RepositoryException recoveryError) { e.addSuppressed(recoveryError); }
-            }
-            if (e.getSuppressed().length > 0)
+            removed.forEach(friendship -> {
+                try {
+                    friendshipRepository.save(friendship);
+                }
+                catch (RepositoryException recoveryError) {
+                    e.addSuppressed(recoveryError);
+                }
+            });
+
+            if (e.getSuppressed().length > 0) {
                 throw new RepositoryException("Removal failed and rollback was incomplete; inspect both files", e);
+            }
+
             throw e;
         }
     }
+
     /**
      * Returns current users.
      * @return current users
@@ -144,10 +161,8 @@ public class SocialNetworkService {
     public Iterable<Friendship> getFriendships() { return friendshipRepository.findAll(); }
 
     private void validateLoadedRelationships() {
-        for (Friendship friendship : friendshipRepository.findAll()) {
-            ensureUserExists(friendship.getFirstUserId());
-            ensureUserExists(friendship.getSecondUserId());
-        }
+        stream(friendshipRepository.findAll()).flatMap(friendship -> java.util.stream.Stream.of(
+                        friendship.getFirstUserId(), friendship.getSecondUserId())).forEach(this::ensureUserExists);
     }
 
     private void ensureUserExists(Long id) {
@@ -179,8 +194,7 @@ public class SocialNetworkService {
      * @throws RepositoryException if storage fails
      */
     public Community getMostSociableCommunity() {
-        Optional<Community> result = communityAnalyzer.findMostSociableCommunity(buildFriendshipGraph());
-        if (result.isEmpty()) throw new ServiceException("No communities found in the network.");
-        return result.get();
+        return communityAnalyzer.findMostSociableCommunity(buildFriendshipGraph()).
+                orElseThrow(() -> new ServiceException("No communities found in the network."));
     }
 }

@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+
+import static util.StreamHelper.stream;
 
 /**
  * Stores and retrieves entities by unique identifier.
@@ -83,7 +84,7 @@ public interface Repository<ID, E extends Entity<ID>> {
             throw new IllegalArgumentException("Filter cannot be null");
         }
 
-        return StreamSupport.stream(findAll().spliterator(), false).filter(filter).collect(Collectors.toList());
+        return stream(findAll()).filter(filter).collect(Collectors.toList());
     }
 
 }

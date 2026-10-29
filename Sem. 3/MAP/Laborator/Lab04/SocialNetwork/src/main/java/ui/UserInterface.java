@@ -12,6 +12,9 @@ import validation.ValidationException;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static util.StreamHelper.stream;
 
 /**
  * Console presentation using the supplied application service.
@@ -226,16 +229,8 @@ public class UserInterface {
     }
 
     private void showUsers() {
-        boolean found = false;
-
-        for (User user : service.getUsers()) {
-            System.out.println(user);
-            found = true;
-        }
-
-        if (!found) {
-            System.out.println("No users found.");
-        }
+        List<User> users = stream(service.getUsers()).collect(Collectors.toList());
+        displayUsers(users);
     }
 
     private void addFriendship() {
@@ -252,6 +247,17 @@ public class UserInterface {
         System.out.println("Friendship removed.");
     }
 
+    private void showFriendships() {
+        List<Friendship> friendships = stream(service.getFriendships()).toList();
+
+        if (friendships.isEmpty()) {
+            System.out.println("No friendships found.");
+            return;
+        }
+
+        friendships.forEach(System.out::println);
+    }
+
     private void showCommunityCount() {
         System.out.println("Number of communities: " + service.getCommunityCount());
     }
@@ -262,28 +268,14 @@ public class UserInterface {
     }
 
     private void showCommunities() {
-        boolean found = false;
+        List<Community> communities = service.getCommunities();
 
-        for (Community community : service.getCommunities()) {
-            System.out.println(community);
-            found = true;
-        }
-
-        if (!found) {
+        if (communities.isEmpty()) {
             System.out.println("No communities found in the network.");
+            return;
         }
+
+        communities.forEach(System.out::println);
     }
 
-    private void showFriendships() {
-        boolean found = false;
-
-        for (Friendship friendship : service.getFriendships()) {
-            System.out.println(friendship);
-            found = true;
-        }
-
-        if (!found) {
-            System.out.println("No friendships found.");
-        }
-    }
 }
