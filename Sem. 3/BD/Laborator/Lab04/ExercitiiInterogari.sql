@@ -26,7 +26,7 @@ SELECT G.title, G.price, C.name AS developer_name
 FROM Games G
 INNER JOIN GameCompanies GC on G.game_id = GC.game_id
 INNER JOIN Companies C on GC.company_id = C.company_id
-WHERE C.country = 'Japan';
+WHERE C.country = 'Japan' AND GC.role = 'developer';
 
 -- 6. Afișează, fără duplicate, titlurile jocurilor din genul „Action” disponibile pe „Linux”.
 SELECT DISTINCT G.title
@@ -62,7 +62,7 @@ FROM UserAchievements UA
 INNER JOIN Users U ON UA.user_id = U.user_id
 INNER JOIN Achievements A ON UA.achievement_id = A.achievement_id
 INNER JOIN Games G on A.game_id = G.game_id
-WHERE UA.unlocked_at BETWEEN '2026-10-11 00:00:00' AND '2026-10-14 00:00:00'
+WHERE UA.unlocked_at BETWEEN '2026-10-11 00:00:00' AND '2026-10-15 00:00:00'
 
 -- 10.Afișează, fără duplicate, utilizatorii care au cumpărat cel puțin un joc din genul „RPG” printr-o comandă finalizată.
 SELECT DISTINCT U.username
@@ -76,14 +76,14 @@ WHERE O.status = 'completed' AND GE.name = 'RPG';
 -- 11. Afișează toate jocurile împreună cu notele primite și numele autorilor recenziilor. Include și jocurile fără recenzii.
 SELECT G.title, R.rating, U.username
 FROM Games G
-LEFT OUTER JOIN UserGames UG ON G.game_id = UG.game_id
-LEFT OUTER JOIN Users U ON UG.user_id = U.user_id
-LEFT OUTER JOIN Reviews R ON U.user_id = R.user_id
+LEFT OUTER JOIN Reviews R ON G.game_id = R.game_id
+LEFT OUTER JOIN Users U ON R.user_id = U.user_id;
+
 
 -- 12. Pentru fiecare platformă, afișează numele și numărul de jocuri disponibile. Include platformele fără jocuri.
 SELECT P.name, COUNT(GP.game_id) AS game_count
-FROM GamePlatforms GP
-LEFT OUTER JOIN Platforms P ON GP.platform_id = P.platform_id
+FROM Platforms P
+LEFT OUTER JOIN GamePlatforms GP ON P.platform_id = GP.platform_id
 GROUP BY P.name;
 
 -- 13. Pentru fiecare dezvoltator care are cel puțin două jocuri asociate, afișează numele și prețul mediu al jocurilor dezvoltate de acesta.
@@ -91,7 +91,8 @@ SELECT C.name, AVG(G.price) AS average_price
 FROM GameCompanies GC
 INNER JOIN Companies C ON GC.company_id = C.company_id
 INNER JOIN Games G ON GC.game_id = G.game_id
-GROUP BY C.name
+WHERE GC.role = 'developer'
+GROUP BY C.company_id, C.name
 HAVING COUNT(GC.game_id) >= 2;
 
 -- 14. Afișează genurile care conțin cel puțin două jocuri cu prețul strict mai mare de 30. Pentru fiecare gen, afișează numele și numărul jocurilor care respectă condiția.
@@ -100,5 +101,40 @@ FROM Genres GE
 INNER JOIN GameGenres GG ON GE.genre_id = GG.genre_id
 INNER JOIN Games G ON GG.game_id = G.game_id
 WHERE G.price > 30
-GROUP BY GE.name
-HAVING COUNT(GE.genre_id) > 2;
+GROUP BY GE.genre_id, GE.name
+HAVING COUNT(GG.game_id) >= 2;
+
+-- 15. Pentru fiecare comandă finalizată care conține cel puțin două jocuri, afișează identificatorul comenzii, numele cumpărătorului, numărul jocurilor și valoarea totală. Calculează valoarea folosind prețurile de cumpărare din OrderItems.
+SELECT O.order_id, U.username, COUNT(OI.game_id) AS game_count, SUM(OI.purchase_price) AS total_value
+FROM Orders O
+INNER JOIN Users U ON O.user_id = U.user_id
+INNER JOIN OrderItems OI ON O.order_id = OI.order_id
+WHERE O.status = 'completed'
+GROUP BY O.order_id, U.username
+HAVING COUNT(OI.game_id) >= 2;
+
+-- 16. Afișează jocurile din biblioteca utilizatorului „tudor” pentru care acesta nu a scris o recenzie.
+-- Rezultatul trebuie să conțină titlul jocului și numele colecției.
+SELECT G.title, CO.name
+FROM Users U
+INNER JOIN UserGames UG ON U.user_id = UG.user_id
+INNER JOIN Games G ON UG.game_id = G.game_id
+INNER JOIN Collections CO ON CO.collection_id = UG.collection_id
+LEFT OUTER JOIN Reviews R ON R.user_id = U.user_id AND R.game_id = G.game_id
+WHERE U.username = 'tudor' AND R.review_id IS NULL;
+
+-- 17. Pentru fiecare joc, afișează de câte ori a fost cumpărat prin comenzi finalizate. Include și jocurile fără astfel de cumpărări, cu valoarea zero.
+SELECT G.game_id, G.title, COUNT(O.order_id) AS game_purchases
+FROM Games G
+LEFT JOIN OrderItems OI ON G.game_id = OI.game_id
+LEFT JOIN Orders O ON OI.order_id = O.order_id AND O.status = 'completed'
+GROUP BY G.game_id, G.title;
+
+--18. Pentru fiecare utilizator care are cel puțin o comandă finalizată, afișează numărul comenzilor finalizate și suma totală cheltuită.
+-- Fiecare comandă trebuie numărată o singură dată, indiferent câte jocuri conține.
+SELECT U.username, COUNT(DISTINCT O.order_id) AS finished_orders, COALESCE(SUM(OI.purchase_price), 0) AS total_price
+FROM Users U
+INNER JOIN Orders O ON U.user_id = O.user_id
+LEFT JOIN OrderItems OI ON O.order_id = OI.order_id
+WHERE O.status = 'completed'
+GROUP BY U.user_id, U.username;

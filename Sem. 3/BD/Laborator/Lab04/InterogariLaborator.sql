@@ -1,4 +1,7 @@
---1. Jocuri care costa cel mult $20
+USE LaboratorGestiuneJocuri;
+GO
+
+--1. Jocuri care costa cel mult 20 unitati monetare
 SELECT G.game_id, G.title, G.price FROM GAMES G
 WHERE G.price <= 20;
 
