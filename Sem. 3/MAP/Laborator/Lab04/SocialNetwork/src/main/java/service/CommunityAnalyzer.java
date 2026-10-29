@@ -27,7 +27,7 @@ public final class CommunityAnalyzer {
 
         List<Community> communities = graph.getUserIds().stream()
                 .collect(
-                        ArrayList<Community>::new,
+                        ArrayList::new,
                         (result, userId) -> {
                             if (!visited.contains(userId)) {
                                 Set<Long> members =
@@ -36,7 +36,7 @@ public final class CommunityAnalyzer {
                                 result.add(new Community(members));
                             }
                         },
-                        (left, right) -> left.addAll(right));
+                        ArrayList::addAll);
 
         return List.copyOf(communities);
     }
@@ -80,7 +80,7 @@ public final class CommunityAnalyzer {
     /**
      * Finds the community with the longest chain of friendships without repeated users.
      * @param graph network graph
-     * @return a community with a longest such chain (any in case of a tie), or empty for an empty network
+     * @return a community with the longest such chain (any in case of a tie), or empty for an empty network
      * @throws NullPointerException if graph is null
      */
     public Optional<Community> findMostSociableCommunity(

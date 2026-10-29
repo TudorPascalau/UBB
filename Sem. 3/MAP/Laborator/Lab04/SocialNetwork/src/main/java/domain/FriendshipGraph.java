@@ -19,9 +19,7 @@ public final class FriendshipGraph {
      * @param friendships friendships between network users
      * @throws IllegalArgumentException if a friendship references a user outside the network
      */
-    public FriendshipGraph(
-            Iterable<User> users,
-            Iterable<Friendship> friendships) {
+    public FriendshipGraph(Iterable<User> users, Iterable<Friendship> friendships) {
 
         Set<Long> userIds = stream(users)
                 .map(User::getId)
@@ -30,33 +28,24 @@ public final class FriendshipGraph {
         List<Friendship> friendshipList = stream(friendships).toList();
 
         friendshipList.forEach(friendship -> {
-            if (!userIds.contains(friendship.getFirstUserId())
-                    || !userIds.contains(friendship.getSecondUserId())) {
-
+            if (!userIds.contains(friendship.getFirstUserId()) || !userIds.contains(friendship.getSecondUserId())) {
                 throw new IllegalArgumentException(
                         "Friendship references a user outside the network");
             }
         });
 
         Map<Long, Set<Long>> neighbors = friendshipList.stream()
-                .flatMap(friendship -> Stream.of(
-                        Map.entry(
-                                friendship.getFirstUserId(),
-                                friendship.getSecondUserId()),
-                        Map.entry(
-                                friendship.getSecondUserId(),
-                                friendship.getFirstUserId())))
+                .flatMap(FriendshipGraph::directedEdges)
                 .collect(Collectors.groupingBy(
-                        entry -> entry.getKey(),
+                        Map.Entry::getKey,
                         Collectors.mapping(
-                                entry -> entry.getValue(),
+                                Map.Entry::getValue,
                                 Collectors.toSet())));
 
         Map<Long, Set<Long>> immutableNeighbors = userIds.stream()
                 .collect(Collectors.toMap(
                         id -> id,
-                        id -> Set.copyOf(
-                                neighbors.getOrDefault(id, Set.of()))));
+                        id -> Set.copyOf(neighbors.getOrDefault(id, Set.of()))));
 
         adjacency = Map.copyOf(immutableNeighbors);
     }
@@ -84,5 +73,21 @@ public final class FriendshipGraph {
         }
 
         return neighbors;
+    }
+
+    /**
+     * Converts a mutual friendship into its two directed edges.
+     *
+     * @param friendship friendship to convert
+     * @return a stream containing both directions of the friendship
+     * @throws NullPointerException if friendship or either participant ID is null
+     */
+    private static Stream<Map.Entry<Long, Long>> directedEdges(
+            Friendship friendship) {
+
+        Long first = friendship.getFirstUserId();
+        Long second = friendship.getSecondUserId();
+
+        return Stream.of(Map.entry(first, second), Map.entry(second, first));
     }
 }

@@ -5,6 +5,7 @@ import repository.Repository;
 import repository.RepositoryException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -119,6 +120,24 @@ public class SocialNetworkService {
      */
     public List<User> findUsers(Predicate<User> filter) {
         return userRepository.findAll(filter);
+    }
+
+    /**
+     * Returns users sorted using the supplied comparator.
+     *
+     * @param comparator ordering applied to users
+     * @return a sorted, unmodifiable list; empty if no users exist
+     * @throws IllegalArgumentException if comparator is null
+     * @throws RepositoryException if persistence fails
+     */
+    public List<User> getSortedUsers(Comparator<User> comparator) {
+        if (comparator == null) {
+            throw new IllegalArgumentException("Comparator cannot be null");
+        }
+
+        return stream(userRepository.findAll())
+                .sorted(comparator)
+                .toList();
     }
 
     /**
