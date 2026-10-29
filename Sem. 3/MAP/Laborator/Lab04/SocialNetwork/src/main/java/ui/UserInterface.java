@@ -6,9 +6,12 @@ import domain.User;
 import repository.RepositoryException;
 import service.ServiceException;
 import service.SocialNetworkService;
+import service.UserCriteria;
 import validation.ValidationException;
 
+import java.util.List;
 import java.util.Scanner;
+import java.util.function.Predicate;
 
 /**
  * Console presentation using the supplied application service.
@@ -71,6 +74,9 @@ public class UserInterface {
                     case "9":
                         showCommunities();
                         break;
+                    case "10":
+                        filterUsers();
+                        break;
                     case "0":
                         running = false;
                         break;
@@ -111,8 +117,76 @@ public class UserInterface {
         System.out.println("7. Show community count");
         System.out.println("8. Show the most sociable community");
         System.out.println("9. Show all communities");
+        System.out.println("10. Filter users");
         System.out.println("0. Exit");
         System.out.print("Option: ");
+    }
+
+    /**
+     * Reads a search criterion and displays matching users.
+     */
+    private void filterUsers() {
+        System.out.println("1. Last name equals");
+        System.out.println("2. First name equals");
+        System.out.println("3. Last name AND first name");
+        System.out.println("4. Last name OR first name");
+        System.out.println("5. Last name differs");
+        System.out.println("6. First name differs");
+
+        String option = readLine("Filter option: ");
+        Predicate<User> criterion;
+
+        switch (option) {
+            case "1":
+                criterion = UserCriteria.lastNameEquals(
+                        readLine("Last name: "));
+                break;
+
+            case "2":
+                criterion = UserCriteria.firstNameEquals(
+                        readLine("First name: "));
+                break;
+
+            case "3":
+                criterion = UserCriteria.lastNameEquals(
+                                readLine("Last name: "))
+                        .and(UserCriteria.firstNameEquals(
+                                readLine("First name: ")));
+                break;
+
+            case "4":
+                criterion = UserCriteria.lastNameEquals(
+                                readLine("Last name: "))
+                        .or(UserCriteria.firstNameEquals(
+                                readLine("First name: ")));
+                break;
+
+            case "5":
+                criterion = UserCriteria.lastNameEquals(
+                        readLine("Last name: ")).negate();
+                break;
+
+            case "6":
+                criterion = Predicate.not(
+                        UserCriteria.firstNameEquals(
+                                readLine("First name: ")));
+                break;
+
+            default:
+                System.out.println("Invalid filter option.");
+                return;
+        }
+
+        displayUsers(service.findUsers(criterion));
+    }
+
+    private void displayUsers(List<User> users) {
+        if (users.isEmpty()) {
+            System.out.println("No users found.");
+            return;
+        }
+
+        users.forEach(System.out::println);
     }
 
     private String readLine(String prompt) {

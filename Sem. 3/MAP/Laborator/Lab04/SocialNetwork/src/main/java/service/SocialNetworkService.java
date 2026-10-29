@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Coordinates network operations independently of the persistence backend.
@@ -92,6 +93,18 @@ public class SocialNetworkService {
      * @throws RepositoryException if storage fails
      */
     public Iterable<User> getUsers() { return userRepository.findAll(); }
+
+    /**
+     * Finds users matching the supplied condition.
+     * @param filter condition used to select users
+     * @return matching users; empty if none match
+     * @throws IllegalArgumentException if filter is null
+     * @throws RepositoryException if persistence fails
+     */
+    public List<User> findUsers(Predicate<User> filter) {
+        return userRepository.findAll(filter);
+    }
+
     /**
      * Adds a friendship between existing users.
      * @param firstUserId first participant
