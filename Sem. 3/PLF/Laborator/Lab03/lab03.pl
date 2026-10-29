@@ -1,10 +1,11 @@
 % prefixPar(L:list, R:list)
 % L: lista data
-% R: cel mai lung prefix de numere pare din L
+% R: cel mai lunga subsecventa de numere pare de la inceputul lui L
 % model flux: (i,o), (i,i)
 prefixPar([],[]).
 prefixPar([H|_], []):-
-	H mod 2 =\= 0.
+	H mod 2 =\= 0,
+	!.
 
 prefixPar([H|T],[H|R]):-
 	H mod 2 =:= 0,
@@ -27,7 +28,8 @@ lungime([_|T], R):-
 alegeMax(L1,L2,L1):-
 	lungime(L1,N),
 	lungime(L2,M),
-	N >= M.
+	N >= M,
+	!.
 
 alegeMax(L1,L2,L2):-
 	lungime(L1,N),
@@ -52,6 +54,7 @@ secventaMaxPara([H|T],R):-
 inlocuireSublisteSecventaMaxPara([],[]).
 inlocuireSublisteSecventaMaxPara([H|T],[H|R]):-
 	number(H),
+	!,
 	inlocuireSublisteSecventaMaxPara(T,R).
 
 inlocuireSublisteSecventaMaxPara([H|T],[S|R]):-
