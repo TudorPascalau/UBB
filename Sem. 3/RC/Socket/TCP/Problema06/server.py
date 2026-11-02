@@ -19,7 +19,7 @@ while True:
     print("Received message:", message)
 
     data = conn.recv(1)
-    character = data.decode()
+    character = data.decode()[0]
     print("Received character:", character)
 
     positions = [i for i in range(len(message)) if message[i] == character]

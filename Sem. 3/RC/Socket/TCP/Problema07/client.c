@@ -30,12 +30,25 @@ int main() {
     fgets(message, sizeof(message), stdin);
     send(c, message, strlen(message), 0);
 
-    uint16_t subseq_length;
+    int subseq_length;
     printf("Enter subsequence length: ");
-    scanf("%hu", &subseq_length);
-    subseq_length = htons(subseq_length);
-    send(c, &subseq_length, sizeof(subseq_length), 0);
-    
+    scanf("%d", &subseq_length);
+    subseq_length = htonl(subseq_length);
+    send(c, &subseq_length, 4, 0);
+
+    int start_index;
+    printf("Enter start index: ");
+    scanf("%d", &start_index);
+    start_index = htonl(start_index);
+    send(c, &start_index, 4, 0);
+
+    char subseq[1024];
+    int n = recv(c, subseq, sizeof(subseq) - 1, 0);
+    if (n > 0) {
+        subseq[n] = '\0';
+        printf("Received subsequence from server: %s\n", subseq);
+    }
+
     close(c);
 
     return 0;

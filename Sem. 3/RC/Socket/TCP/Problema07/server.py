@@ -7,10 +7,21 @@ def deservire_client(conn):
     if data:
         print("Received message from client:", message)
         
-    data = conn.recv(2)
-    subseq_lenght = int(data.decode())
+    data = conn.recv(4)
+    subseq_lenght = int.from_bytes(data, byteorder='big', signed=True)
     if subseq_lenght:
         print("Received subsequence length from client:", subseq_lenght)
+
+    data = conn.recv(4)
+    start_index = int.from_bytes(data, byteorder='big', signed=True)
+    if start_index:
+        print("Received start index from client:", start_index)
+
+    if start_index + subseq_lenght <= len(message):
+        subseq = message[start_index:start_index + subseq_lenght]
+        conn.send(subseq.encode())
+    else:
+        print("Invalid start index or subsequence length")
 
 TCP_IP = '127.0.0.1'
 TCP_PORT = 5005
@@ -21,6 +32,8 @@ s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
 while True:
     conn, addr = s.accept()
-    print('Connection address:', addr)
-    deservire_client(conn)
+    if os.fork() == 0:
+        deservire_client(conn)
+        conn.close()
+        os._exit(0)
     conn.close()
