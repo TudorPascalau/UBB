@@ -9,6 +9,7 @@ import service.SocialNetworkService;
 import service.UserCriteria;
 import validation.ValidationException;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Predicate;
@@ -80,6 +81,9 @@ public class UserInterface {
                     case "10":
                         filterUsers();
                         break;
+                    case "11":
+                        sortUsers();
+                        break;
                     case "0":
                         running = false;
                         break;
@@ -121,6 +125,7 @@ public class UserInterface {
         System.out.println("8. Show the most sociable community");
         System.out.println("9. Show all communities");
         System.out.println("10. Filter users");
+        System.out.println("11. Sort users");
         System.out.println("0. Exit");
         System.out.print("Option: ");
     }
@@ -181,6 +186,70 @@ public class UserInterface {
         }
 
         displayUsers(service.findUsers(criterion));
+    }
+
+    /**
+     * Reads the sorting criterion and direction, then displays sorted users.
+     */
+    private void sortUsers() {
+        System.out.println("1. Last name, then first name");
+        System.out.println("2. First name, then last name");
+        System.out.println("3. First name length, then first name");
+        System.out.println("4. User ID");
+
+        String option = readLine("Sort option: ");
+        Comparator<User> comparator;
+
+        switch (option) {
+            case "1":
+                comparator = Comparator
+                        .comparing(User::getLastName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(User::getFirstName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparingLong(User::getId);
+                break;
+
+            case "2":
+                comparator = Comparator
+                        .comparing(User::getFirstName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(User::getLastName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparingLong(User::getId);
+                break;
+
+            case "3":
+                comparator = Comparator
+                        .comparingInt((User user) -> user.getFirstName().length())
+                        .thenComparing(User::getFirstName, String.CASE_INSENSITIVE_ORDER)
+                        .thenComparingLong(User::getId);
+                break;
+
+            case "4":
+                comparator = Comparator.comparingLong(User::getId);
+                break;
+
+            default:
+                System.out.println("Invalid sort option.");
+                return;
+        }
+
+        System.out.println("1. Ascending");
+        System.out.println("2. Descending");
+
+        String direction = readLine("Direction: ");
+
+        switch (direction) {
+            case "1":
+                break;
+
+            case "2":
+                comparator = comparator.reversed();
+                break;
+
+            default:
+                System.out.println("Invalid direction.");
+                return;
+        }
+
+        displayUsers(service.getSortedUsers(comparator));
     }
 
     private void displayUsers(List<User> users) {
