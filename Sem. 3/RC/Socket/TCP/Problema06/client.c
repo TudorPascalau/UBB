@@ -31,10 +31,10 @@ int main() {
     fgets(buffer, sizeof(buffer), stdin);
     send(c, buffer, strlen(buffer), 0);
 
-    char character[2];
+    char character;
     printf("Enter a character: \n");
-    scanf("%s", character);
-    send(c, character, sizeof(character), 0);
+    scanf("%c", &character);
+    send(c, &character, sizeof(character), 0);
 
     int n = recv(c, buffer, sizeof(buffer) - 1, 0);
     if (n > 0) {
