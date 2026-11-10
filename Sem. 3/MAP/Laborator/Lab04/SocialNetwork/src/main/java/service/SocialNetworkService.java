@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static util.StreamHelper.stream;
 
@@ -71,8 +73,7 @@ public class SocialNetworkService {
     public void removeUser(Long id) {
         ensureUserExists(id);
 
-        List<Friendship> incidentFriendships =stream(friendshipRepository.findAll()).filter(friendship ->
-                                friendship.getFirstUserId().equals(id) || friendship.getSecondUserId().equals(id)).toList();
+        List<Friendship> incidentFriendships = incidentFriendships(id).toList();
 
         List<Friendship> removed = new ArrayList<>();
 
@@ -141,6 +142,37 @@ public class SocialNetworkService {
     }
 
     /**
+     * Returns the friends of an existing user.
+     *
+     * @param userId identifier of the user whose friends are requested
+     * @return the user's friends, or an empty list if the user has none
+     * @throws IllegalArgumentException if userId is null
+     * @throws ServiceException if the user or a referenced friend does not exist
+     * @throws RepositoryException if storage cannot be accessed
+     */
+    public List<User> getFriends(Long userId) {
+        ensureUserExists(userId);
+
+        return incidentFriendships(userId)
+                .map(friendship -> friendship.getFirstUserId().equals(userId)
+                        ? friendship.getSecondUserId()
+                        : friendship.getFirstUserId())
+                .map(this::ensureUserExists)
+                .collect(Collectors.toList());
+    }
+
+    private Stream<Friendship> incidentFriendships(Long userId) {
+        return stream(friendshipRepository.findAll())
+                .filter(friendship -> friendship.getFirstUserId().equals(userId)
+                        || friendship.getSecondUserId().equals(userId));
+    }
+
+    private User ensureUserExists(Long id) {
+        return userRepository.findOne(id).orElseThrow(() ->
+                new ServiceException("User with id " + id + " not found"));
+    }
+
+    /**
      * Adds a friendship between existing users.
      * @param firstUserId first participant
      * @param secondUserId second participant
@@ -180,11 +212,6 @@ public class SocialNetworkService {
     private void validateLoadedRelationships() {
         stream(friendshipRepository.findAll()).flatMap(friendship -> java.util.stream.Stream.of(
                         friendship.getFirstUserId(), friendship.getSecondUserId())).forEach(this::ensureUserExists);
-    }
-
-    private void ensureUserExists(Long id) {
-        userRepository.findOne(id).orElseThrow(() ->
-                        new ServiceException("User with id " + id + " not found"));
     }
 
     private FriendshipGraph buildFriendshipGraph() {
