@@ -153,8 +153,7 @@ public final class UserDbRepository implements Repository<Long, User> {
             statement.setString(2, entity.getLastName());
             statement.setLong(3, entity.getId());
 
-            int rowsUpdated = statement.executeUpdate();
-            if (rowsUpdated == 0) {
+            if (statement.executeUpdate() == 0) {
                 return Optional.of(entity);
             }
             return Optional.empty();
