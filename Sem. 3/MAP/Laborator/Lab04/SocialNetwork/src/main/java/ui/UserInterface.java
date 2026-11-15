@@ -286,8 +286,8 @@ public class UserInterface {
         String firstName = readLine("First name: ");
         String lastName = readLine("Last name: ");
 
-        service.addUser(firstName, lastName);
-        System.out.println("User added.");
+        User addedUser = service.addUser(firstName, lastName);
+        System.out.println("User added with ID" + addedUser.getId() + ".");
     }
 
     private void removeUser() {

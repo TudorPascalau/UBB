@@ -6,10 +6,10 @@ import java.util.Objects;
  * @param <ID> identifier type
  */
 public abstract class Entity<ID> {
-    private final ID id;
+    private ID id;
     /**
      * Creates an entity.
-     * @param id immutable identifier
+     * @param id entity identifier
      * @throws IllegalArgumentException if id is null
      */
     protected Entity(ID id) {
@@ -21,6 +21,19 @@ public abstract class Entity<ID> {
      * @return the identifier
      */
     public ID getId() { return id; }
+
+    /**
+     * Sets entity ID.
+     * @param id identifier to be set
+     * @throws IllegalArgumentException if id is null
+     */
+    public void setId(ID id) {
+        if(id == null) {
+            throw new IllegalArgumentException("ID cannot be null");
+        }
+
+        this.id = id; }
+
     /**
      * Compares entities by concrete type and identifier.
      * @param other object to compare

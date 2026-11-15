@@ -1,7 +1,7 @@
 package domain;
 
 /**
- * A user identified by an immutable numeric ID.
+ * A user identified by a numeric ID.
  */
 public class User extends Entity<Long> {
     private final String firstName;

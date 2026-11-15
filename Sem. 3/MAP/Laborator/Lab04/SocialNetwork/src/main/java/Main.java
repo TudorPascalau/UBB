@@ -46,8 +46,8 @@ public final class Main {
     private static UserInterface initializeApplication() {
         try {
             Validator<User> nameLengthValidator = user -> {
-                if (user.getFirstName().length() > 100 || user.getLastName().length() > 100) {
-                    throw new ValidationException("First and last names must not exceed 100 characters.");
+                if (user.getFirstName().length() > 15 || user.getLastName().length() > 15) {
+                    throw new ValidationException("First and last names must not exceed 15 characters.");
                 }
             };
             Validator<User> userValidator = new UserValidator().andThen(nameLengthValidator);

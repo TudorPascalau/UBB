@@ -3,12 +3,12 @@ package service;
 import domain.*;
 import repository.Repository;
 import repository.RepositoryException;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static util.StreamHelper.stream;
@@ -52,16 +52,18 @@ public class SocialNetworkService {
      * Adds a valid new user.
      * @param firstName given name
      * @param lastName family name
+     * @return added user
      * @throws validation.ValidationException if the user is invalid
      * @throws ServiceException if the generated ID already exists
      * @throws RepositoryException if persistence fails
      */
-    public void addUser(String firstName, String lastName) {
+    public User addUser(String firstName, String lastName) {
         User user = new User(nextUserId, firstName, lastName);
         if (userRepository.save(user).isPresent()) {
             throw new ServiceException("User already exists with id " + nextUserId);
         }
         nextUserId++;
+        return user;
     }
     /**
      * Removes the user and all incident friendships. Rollback is attempted on persistence failure.
@@ -141,25 +143,6 @@ public class SocialNetworkService {
                 .toList();
     }
 
-    /**
-     * Returns the friends of an existing user.
-     *
-     * @param userId identifier of the user whose friends are requested
-     * @return the user's friends, or an empty list if the user has none
-     * @throws IllegalArgumentException if userId is null
-     * @throws ServiceException if the user or a referenced friend does not exist
-     * @throws RepositoryException if storage cannot be accessed
-     */
-    public List<User> getFriends(Long userId) {
-        ensureUserExists(userId);
-
-        return incidentFriendships(userId)
-                .map(friendship -> friendship.getFirstUserId().equals(userId)
-                        ? friendship.getSecondUserId()
-                        : friendship.getFirstUserId())
-                .map(this::ensureUserExists)
-                .collect(Collectors.toList());
-    }
 
     private Stream<Friendship> incidentFriendships(Long userId) {
         return stream(friendshipRepository.findAll())
@@ -167,8 +150,8 @@ public class SocialNetworkService {
                         || friendship.getSecondUserId().equals(userId));
     }
 
-    private User ensureUserExists(Long id) {
-        return userRepository.findOne(id).orElseThrow(() ->
+    private void ensureUserExists(Long id) {
+        userRepository.findOne(id).orElseThrow(() ->
                 new ServiceException("User with id " + id + " not found"));
     }
 

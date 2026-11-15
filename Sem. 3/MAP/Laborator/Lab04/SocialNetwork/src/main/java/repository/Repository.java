@@ -27,15 +27,14 @@ public interface Repository<ID, E extends Entity<ID>> {
     Optional<E> findOne(ID id);
 
     /**
-     * Adds an entity if its identifier is absent;
-     * otherwise leaves storage unchanged.
+     * Adds a new entity. A repository with generated identifiers may replace
+     * the supplied identifier on successful insertion.
      *
      * @param entity entity to add
-     * @return an empty Optional if the entity was added,
-     *         or an Optional containing the existing entity
-     *         if its identifier is already present
+     * @return an empty Optional on success, or the existing entity if the
+     *         repository uses the supplied identifier and it is already present
      * @throws IllegalArgumentException if entity is null
-     * @throws validation.ValidationException if the entity violates validation rules
+     * @throws validation.ValidationException if the entity is invalid
      * @throws RepositoryException if persistence fails
      */
     Optional<E> save(E entity);
