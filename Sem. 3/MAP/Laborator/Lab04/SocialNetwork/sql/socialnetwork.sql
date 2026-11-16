@@ -13,3 +13,5 @@ CREATE TABLE friendships (
 );
 
 SELECT * FROM users
+
+SELECT * FROM friendships
