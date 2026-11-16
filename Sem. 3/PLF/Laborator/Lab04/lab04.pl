@@ -11,7 +11,13 @@ permutare(N, P):-
 % permutare(4, [2,1,3,4]).
 % permutare(4, [1,3,2,4]).
 
+permutari(N,R):-
+	N >= 1,
+	findall(P,construieste(1,N,[],P),R).
+
 % construieste(St: el, Dr: el, Col: list, P: list)
+% Construieste permutarea de la dreapta la stanga folosind
+% intervalul [st, dr]
 % St: cea mai mica valoare inca nefolosita
 % Dr: cea mai mare valoare inca nefolosita
 % Col: lista elementelor deja asezate la sfarsitul permutarii
@@ -28,7 +34,3 @@ construieste(St, Dr, Col, P) :-
     Dr1 is Dr - 1,
     construieste(St, Dr1, [Dr|Col], P).
 
-% Cazuri testare
-% construieste(2, 2, [1,3], P).
-% construieste(2, 3, [1,4], P).
-% construieste(2, 2, [1,3], [1,2,3]).

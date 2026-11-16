@@ -33,3 +33,5 @@ insert_lista([H1,H2|T],[H1,LR|R]):-
 insert_lista([H|T],[H|R]):-
 	\+ is_list(H),
 	insert_lista(T,R).
+
+

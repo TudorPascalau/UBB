@@ -20,7 +20,7 @@ suma_aux([H|T],C,Tr,[Cif|R]):-
 	P is H + C + Tr,
 	Cif is P mod 10,
 	Trans is P div 10,
-	inmultire_aux(T,C,Trans,R).
+	suma_aux(T,0,Trans,R).
 
 succesor(L,R):-
 	suma(L,1,R).
