@@ -1,6 +1,12 @@
 USE LaboratorGestiuneJocuri;
 GO
 
+EXEC goToVersion 1;
+GO
+
+SELECT version FROM versionTable;
+GO
+
 CREATE TABLE versionTable
 (
     version INT NOT NULL,
@@ -186,9 +192,8 @@ BEGIN
         WHERE initial_version = @current_version
             AND final_version = @current_version - 1;
 
-        PRINT ('Executing ' + @procedureName);
-
         BEGIN TRY
+            PRINT ('Executing ' + @procedureName);
             EXEC @procedureName;
         END TRY
         BEGIN CATCH
@@ -208,9 +213,8 @@ BEGIN
         WHERE initial_version = @current_version
           AND final_version = @current_version + 1;
 
-        PRINT ('Executing ' + @procedureName);
-
         BEGIN TRY
+            PRINT ('Executing ' + @procedureName);
             EXEC @procedureName;
         END TRY
         BEGIN CATCH
@@ -224,3 +228,11 @@ BEGIN
     END;
 END;
 GO
+
+EXEC goToVersion 6;
+
+SELECT GE.name, AVG(G.price) as average_price
+FROM Games G
+INNER JOIN GameGenres GG ON G.game_id = GG.game_id
+INNER JOIN Genres GE ON GG.genre_id = GE.genre_id
+GROUP BY GE.name
