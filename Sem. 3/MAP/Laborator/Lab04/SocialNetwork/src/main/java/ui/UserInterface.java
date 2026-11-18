@@ -9,6 +9,8 @@ import service.SocialNetworkService;
 import service.UserCriteria;
 import validation.ValidationException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
@@ -84,6 +86,12 @@ public class UserInterface {
                     case "11":
                         sortUsers();
                         break;
+                    case "12":
+                        updateUser();
+                        break;
+                    case "13":
+                        updateFriendship();
+                        break;
                     case "0":
                         running = false;
                         break;
@@ -126,6 +134,8 @@ public class UserInterface {
         System.out.println("9. Show all communities");
         System.out.println("10. Filter users");
         System.out.println("11. Sort users");
+        System.out.println("12. Update user");
+        System.out.println("13. Update friendship date");
         System.out.println("0. Exit");
         System.out.print("Option: ");
     }
@@ -345,6 +355,31 @@ public class UserInterface {
         }
 
         communities.forEach(System.out::println);
+    }
+
+    private void updateUser() {
+        Long id = readId("User ID: ");
+        String firstName = readLine("New first name: ");
+        String lastName = readLine("New last name: ");
+
+        service.updateUser(id, firstName, lastName);
+        System.out.println("User updated.");
+    }
+
+    private void updateFriendship() {
+        Long firstUserId = readId("First user ID: ");
+        Long secondUserId = readId("Second user ID: ");
+        String input = readLine("New start date and time (e.g. 2026-11-18T14:30): ");
+
+        LocalDateTime friendsSince;
+        try {
+            friendsSince = LocalDateTime.parse(input);
+        } catch (DateTimeParseException e) {
+            throw new UIException("Enter a date and time like 2026-11-18T14:30.", e);
+        }
+
+        service.updateFriendship(firstUserId, secondUserId, friendsSince);
+        System.out.println("Friendship updated.");
     }
 
 }

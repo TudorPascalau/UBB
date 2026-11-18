@@ -12,6 +12,6 @@ CREATE TABLE friendships (
     CHECK (id1 < id2)
 );
 
-SELECT * FROM users
+SELECT * FROM users;
 
-SELECT * FROM friendships
+SELECT * FROM friendships;

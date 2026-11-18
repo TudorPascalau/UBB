@@ -65,6 +65,25 @@ public class SocialNetworkService {
         nextUserId++;
         return user;
     }
+
+    /**
+     * Updates the names of an existing user.
+     * @param id ID of the user to update
+     * @param firstName new first name
+     * @param lastName new last name
+     * @throws IllegalArgumentException if the ID is null
+     * @throws validation.ValidationException if the updated user is invalid
+     * @throws ServiceException if the user does not exist
+     * @throws RepositoryException if persistence fails
+     */
+    public void updateUser(Long id, String firstName, String lastName) {
+        User updatedUser = new User(id, firstName, lastName);
+
+        if (userRepository.update(updatedUser).isPresent()) {
+            throw new ServiceException("User with id " + id + " not found");
+        }
+    }
+
     /**
      * Removes the user and all incident friendships. Rollback is attempted on persistence failure.
      * @param id user ID
@@ -167,12 +186,33 @@ public class SocialNetworkService {
     public void addFriendship(Long firstUserId, Long secondUserId) {
         Friendship friendship = new Friendship(firstUserId, secondUserId,
                 LocalDateTime.now().withSecond(0).withNano(0));
+
         ensureUserExists(firstUserId);
         ensureUserExists(secondUserId);
+
         if (friendshipRepository.save(friendship).isPresent()) {
             throw new ServiceException("Friendship already exists: " + friendship.getId());
         }
     }
+
+    /**
+     * Updates the start date of an existing friendship.
+     * @param firstUserId ID of one participant
+     * @param secondUserId ID of the other participant
+     * @param friendsSince new start date and time
+     * @throws IllegalArgumentException if either participant ID is null
+     * @throws validation.ValidationException if the updated friendship is invalid
+     * @throws ServiceException if the friendship does not exist
+     * @throws RepositoryException if persistence fails
+     */
+    public void updateFriendship(Long firstUserId, Long secondUserId, LocalDateTime friendsSince) {
+        Friendship updatedFriendship = new Friendship(firstUserId, secondUserId, friendsSince);
+
+        if (friendshipRepository.update(updatedFriendship).isPresent()) {
+            throw new ServiceException("Friendship does not exist: " + updatedFriendship.getId());
+        }
+    }
+
     /**
      * Removes a friendship by its participant IDs.
      * @param firstUserId first participant
