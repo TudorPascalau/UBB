@@ -1,0 +1,2 @@
+USE LaboratorGestiuneJocuri;
+GO
